@@ -1,4 +1,4 @@
-@OneTime.Api_HostAddress = http://localhost:5130
+@OneTime.Api_HostAddress = http://localhost:5273
 
 GET {{OneTime.Api_HostAddress}}/weatherforecast/
 Accept: application/json
