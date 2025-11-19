@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OneTime.Core.Models;
 
-public partial class DbContextOneTime : DbContext
+public partial class OneTimeContext : DbContext
 {
-    public DbContextOneTime(DbContextOptions<DbContext> options)
+    public OneTimeContext(DbContextOptions<OneTimeContext> options)
         : base(options)
     {
     }

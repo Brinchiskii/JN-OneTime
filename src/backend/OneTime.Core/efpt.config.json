@@ -1,6 +1,6 @@
 ﻿{
    "CodeGenerationMode": 6,
-   "ContextClassName": "DbContext",
+   "ContextClassName": "OneTimeContext",
    "ContextNamespace": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
