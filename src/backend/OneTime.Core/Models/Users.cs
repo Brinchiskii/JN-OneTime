@@ -6,8 +6,6 @@ namespace OneTime.Core.Models
 {
     public class Users
     {
-
-
-
+        public int Id { get; set; }
     }
 }
