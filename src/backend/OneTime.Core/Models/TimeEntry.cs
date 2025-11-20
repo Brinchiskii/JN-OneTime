@@ -24,9 +24,7 @@ public partial class TimeEntry
     [Column(TypeName = "decimal(4, 2)")]
     public decimal Hours { get; set; }
 
-    [Required]
-    [StringLength(50)]
-    public string Status { get; set; }
+    public int Status { get; set; }
 
     [ForeignKey("ProjectId")]
     [InverseProperty("TimeEntries")]

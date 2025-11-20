@@ -17,9 +17,7 @@ public partial class Project
     [StringLength(200)]
     public string Name { get; set; }
 
-    [Required]
-    [StringLength(50)]
-    public string Status { get; set; }
+    public int Status { get; set; }
 
     [InverseProperty("Project")]
     public virtual ICollection<TimeEntry> TimeEntries { get; set; } = new List<TimeEntry>();
