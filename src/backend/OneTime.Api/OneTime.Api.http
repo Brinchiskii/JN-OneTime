@@ -1,6 +1,20 @@
 @OneTime.Api_HostAddress = http://localhost:5273
 
-GET {{OneTime.Api_HostAddress}}/weatherforecast/
+
+GET {{OneTime.Api_HostAddress}}/api/TimeEntries/projects
 Accept: application/json
+
+###
+
+POST {{OneTime.Api_HostAddress}}/api/TimeEntries
+Content-Type: application/json
+Accept: application/json
+{
+	"userId": 1,
+	"projectId": 5,
+	"date": "2025-11-20",
+	"note": "Worked on API integration",
+	"hours": 4
+}
 
 ###
