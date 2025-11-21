@@ -34,5 +34,11 @@ namespace OneTime.Core.Services.Repository
         {
             return await _projectRepo.GetAll();
         }
-    }
+
+		public async Task<IEnumerable<TimeEntry>> GetTimeEntriesForUser(int userId)
+		{
+			return await _timeEntryRepo.GetByUserWithDetails(userId);
+		}
+
+	}
 }	

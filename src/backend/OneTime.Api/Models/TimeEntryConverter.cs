@@ -1,4 +1,6 @@
-﻿using OneTime.Core.Models;
+﻿using OneTime.Api.Models.OneTime.Api.Models;
+using OneTime.Core.Models;
+using OneTime.Core.Models.Enums;
 
 namespace OneTime.Api.Models
 {
@@ -17,15 +19,23 @@ namespace OneTime.Api.Models
 		}
 		public static TimeEntryDto ToDto(TimeEntry entity)
 		{
-			return new TimeEntryDto(
+			return new TimeEntryDto(entity.TimeEntryId, entity.UserId, entity.ProjectId, entity.Date, entity.Note, entity.Hours, entity.Status);
+		}
+
+		public static TimeEntryDetailsDto ToDetailsDto(TimeEntry entity)
+		{
+			return new TimeEntryDetailsDto(
 				entity.TimeEntryId,
 				entity.UserId,
+				entity.User?.Name ?? string.Empty,
+				entity.User?.Email ?? string.Empty,
 				entity.ProjectId,
+				entity.Project?.Name ?? string.Empty,
+				entity.Project?.Status ?? ProjectStatus.Active,
 				entity.Date,
 				entity.Note,
 				entity.Hours,
-				entity.Status
-			);
+				entity.Status);
 		}
 	}
 }

@@ -6,5 +6,7 @@ namespace OneTime.Core.Services.Interfaces
     {
         Task<TimeEntry> CreateTimeEntry(TimeEntry entry);
         Task<IEnumerable<Project>> GetAvailableProjects();
-    }
+		Task<IEnumerable<TimeEntry>> GetTimeEntriesForUser(int userId);
+
+	}
 }

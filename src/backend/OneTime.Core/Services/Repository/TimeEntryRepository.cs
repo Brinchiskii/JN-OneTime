@@ -1,4 +1,5 @@
-﻿using OneTime.Core.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using OneTime.Core.Models;
 using OneTime.Core.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -21,5 +22,10 @@ namespace OneTime.Core.Services.Repository
             await _context.SaveChangesAsync();
             return entry;
         }
-    }
+
+        public async Task<IEnumerable<TimeEntry>> GetByUserWithDetails(int userId)
+		{
+			return await _context.TimeEntries.Where(t => t.UserId == userId).Include(t => t.Project).Include(t => t.User).OrderBy(t => t.Date).ToListAsync();
+		}
+	}
 }

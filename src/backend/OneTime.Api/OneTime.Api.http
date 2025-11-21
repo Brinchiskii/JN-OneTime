@@ -18,3 +18,7 @@ Accept: application/json
 }
 
 ###
+
+GET {{OneTime.Api_HostAddress}}/api/TimeEntries/user/3
+Accept: application/json
+###

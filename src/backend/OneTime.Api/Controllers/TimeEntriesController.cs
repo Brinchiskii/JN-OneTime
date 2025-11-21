@@ -51,5 +51,20 @@ namespace OneTime.Api.Controllers
 			}
 		}
 
+		[HttpGet("user/{userId}")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(204)]
+		public async Task<IActionResult> GetTimeEntriesForUser(int userId)
+		{
+			var entries = await _service.GetTimeEntriesForUser(userId);
+
+			if (!entries.Any())
+				return NoContent();
+
+			var response = entries.Select(TimeEntryConverter.ToDetailsDto).ToList();
+
+			return Ok(response);
+		}
+
 	}
 }
