@@ -5,11 +5,22 @@ using OneTime.Core.Services.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddDbContext<OneTimeContext>(options =>
+// Configure DbContext based on environment
+if (builder.Environment.IsEnvironment("IntegrationsTesting")) 
 {
-	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+    builder.Services.AddDbContext<OneTimeContext>(options =>
+    {
+        options.UseInMemoryDatabase("OneTimeTestDb");
+    });
+} else
+{
+    // Add services to the container.
+    builder.Services.AddDbContext<OneTimeContext>(options =>
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    });
+}
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -31,3 +42,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Make the implicit Program class public so test projects can access it
+public partial class Program { }

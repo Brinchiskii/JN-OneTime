@@ -18,6 +18,15 @@ namespace OneTime.Core.Services.Repository
             _projectRepo = projectRepo;
         }
 
+        /// <summary>
+        /// Creates a new time entry for a given user.
+        /// Validates that the project exists before creating the entry.
+        /// </summary>
+        /// <param name="entry">The time entry, that needs to be saved.</param>
+        /// <returns>The saved <see cref="TimeEntry"/> with updated values.</returns>
+        /// <exception cref="Exception">
+        /// Will be thrown if the project with the projectId does not exist.
+        /// </exception>
         public async Task<TimeEntry> CreateTimeEntry(TimeEntry entry)
         {
             var project = await _projectRepo.GetById(entry.ProjectId);
@@ -30,6 +39,10 @@ namespace OneTime.Core.Services.Repository
             return await _timeEntryRepo.Add(entry);
         }
 
+        /// <summary>
+        /// Retrieves a collection of all available projects.
+        /// </summary>
+        /// <returns>The collection of all available projects.</returns>
         public async Task<IEnumerable<Project>> GetAvailableProjects()
         {
             return await _projectRepo.GetAll();

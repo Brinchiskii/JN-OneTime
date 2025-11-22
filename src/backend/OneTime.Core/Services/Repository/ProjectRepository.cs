@@ -11,16 +11,29 @@ namespace OneTime.Core.Services.Repository
     {
         private readonly OneTimeContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the ProjectRepository class using the specified database context.
+        /// </summary>
+        /// <param name="context">The database context.</param>
         public ProjectRepository(OneTimeContext context)
         {
             _context = context;
         }
 
+        /// <summary>
+        /// Retrieves a project by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier for retrievel of the project.</param>
+        /// <returns>The project, which matches the unique identifier.</returns>
         public async Task<Project> GetById(int id)
         {
             return await _context.Projects.FirstOrDefaultAsync(p => p.ProjectId == id);
         }
 
+        /// <summary>
+        /// Retrives all projects from the database.
+        /// </summary>
+        /// <returns>A collection of all the projects.</returns>
         public async Task<IEnumerable<Project>> GetAll()
         {
             return await _context.Projects.ToListAsync();

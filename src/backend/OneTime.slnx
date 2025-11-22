@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="OneTime.Api.Tests/OneTime.Api.Tests.csproj" Id="16536f3d-ccbd-4296-96d3-9b583c832d3d" />
   <Project Path="OneTime.Api/OneTime.Api.csproj" />
+  <Project Path="OneTime.Core.Tests/OneTime.Core.Tests.csproj" Id="4c886025-6310-4875-bd1a-dd074e9888e1" />
   <Project Path="OneTime.Core/OneTime.Core.csproj" />
 </Solution>
