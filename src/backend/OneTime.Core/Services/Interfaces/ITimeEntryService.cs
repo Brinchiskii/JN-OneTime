@@ -19,5 +19,7 @@ namespace OneTime.Core.Services.Interfaces
         /// </summary>
         /// <returns>A collection of all available projects.</returns>
         Task<IEnumerable<Project>> GetAvailableProjects();
-    }
+		Task<IEnumerable<TimeEntry>> GetTimeEntriesForUser(int userId);
+
+	}
 }

@@ -13,5 +13,7 @@ namespace OneTime.Core.Services.Interfaces
         /// <param name="entry">The time entry that needs to be added to the database.</param>
         /// <returns>The added time entry.</returns>
         Task<TimeEntry> Add(TimeEntry entry);
-    }
+		Task<IEnumerable<TimeEntry>> GetByUserWithDetails(int userId);
+
+	}
 }
