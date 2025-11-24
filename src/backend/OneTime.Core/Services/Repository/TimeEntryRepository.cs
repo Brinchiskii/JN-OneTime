@@ -32,6 +32,11 @@ namespace OneTime.Core.Services.Repository
             return entry;
         }
 
+        /// <summary>
+        /// Retrieves time entries for a specific user, including related project and user details.
+        /// </summary>
+        /// <param name="userId">The unique identifier for the user.</param>
+        /// <returns>A collection of all the time entries for the given user.</returns>
         public async Task<IEnumerable<TimeEntry>> GetByUserWithDetails(int userId)
 		{
 			return await _context.TimeEntries.Where(t => t.UserId == userId).Include(t => t.Project).Include(t => t.User).OrderBy(t => t.Date).ToListAsync();

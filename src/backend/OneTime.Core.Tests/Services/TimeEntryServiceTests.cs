@@ -100,5 +100,109 @@ namespace OneTime.Core.Tests.Services
             Assert.Equal(1, list[0].ProjectId);
             Assert.Equal(2, list[1].ProjectId);
         }
+
+        [Fact]
+        public async Task CreateTimeEntry_Saves_Correct_Data_For_User()
+        {
+            // Arrange
+            var fakeProjectRepo = new FakeProjectRepository();
+            fakeProjectRepo.Projects.Add(new Project
+            {
+                ProjectId = 10,
+                Name = "Testprojekt"
+            });
+
+            var fakeTimeRepo = new FakeTimeEntryRepository();
+            var timeEntryService = new TimeEntryService(fakeTimeRepo, fakeProjectRepo);
+
+            var entry = new TimeEntry
+            {
+                UserId = 5,
+                ProjectId = 10,
+                Hours = 6m,
+                Date = new DateOnly(2024, 6, 15),
+                Note = "Test Note"
+            };
+
+            // Act
+            var result = await timeEntryService.CreateTimeEntry(entry);
+
+            // Assert
+            Assert.True(fakeTimeRepo.AddCalled);
+            Assert.NotNull(fakeTimeRepo.AddedEntry);
+            Assert.Equal(5, fakeTimeRepo.AddedEntry.UserId);
+            Assert.Equal(10, fakeTimeRepo.AddedEntry.ProjectId);
+            Assert.Equal(6m, fakeTimeRepo.AddedEntry.Hours);
+            Assert.Equal(new DateOnly(2024, 6, 15), fakeTimeRepo.AddedEntry.Date);
+            Assert.Equal("Test Note", fakeTimeRepo.AddedEntry.Note);
+            Assert.Equal(TimeEntryStatus.Pending, fakeTimeRepo.AddedEntry.Status);
+        }
+
+        [Fact]
+        public async Task CreateTimeEntry_Throws_When_Hours_Invalid()
+        {
+            // Arrange
+            var fakeProjectRepo = new FakeProjectRepository();
+            fakeProjectRepo.Projects.Add(new Project
+            {
+                ProjectId = 10,
+                Name = "Testprojekt"
+            });
+            var fakeTimeRepo = new FakeTimeEntryRepository();
+            var timeEntryService = new TimeEntryService(fakeTimeRepo, fakeProjectRepo);
+
+            var entryWithZeroHours = new TimeEntry
+            {
+                UserId = 5,
+                ProjectId = 10,
+                Hours = 0m,
+                Date = new DateOnly(2024, 6, 15),
+                Note = "Test Note"
+            };
+
+            var entryWithTooManyHours = new TimeEntry
+            {
+                UserId = 5,
+                ProjectId = 10,
+                Hours = 25m,
+                Date = new DateOnly(2024, 6, 15),
+                Note = "Test Note"
+            };
+
+            // Act & Assert
+            var ex1 = await Assert.ThrowsAsync<Exception>(() => timeEntryService.CreateTimeEntry(entryWithZeroHours));
+            Assert.Equal("Hours must be greater than zero and less than 24", ex1.Message);
+            var ex2 = await Assert.ThrowsAsync<Exception>(() => timeEntryService.CreateTimeEntry(entryWithTooManyHours));
+            Assert.Equal("Hours must be greater than zero and less than 24", ex2.Message);
+        }
+
+        [Fact]
+        public async Task GetTimeEntriesForUser_Returns_Entries_From_Repository()
+        {
+            // Arrange
+            var fakeProjectRepo = new FakeProjectRepository();
+            var fakeTimeEntryRepo = new FakeTimeEntryRepository();
+
+            fakeTimeEntryRepo.EntriesToReturn.AddRange(new[] 
+            {
+                new TimeEntry { TimeEntryId = 1, UserId = 42, Hours = 4m},
+                new TimeEntry { TimeEntryId = 2, UserId = 42, Hours = 3.5m},
+            });
+
+            var timeEntryService = new TimeEntryService(fakeTimeEntryRepo, fakeProjectRepo);
+
+            // Act
+            var result = await timeEntryService.GetTimeEntriesForUser(42);
+
+            // Assert
+            var list = result.ToList();
+
+            Assert.Equal(2, list.Count);
+            Assert.Equal(1, list[0].TimeEntryId);
+            Assert.Equal(2, list[1].TimeEntryId);
+
+            Assert.Equal(42, fakeTimeEntryRepo.LastUserIdRequested);
+
+        }
     }
 }
