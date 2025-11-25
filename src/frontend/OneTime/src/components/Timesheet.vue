@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { TimesheetRow, Project } from '../types'
+import type { TimesheetRow, Project, WeekDay } from '../types'
 
 const props = defineProps<{
   rows: TimesheetRow[]
-  weekDays: { name: string; key: string; date: string }
+  weekDays: WeekDay[]
   projects: Project[]
 }>()
 
@@ -24,7 +24,7 @@ const grandTotal = computed(() => props.rows.reduce((acc, row) => acc + getRowTo
       <thead class="table-light">
         <tr>
           <th class="text-center">Projekt</th>
-          <th class="text-center" v-for="day in weekDays" :key="day">
+          <th class="text-center" v-for="day in props.weekDays" :key="day.key">
             {{ day.name }}<br /><small class="text-muted">{{ day.date }}</small>
           </th>
           <th class="text-center">Total</th>
@@ -32,17 +32,17 @@ const grandTotal = computed(() => props.rows.reduce((acc, row) => acc + getRowTo
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, index) in rows" :key="index">
+        <tr v-for="(row, index) in props.rows" :key="index">
           <td>
             <select class="form-select">
               <option>Vælg projekt</option>
-              <option v-for="p in projects" :key="p.id" :value="p.id">
+              <option v-for="p in props.projects" :key="p.id" :value="p.id">
                 {{ p.name }}
               </option>
             </select>
           </td>
 
-          <td v-for="day in weekDays" :key="day.key" class="text-center">
+          <td v-for="day in props.weekDays" :key="day.key" class="text-center">
             <input
               type="number"
               v-model="row.hours[day.key]"
@@ -72,7 +72,7 @@ const grandTotal = computed(() => props.rows.reduce((acc, row) => acc + getRowTo
         <tr class="table-info fw-semibold">
           <td class="text-end">Daglige timer:</td>
 
-          <td v-for="day in weekDays" :key="day" class="text-center">
+          <td v-for="day in weekDays" :key="day.key" class="text-center">
             <span class="badge bg-light text-dark">{{ getColumnTotal(day.key) }}t</span>
           </td>
 

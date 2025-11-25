@@ -15,3 +15,10 @@ export interface Project {
   name: string
   code: string 
 }
+
+export interface WeekDay {
+  name: string
+  key: any
+  date: string
+  fullDate: string
+}
