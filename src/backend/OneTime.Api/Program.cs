@@ -5,14 +5,33 @@ using OneTime.Core.Services.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Cors
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost",
+        policy =>
+        {
+            policy
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .WithOrigins(
+                    "http://localhost:5173",
+                    "https://localhost:5173"
+                );
+        });
+});
+
 // Configure DbContext based on environment
-if (builder.Environment.IsEnvironment("IntegrationsTesting")) 
+if (builder.Environment.IsEnvironment("IntegrationsTesting"))
 {
     builder.Services.AddDbContext<OneTimeContext>(options =>
     {
         options.UseInMemoryDatabase("OneTimeTestDb");
     });
-} else
+}
+else
 {
     // Add services to the container.
     builder.Services.AddDbContext<OneTimeContext>(options =>
@@ -28,6 +47,8 @@ builder.Services.AddScoped<ITimeEntryRepository, TimeEntryRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITimeEntryService, TimeEntryService>();
 var app = builder.Build();
+
+app.UseCors("AllowLocalhost");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
