@@ -15,6 +15,7 @@ const getColumnTotal = (dayKey: string) =>
   props.rows.reduce((acc, row) => acc + (Number(row.hours[dayKey]) || 0), 0)
 
 const grandTotal = computed(() => props.rows.reduce((acc, row) => acc + getRowTotal(row), 0))
+
 </script>
 
 <template>
@@ -83,4 +84,5 @@ const grandTotal = computed(() => props.rows.reduce((acc, row) => acc + getRowTo
       </tbody>
     </table>
   </div>
+  <div></div>
 </template>
