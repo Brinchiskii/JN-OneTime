@@ -1,5 +1,9 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import EmployeeDashboard from './views/EmployeeDashboard.vue'
+</script>
 
-<template></template>
+<template>
+  <EmployeeDashboard></EmployeeDashboard>
+</template>
 
 <style scoped></style>
