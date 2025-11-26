@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/da'
 import isoWeek from 'dayjs/plugin/isoWeek'
-import type { TimesheetRow } from '../types'
+import type { TimesheetRow, WeekDay } from '../types'
 
 dayjs.locale('da')
 dayjs.extend(isoWeek)
@@ -17,7 +17,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     },
   ])
 
-  // 2. ACTIONS (Funktioner der ændrer data)
+  // 2. ACTIONS (Funktioner der ændrer data
   function addRow() {
     rows.value.push({
       projectId: null,
@@ -30,12 +30,13 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   }
 
   const currentWeekStart = ref(dayjs().startOf('isoWeek'))
-  const weekDays = computed(() => {
-    const days = []
+  const weekDays = computed<WeekDay[]>(() => {
+    const days: WeekDay[] = []
     const keys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
     for (let i = 0; i < 7; i++) {
       const dayToAdd = currentWeekStart.value.add(i, 'day')
+      
       days.push({
         name: dayToAdd.format('ddd'),
         key: keys[i],
@@ -71,12 +72,10 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   }
 
   return {
-    // Data
     rows,
     addRow,
     removeRow,
 
-    // Datoer
     currentWeekStart,
     weekDays,
     weekHeader,
