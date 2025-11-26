@@ -22,7 +22,7 @@ namespace OneTime.Core.Services.Repository
         /// Creates a new time entry for a given user.
         /// Validates that the project exists before creating the entry.
         /// </summary>
-        /// <param name="entry">The time entry, that needs to be saved.</param>
+        /// <param name="entry">The time entry that needs to be saved.</param>
         /// <returns>The saved <see cref="TimeEntry"/> with updated values.</returns>
         /// <exception cref="Exception">
         /// Will be thrown if the project with the projectId does not exist.
