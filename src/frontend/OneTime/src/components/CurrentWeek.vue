@@ -29,8 +29,12 @@ onMounted(() => {
         </div>
       </div>
 
-      <Timesheet :rows="timesheetStore.rows" @delete-row="timesheetStore.removeRow" :weekDays="timesheetStore.weekDays"
-        :projects="projectStore.projects"></Timesheet>
+      <Timesheet
+        :rows="timesheetStore.rows"
+        @delete-row="timesheetStore.removeRow"
+        :weekDays="timesheetStore.weekDays"
+        :projects="projectStore.projects"
+      ></Timesheet>
 
       <button @click="timesheetStore.addRow" class="btn btn-outline-secondary w-100 mt-3">
         <i class="bi bi-plus-lg me-1"></i> Tilføj nyt projekt
