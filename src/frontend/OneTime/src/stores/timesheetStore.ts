@@ -17,7 +17,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     },
   ])
 
-  // 2. ACTIONS (Funktioner der ændrer data)
+  // 2. ACTIONS (Funktioner der ændrer data
   function addRow() {
     rows.value.push({
       projectId: null,
