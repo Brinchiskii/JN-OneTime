@@ -3,5 +3,5 @@ import CurrentWeek from '../components/CurrentWeek.vue'
 </script>
 
 <template>
-    <CurrentWeek></CurrentWeek>
+  <CurrentWeek></CurrentWeek>
 </template>
