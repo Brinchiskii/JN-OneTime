@@ -88,8 +88,12 @@ public partial class OneTimeContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(Secret.ConnectionString);
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer(Secret.ConnectionString);
+        }
+        
     }
-
+    
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

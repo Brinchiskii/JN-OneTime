@@ -46,6 +46,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<ITimeEntryRepository, TimeEntryRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITimeEntryService, TimeEntryService>();
+builder.Services.AddScoped<IMonthlyReviewService, MonthlyReviewService>();
 var app = builder.Build();
 
 app.UseCors("AllowLocalhost");
