@@ -33,18 +33,27 @@ public partial class JNUser
     [StringLength(50)]
     public string Role { get; set; }
 
+    public int? ManagerId { get; set; }
+
     [InverseProperty("ActorUser")]
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 
-    [InverseProperty("DecidedByUser")]
-    public virtual ICollection<MonthlyReview> MonthlyReviewDecidedByUsers { get; set; } = new List<MonthlyReview>();
+    [InverseProperty("Manager")]
+    public virtual ICollection<JNUser> InverseManager { get; set; } = new List<JNUser>();
 
-    [InverseProperty("User")]
-    public virtual ICollection<MonthlyReview> MonthlyReviewUsers { get; set; } = new List<MonthlyReview>();
+    [ForeignKey("ManagerId")]
+    [InverseProperty("InverseManager")]
+    public virtual JNUser Manager { get; set; }
 
     [InverseProperty("User")]
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     [InverseProperty("User")]
     public virtual ICollection<TimeEntry> TimeEntries { get; set; } = new List<TimeEntry>();
+
+    [InverseProperty("DecidedByUser")]
+    public virtual ICollection<Timesheet> TimesheetDecidedByUsers { get; set; } = new List<Timesheet>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<Timesheet> TimesheetUsers { get; set; } = new List<Timesheet>();
 }

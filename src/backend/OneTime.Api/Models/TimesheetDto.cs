@@ -3,7 +3,7 @@
     /// <summary>
     /// Data transfer object for a monthly review.
     /// </summary>
-    public record MonthlyReviewDto(
+    public record TimesheetDto(
         int MonthlyReviewId,
         int UserId,
         DateOnly PeriodStart,

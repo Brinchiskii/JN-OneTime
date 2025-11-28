@@ -5,7 +5,7 @@ using System.Text;
 
 namespace OneTime.Core.Services.Interfaces
 {
-    public interface IMonthlyReviewService
+    public interface ITimesheetService
     {
         /// <summary>
         /// submits a monthly review for the specified user and period.
@@ -14,6 +14,6 @@ namespace OneTime.Core.Services.Interfaces
         /// <param name="periodStart">Start of the review period.</param>
         /// <param name="periodEnd">End of the review period.</param>
         /// <returns>The monthly review object.</returns>
-        Task<MonthlyReview> SubmitMonthlyReviewAsync(int userId, DateOnly periodStart, DateOnly periodEnd);
+        Task<Timesheet> SubmitMonthlyReviewAsync(int userId, DateOnly periodStart, DateOnly periodEnd);
     }
 }

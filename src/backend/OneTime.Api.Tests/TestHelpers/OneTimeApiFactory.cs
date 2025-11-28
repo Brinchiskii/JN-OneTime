@@ -44,12 +44,12 @@ namespace OneTime.Api.Tests.TestHelpers
             );
 
             context.TimeEntries.AddRange(
-                new TimeEntry { TimeEntryId = 1, UserId = 1, ProjectId = 1, Date = new DateOnly(2025, 10, 15), Hours = 8m, Note = "Worked on feature A", Status = TimeEntryStatus.Approved },
-                new TimeEntry { TimeEntryId = 2, UserId = 1, ProjectId = 2, Date = new DateOnly(2025, 10, 20), Hours = 6m, Note = "Fixed bug B", Status = TimeEntryStatus.Approved }
+                new TimeEntry { TimeEntryId = 1, UserId = 1, ProjectId = 1, Date = new DateOnly(2025, 10, 15), Hours = 8m, Note = "Worked on feature A", Status = (int)TimeEntryStatus.Pending },
+                new TimeEntry { TimeEntryId = 2, UserId = 1, ProjectId = 2, Date = new DateOnly(2025, 10, 20), Hours = 6m, Note = "Fixed bug B", Status = (int)TimeEntryStatus.Approved }
             );
 
-            context.MonthlyReviews.AddRange(
-                new MonthlyReview { UserId = 1, PeriodStart = new DateOnly(2025, 11, 1), PeriodEnd = new DateOnly(2025, 11, 30), Status = "Pending" }
+            context.Timesheets.AddRange(
+                new Timesheet { UserId = 1, PeriodStart = new DateOnly(2025, 11, 1), PeriodEnd = new DateOnly(2025, 11, 30), Status = "Pending" }
             );
 
             context.SaveChanges();

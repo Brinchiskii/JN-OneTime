@@ -8,27 +8,27 @@ using System.Text;
 
 namespace OneTime.Api.Tests.Endpoints
 {
-    public class MonthlyReviewsTests : IClassFixture<OneTimeApiFactory>
+    public class TimesheetsTests : IClassFixture<OneTimeApiFactory>
     {
         private readonly HttpClient _client;
 
-        public MonthlyReviewsTests(OneTimeApiFactory factory)
+        public TimesheetsTests(OneTimeApiFactory factory)
         {
             _client = factory.CreateClient();
         }
 
         [Fact]
-        public async Task SubmitMonthlyReview_Already_Exists_Throws()
+        public async Task SubmitTimesheet_Already_Exists_Throws()
         {
             // Arrange
-            var dto = new SubmitMonthlyReviewDto(
+            var dto = new SubmitTimesheetDto(
                 UserId: 1,
                 PeriodStart: new DateOnly(2025, 11, 1),
                 PeriodEnd: new DateOnly(2025, 11, 30)
             );
 
             // Act
-            var response = await _client.PostAsJsonAsync("api/MonthlyReviews/submit", dto);
+            var response = await _client.PostAsJsonAsync("api/Timesheets/submit", dto);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -38,17 +38,17 @@ namespace OneTime.Api.Tests.Endpoints
         }
 
         [Fact]
-        public async Task SubmitMonthlyReview_No_TimeEntries_Throws()
+        public async Task SubmitTimesheet_No_TimeEntries_Throws()
         {
             // Arrange
-            var dto = new SubmitMonthlyReviewDto(
+            var dto = new SubmitTimesheetDto(
                 UserId: 2,
                 PeriodStart: new DateOnly(2025, 12, 1),
                 PeriodEnd: new DateOnly(2025, 12, 31)
             );
 
             // Act
-            var response = await _client.PostAsJsonAsync("api/MonthlyReviews/submit", dto);
+            var response = await _client.PostAsJsonAsync("api/Timesheets/submit", dto);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -57,22 +57,22 @@ namespace OneTime.Api.Tests.Endpoints
         }
 
         [Fact]
-        public async Task SubmitMonthlyReview_Succeeds()
+        public async Task SubmitTimesheet_Succeeds()
         {
             // Arrange
-            var dto = new SubmitMonthlyReviewDto(
+            var dto = new SubmitTimesheetDto(
                 UserId: 1,
                 PeriodStart: new DateOnly(2025, 10, 1),
                 PeriodEnd: new DateOnly(2025, 10, 30)
             );
 
             // Act
-            var response = await _client.PostAsJsonAsync("api/MonthlyReviews/submit", dto);
+            var response = await _client.PostAsJsonAsync("api/Timesheets/submit", dto);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadFromJsonAsync<MonthlyReviewDto>();
+            var result = await response.Content.ReadFromJsonAsync<TimesheetDto>();
             Assert.NotNull(result);
             Assert.Equal(1, result.UserId);
             Assert.Equal(new DateOnly(2025, 10, 1), result.PeriodStart);

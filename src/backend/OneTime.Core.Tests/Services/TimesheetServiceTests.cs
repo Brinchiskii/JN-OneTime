@@ -7,7 +7,7 @@ using OneTime.Core.Models;
 using OneTime.Core.Tests.TestHelpers;
 namespace OneTime.Core.Tests.Services
 {
-    public class MonthlyReviewServiceTests
+    public class TimesheetServiceTests
     {
         [Fact]
         public async Task SubmitMonthlyReview_Already_Exists_Throws()
@@ -19,7 +19,7 @@ namespace OneTime.Core.Tests.Services
 
             var context = OneTimeContextFactory.CreateInMemoryContext();
 
-            context.MonthlyReviews.Add(new MonthlyReview
+            context.Timesheets.Add(new Timesheet
             {
                 UserId = userId,
                 PeriodStart = periodStart,
@@ -29,7 +29,7 @@ namespace OneTime.Core.Tests.Services
 
             await context.SaveChangesAsync();
 
-            var service = new MonthlyReviewService(context);
+            var service = new TimesheetService(context);
 
             // Act + Assert 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -46,7 +46,7 @@ namespace OneTime.Core.Tests.Services
 
             var context = OneTimeContextFactory.CreateInMemoryContext();
 
-            var service = new MonthlyReviewService(context);
+            var service = new TimesheetService(context);
 
             // Act + Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -75,7 +75,7 @@ namespace OneTime.Core.Tests.Services
 
             await context.SaveChangesAsync();
 
-            var service = new MonthlyReviewService(context);
+            var service = new TimesheetService(context);
 
             // Act
             var review = await service.SubmitMonthlyReviewAsync(userId, periodStart, periodEnd);

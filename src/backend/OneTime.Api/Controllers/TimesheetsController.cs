@@ -9,11 +9,11 @@ namespace OneTime.Api.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    public class MonthlyReviewsController : ControllerBase
+    public class TimesheetsController : ControllerBase
     {
-        private readonly IMonthlyReviewService _service;
+        private readonly ITimesheetService _service;
 
-        public MonthlyReviewsController(IMonthlyReviewService monthlyReviewService)
+        public TimesheetsController(ITimesheetService monthlyReviewService)
         {
             _service = monthlyReviewService;
         }
@@ -29,7 +29,7 @@ namespace OneTime.Api.Controllers
         [HttpPost("submit")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> Submit([FromBody] SubmitMonthlyReviewDto dto)
+        public async Task<IActionResult> Submit([FromBody] SubmitTimesheetDto dto)
         {
             if (!ModelState.IsValid)
             {
@@ -40,8 +40,8 @@ namespace OneTime.Api.Controllers
             {
                 var review = await _service.SubmitMonthlyReviewAsync(dto.UserId, dto.PeriodStart, dto.PeriodEnd);
 
-                var response = new MonthlyReviewDto(
-                    review.MonthlyReviewId,
+                var response = new TimesheetDto(
+                    review.TimesheetId,
                     review.UserId,
                     review.PeriodStart,
                     review.PeriodEnd,

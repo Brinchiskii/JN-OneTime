@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OneTime.Core.Models;
 
-public partial class MonthlyReview
+public partial class Timesheet
 {
     [Key]
-    public int MonthlyReviewId { get; set; }
+    public int TimesheetId { get; set; }
 
     public int UserId { get; set; }
 
@@ -31,10 +31,10 @@ public partial class MonthlyReview
     public string Status { get; set; }
 
     [ForeignKey("DecidedByUserId")]
-    [InverseProperty("MonthlyReviewDecidedByUsers")]
+    [InverseProperty("TimesheetDecidedByUsers")]
     public virtual JNUser DecidedByUser { get; set; }
 
     [ForeignKey("UserId")]
-    [InverseProperty("MonthlyReviewUsers")]
+    [InverseProperty("TimesheetUsers")]
     public virtual JNUser User { get; set; }
 }

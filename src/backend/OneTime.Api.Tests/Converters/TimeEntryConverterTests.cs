@@ -45,7 +45,7 @@ namespace OneTime.Api.Tests.Converters
                 Date = DateOnly.FromDateTime(new DateTime(2025, 3, 5)),
                 Note = "Test Note",
                 Hours = 4m,
-                Status = TimeEntryStatus.Approved
+                Status = (int)TimeEntryStatus.Pending
             };
 
             // Act
@@ -59,7 +59,7 @@ namespace OneTime.Api.Tests.Converters
             Assert.Equal(entity.Date, dto.Date );
             Assert.Equal(entity.Note, dto.Note );
             Assert.Equal(entity.Hours, dto.Hours );
-            Assert.Equal(entity.Status, dto.Status );
+            Assert.Equal((TimeEntryStatus)entity.Status, dto.Status );
         }
     }
 }

@@ -7,11 +7,11 @@ using System.Text;
 
 namespace OneTime.Core.Services.Repository
 {
-    public class MonthlyReviewService : IMonthlyReviewService
+    public class TimesheetService : ITimesheetService
     {
         private readonly OneTimeContext _context;
 
-        public MonthlyReviewService(OneTimeContext context)
+        public TimesheetService(OneTimeContext context)
         {
             _context = context;
         }
@@ -25,10 +25,10 @@ namespace OneTime.Core.Services.Repository
         /// <returns>A <see cref="MonthlyReview"/> object representing the newly created monthly review.</returns>
         /// <exception cref="InvalidOperationException">Thrown if a monthly review already exists or if there are no registered
         /// time entries for the period.</exception>
-        public async Task<MonthlyReview> SubmitMonthlyReviewAsync(int userId, DateOnly periodStart, DateOnly periodEnd)
+        public async Task<Timesheet> SubmitMonthlyReviewAsync(int userId, DateOnly periodStart, DateOnly periodEnd)
         {
             // Check if already existing review for this period.
-            var existingReview = _context.MonthlyReviews
+            var existingReview = _context.Timesheets
                 .FirstOrDefault(m => 
                     m.UserId == userId 
                     && m.PeriodStart == periodStart 
@@ -52,7 +52,7 @@ namespace OneTime.Core.Services.Repository
             }
 
             // Creates a new monthly review.
-            var review = new MonthlyReview
+            var review = new Timesheet
             {
                 UserId = userId,
                 PeriodStart = periodStart,
@@ -64,7 +64,7 @@ namespace OneTime.Core.Services.Repository
             };
 
             // Saves the new review to the database.
-            _context.MonthlyReviews.Add(review);
+            _context.Timesheets.Add(review);
             await _context.SaveChangesAsync();
 
             return review;
