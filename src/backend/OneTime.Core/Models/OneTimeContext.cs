@@ -35,12 +35,17 @@ public partial class OneTimeContext : DbContext
             entity.HasOne(d => d.ActorUser).WithMany(p => p.AuditLogs).HasConstraintName("FK_AuditLog_ActorUser");
         });
 
-        modelBuilder.Entity<JNUser>(entity =>
-        {
-            entity.HasKey(e => e.UserId).HasName("PK_User");
-        });
+		modelBuilder.Entity<JNUser>(entity =>
+		{
+			entity.HasKey(e => e.UserId).HasName("PK_User");
 
-        modelBuilder.Entity<MonthlyReview>(entity =>
+			entity.HasOne(d => d.Manager)
+				.WithMany(p => p.TeamMembers)
+				.HasForeignKey(d => d.ManagerId)
+				.HasConstraintName("FK_JNUsers_Manager");
+		});
+
+		modelBuilder.Entity<MonthlyReview>(entity =>
         {
             entity.HasKey(e => e.MonthlyReviewId).HasName("PK_MonthlyReview");
 

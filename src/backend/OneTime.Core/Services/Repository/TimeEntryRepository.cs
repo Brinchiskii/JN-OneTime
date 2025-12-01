@@ -4,6 +4,7 @@ using OneTime.Core.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace OneTime.Core.Services.Repository
 {
@@ -40,6 +41,21 @@ namespace OneTime.Core.Services.Repository
         public async Task<IEnumerable<TimeEntry>> GetByUserWithDetails(int userId)
 		{
 			return await _context.TimeEntries.Where(t => t.UserId == userId).Include(t => t.Project).Include(t => t.User).OrderBy(t => t.Date).ToListAsync();
+		}
+
+		public async Task<IEnumerable<TimeEntry>> GetLeaderWithDetailsForPeriod(int leaderId, DateOnly start, DateOnly end)
+		{
+			return await _context.TimeEntries.Include(t => t.Project).Include(t => t.User)
+				.Where(t =>
+					t.User != null &&
+					t.User.Role.ToLower() == "employee" &&
+					t.User.ManagerId == leaderId &&
+					t.Date >= start &&
+					t.Date <= end)
+				.OrderBy(t => t.User.Name)
+				.ThenBy(t => t.Project.Name)
+				.ThenBy(t => t.Date)
+				.ToListAsync();
 		}
 	}
 }
