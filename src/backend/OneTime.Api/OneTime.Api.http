@@ -22,3 +22,7 @@ Accept: application/json
 GET {{OneTime.Api_HostAddress}}/api/TimeEntries/user/3
 Accept: application/json
 ###
+
+GET {{OneTime.Api_HostAddress}}/api/TimeEntries/leader/4/team?startDate=2025-11-09&endDate=2025-11-20
+Accept: application/json
+###

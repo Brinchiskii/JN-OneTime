@@ -40,13 +40,16 @@ namespace OneTime.Api.Models
 				entity.UserId,
 				entity.User?.Name ?? string.Empty,
 				entity.User?.Email ?? string.Empty,
+				entity.User?.Role ?? string.Empty,
 				entity.ProjectId,
 				entity.Project?.Name ?? string.Empty,
 				entity.Project?.Status ?? ProjectStatus.Active,
 				entity.Date,
 				entity.Note,
 				entity.Hours,
-				entity.Status);
+				entity.Status
+			);
 		}
+
 	}
 }

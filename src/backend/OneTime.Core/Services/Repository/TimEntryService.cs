@@ -56,5 +56,9 @@ namespace OneTime.Core.Services.Repository
 			return await _timeEntryRepo.GetByUserWithDetails(userId);
 		}
 
+		public async Task<IEnumerable<TimeEntry>> GetLeaderPeriodEntries(int leaderId, DateOnly start, DateOnly end)
+		{
+			return await _timeEntryRepo.GetLeaderWithDetailsForPeriod(leaderId, start, end);
+		}
 	}
 }	
