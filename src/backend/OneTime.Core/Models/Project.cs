@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using OneTime.Core.Models.Enums;
 
 namespace OneTime.Core.Models;
 
@@ -18,7 +17,7 @@ public partial class Project
     [StringLength(200)]
     public string Name { get; set; }
 
-    public ProjectStatus Status { get; set; }
+    public int Status { get; set; }
 
     [InverseProperty("Project")]
     public virtual ICollection<TimeEntry> TimeEntries { get; set; } = new List<TimeEntry>();

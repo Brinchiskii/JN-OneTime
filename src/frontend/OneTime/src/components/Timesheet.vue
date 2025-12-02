@@ -84,5 +84,4 @@ const grandTotal = computed(() => props.rows.reduce((acc, row) => acc + getRowTo
       </tbody>
     </table>
   </div>
-  <div></div>
 </template>

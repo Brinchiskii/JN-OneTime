@@ -36,7 +36,7 @@ namespace OneTime.Core.Services.Repository
             if(entry.Hours <= 0 || entry.Hours > 24)
                 throw new Exception("Hours must be greater than zero and less than 24");
 
-            entry.Status = TimeEntryStatus.Pending;
+            entry.Status = (int)TimeEntryStatus.Pending;
             entry.Date = entry.Date == default ? DateOnly.FromDateTime(DateTime.Now) : entry.Date;
 
             return await _timeEntryRepo.Add(entry);

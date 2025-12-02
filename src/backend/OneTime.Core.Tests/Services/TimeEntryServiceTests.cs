@@ -77,7 +77,7 @@ namespace OneTime.Core.Tests.Services
             // Act
             var result = await timeEntryService.CreateTimeEntry(entry);
 
-            Assert.Equal(TimeEntryStatus.Pending, result.Status);
+            Assert.Equal((int)TimeEntryStatus.Pending, result.Status);
             Assert.NotEqual(default, result.Date);
         }
 
@@ -135,7 +135,7 @@ namespace OneTime.Core.Tests.Services
             Assert.Equal(6m, fakeTimeRepo.AddedEntry.Hours);
             Assert.Equal(new DateOnly(2024, 6, 15), fakeTimeRepo.AddedEntry.Date);
             Assert.Equal("Test Note", fakeTimeRepo.AddedEntry.Note);
-            Assert.Equal(TimeEntryStatus.Pending, fakeTimeRepo.AddedEntry.Status);
+            Assert.Equal((int)TimeEntryStatus.Pending, fakeTimeRepo.AddedEntry.Status);
         }
 
         [Fact]
