@@ -1,42 +1,57 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, onBeforeMount } from 'vue'
 import type { TimesheetRow, Project, WeekDay } from '../types'
+import { useProjectStore } from '@/stores/projectStore'
+import { useTimesheetStore } from '@/stores/timesheetStore'
 
 const props = defineProps<{
   rows: TimesheetRow[]
   weekDays: WeekDay[]
-  projects: Project[]
+  readonly?: boolean
 }>()
 
-const getRowTotal = (row: TimesheetRow) =>
-  Object.values(row.hours).reduce((acc, val) => acc + (Number(val) || 0), 0)
+const projectStore = useProjectStore()
+const timesheetStore = useTimesheetStore()
+
+onMounted(async () => {
+  await projectStore.fetchProjects()
+})
 
 const getColumnTotal = (dayKey: string) =>
   props.rows.reduce((acc, row) => acc + (Number(row.hours[dayKey]) || 0), 0)
 
-const grandTotal = computed(() => props.rows.reduce((acc, row) => acc + getRowTotal(row), 0))
+const grandTotal = computed(() =>
+  props.rows.reduce((acc, row) => acc + timesheetStore.getTotalHours(row), 0),
+)
 
 </script>
 
 <template>
-  <div class="table-responsive border rounded">
-    <table class="table table-sm align-middle mb-0">
-      <thead class="table-light">
+  <div class="timesheet-card shadow">
+    <table class="custom-table">
+      <thead>
         <tr>
-          <th class="text-center">Projekt</th>
+          <th style="width: 25%; padding-left: 20px">Projekt</th>
           <th class="text-center" v-for="day in props.weekDays" :key="day.key">
-            {{ day.name }}<br /><small class="text-muted">{{ day.date }}</small>
+            {{ day.name }}
+            <span class="d-block fw-normal text-muted" style="font-size: 0.7rem">{{
+              day.date
+            }}</span>
           </th>
-          <th class="text-center">Total</th>
-          <th class="text-center">Handlinger</th>
+          <th class="text-center" style="width: 8%">Total</th>
+          <th style="width: 5%" v-if="!props.readonly">Handlinger</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, index) in props.rows" :key="index">
+        <tr v-for="(row, index) in props.rows" :key="row.projectId" class="project-row">
           <td>
-            <select class="form-select">
-              <option>Vælg projekt</option>
-              <option v-for="p in props.projects" :key="p.id" :value="p.id">
+            <select
+              class="project-select form-select"
+              :disabled="props.readonly"
+              v-model="row.projectId"
+            >
+              <option :value="0" hidden>Vælg projekt</option>
+              <option v-for="p in projectStore.projects" :key="p.projectId" :value="p.projectId">
                 {{ p.name }}
               </option>
             </select>
@@ -45,22 +60,24 @@ const grandTotal = computed(() => props.rows.reduce((acc, row) => acc + getRowTo
           <td v-for="day in props.weekDays" :key="day.key" class="text-center">
             <input
               type="number"
-              v-model="row.hours[day.key]"
-              class="form-control form-control-sm text-center w-75 mx-auto"
+              v-model="row.hours[day.fullDate]"
+              :class="!readonly ? 'day-input' : 'hours-cell'"
               placeholder="0"
               min="0"
               max="24"
               step="0.25"
+              :readonly="props.readonly"
+              :disabled="props.readonly"
             />
           </td>
 
           <td class="text-center">
-            <span class="badge bg-secondary">{{ getRowTotal(row) }}t</span>
+            <span class="badge bg-secondary">{{ timesheetStore.getTotalHours(row) }}t</span>
           </td>
 
-          <td class="text-center">
+          <td class="text-center" v-if="!props.readonly">
             <button
-              @click="rows.splice(index, 1)"
+              @click="timesheetStore.removeRow(index)"
               class="btn btn-outline-danger btn-sm"
               title="Delete row"
             >
@@ -68,20 +85,129 @@ const grandTotal = computed(() => props.rows.reduce((acc, row) => acc + getRowTo
             </button>
           </td>
         </tr>
+        <tr v-if="props.rows.length === 0">
+          <td colspan="9" class="text-center py-4 text-muted fst-italic">Ingen registreringer.</td>
+        </tr>
+        <tr class="fw-semibold project-row">
+          <td class="text-center">Daglige timer:</td>
 
         <tr class="table-info fw-semibold">
           <td class="text-end">Daglige timer:</td>
 
           <td v-for="day in weekDays" :key="day.key" class="text-center">
-            <span class="badge bg-light text-dark">{{ getColumnTotal(day.key) }}t</span>
+            <span class="badge bg-light text-dark">{{ getColumnTotal(day.fullDate) }}t</span>
           </td>
 
           <td class="text-center">
             <span class="badge bg-dark">{{ grandTotal }}t</span>
           </td>
-          <td></td>
+          <td v-if="!props.readonly"></td>
         </tr>
       </tbody>
     </table>
   </div>
+  <button v-if="!props.readonly" @click="timesheetStore.addRow" class="btn bg-white w-100 mt-3">
+    <i class="bi bi-plus-lg me-1"></i> Tilføj nyt projekt
+  </button>
 </template>
+
+<style scoped>
+.timesheet-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden; /* Sikrer at indhold ikke stikker ud af de runde hjørner */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table thead th {
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  font-weight: 600;
+  padding: 16px 8px;
+}
+
+.project-row td {
+  padding: 10px 5px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.project-row:last-child td {
+  border-bottom: none;
+}
+
+.project-row:hover {
+  background-color: #fafafa;
+}
+
+.day-input {
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+  color: #374151;
+  width: 100%;
+  padding: 8px 0;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  min-width: 50px;
+}
+
+.day-input:focus {
+  background: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  outline: none;
+}
+
+.day-input:hover {
+  border-color: #d1d5db;
+}
+
+.day-input.weekend {
+  background-color: #f9fafb;
+  color: #9ca3af;
+}
+
+.hours-cell {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 0;
+  text-align: center;
+  font-weight: 500;
+  width: 50px;
+  display: inline-block;
+  color: #475569;
+}
+
+.hours-cell.violation {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+  font-weight: 700;
+}
+
+.project-select {
+  font-weight: 600;
+  color: #1f2937;
+  padding: 8px 5px;
+  cursor: pointer;
+  width: 100%;
+  background: transparent;
+}
+.project-select:focus {
+  outline: none;
+  box-shadow: none;
+}
+</style>
