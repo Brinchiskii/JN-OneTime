@@ -44,9 +44,6 @@ public partial class OneTimeContext : DbContext
 				.HasConstraintName("FK_JNUsers_Manager");
 		});
 
-            entity.HasOne(d => d.Manager).WithMany(p => p.InverseManager).HasConstraintName("FK_JNUsers_Manager");
-        });
-
         modelBuilder.Entity<Notification>(entity =>
         {
             entity.HasKey(e => e.NotificationId).HasName("PK_Notification");

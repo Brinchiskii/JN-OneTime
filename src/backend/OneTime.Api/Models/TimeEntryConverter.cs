@@ -47,7 +47,7 @@ namespace OneTime.Api.Models
 				entity.Date,
 				entity.Note,
 				entity.Hours,
-				entity.Status);
+				(TimeEntryStatus)entity.Status);
 		}
 
 	}

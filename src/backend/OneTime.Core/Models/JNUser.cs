@@ -35,25 +35,18 @@ public partial class JNUser
 
     public int? ManagerId { get; set; }
 
+    // Self-reference: én manager til mange TeamMembers
     [ForeignKey("ManagerId")]
     [InverseProperty("TeamMembers")]
     public virtual JNUser Manager { get; set; }
 
-    public int? ManagerId { get; set; }
+    [InverseProperty("Manager")]
+    public virtual ICollection<JNUser> TeamMembers { get; set; } = new List<JNUser>();
 
     [InverseProperty("ActorUser")]
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 
-    [InverseProperty("Manager")]
-    public virtual ICollection<JNUser> TeamMembers { get; set; } = new List<JNUser>();
-
-	[InverseProperty("DecidedByUser")]
-    public virtual ICollection<MonthlyReview> MonthlyReviewDecidedByUsers { get; set; } = new List<MonthlyReview>();
-
-    [ForeignKey("ManagerId")]
-    [InverseProperty("InverseManager")]
-    public virtual JNUser Manager { get; set; }
-
+    // FK ligger på Notification (typisk Notification.UserId), så ingen [ForeignKey] her
     [InverseProperty("User")]
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
