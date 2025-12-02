@@ -1,6 +1,6 @@
 ﻿namespace OneTime.Api.Models
 {
-	public record ProjectSimpleDto(int Id, string Name, int Status);
+	public record ProjectSimpleDto(int ProjectId, string Name, int Status);
 
 	public record ProjectHoursByDateDto(
 		ProjectSimpleDto Project,
