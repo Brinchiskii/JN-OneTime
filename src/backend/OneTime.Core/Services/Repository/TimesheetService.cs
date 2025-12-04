@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneTime.Core.Models;
+using OneTime.Core.Models.Enums;
 using OneTime.Core.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -57,7 +58,7 @@ namespace OneTime.Core.Services.Repository
                 UserId = userId,
                 PeriodStart = periodStart,
                 PeriodEnd = periodEnd,
-                Status = "Pending",
+                Status = TimesheetStatus.Pending,
                 DecidedByUserId = null,
                 DecidedAt = null,
                 Comment = null
@@ -69,5 +70,31 @@ namespace OneTime.Core.Services.Repository
 
             return review;
         }
-    }
+
+		public async Task<Timesheet> UpdateTimeSheet(int timesheetId, int leaderId, int status, string? comment)
+		{
+			var sheet = await _context.Timesheets.FindAsync(timesheetId);
+
+			if (sheet is null)
+				throw new InvalidOperationException("Timesheet not found.");
+
+            sheet.Status = status switch
+            {
+                0 => TimesheetStatus.Pending,
+                1 => TimesheetStatus.Approved,
+                2 => TimesheetStatus.Rejected,
+                _ => throw new ArgumentOutOfRangeException(nameof(status), "Invalid timesheet status value.")
+            };
+
+			sheet.DecidedByUserId = leaderId;
+			sheet.DecidedAt = DateTime.Now;
+			sheet.Comment = comment;
+
+			await _context.SaveChangesAsync();
+
+			return sheet;
+		}
+	}
+
 }
+

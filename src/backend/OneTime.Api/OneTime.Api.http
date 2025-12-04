@@ -26,3 +26,15 @@ Accept: application/json
 GET {{OneTime.Api_HostAddress}}/api/TimeEntries/leader/4/team?startDate=2025-11-09&endDate=2025-11-20
 Accept: application/json
 ###
+
+###
+POST {{OneTime.Api_HostAddress}}/api/Timesheets/decide
+Content-Type: application/json
+Accept: application/json
+
+{
+  "timesheetId":2,
+  "leaderId": 4,
+  "status": 0,
+  "comment": "Looks good to me xD."
+}

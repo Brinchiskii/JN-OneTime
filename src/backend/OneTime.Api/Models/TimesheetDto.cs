@@ -1,4 +1,6 @@
-﻿namespace OneTime.Api.Models
+﻿using OneTime.Core.Models.Enums;
+
+namespace OneTime.Api.Models
 {
     /// <summary>
     /// Data transfer object for a monthly review.
@@ -8,9 +10,8 @@
         int UserId,
         DateOnly PeriodStart,
         DateOnly PeriodEnd,
-        string Status,
+        TimesheetStatus Status,
         DateTime? DecidedAt,
         string Comment
-        
     );
 }

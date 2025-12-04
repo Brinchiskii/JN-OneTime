@@ -56,5 +56,35 @@ namespace OneTime.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-    }
+
+		[HttpPost("decide")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
+		public async Task<IActionResult> Decide([FromBody] TimesheetDecisionDto dto)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			try
+			{
+				var sheet = await _service.UpdateTimeSheet(dto.TimesheetId, dto.LeaderId, dto.Status, dto.Comment);
+
+				var response = new TimesheetDto(
+					sheet.TimesheetId,
+					sheet.UserId,
+					sheet.PeriodStart,
+					sheet.PeriodEnd,
+					sheet.Status,
+					sheet.DecidedAt,
+					sheet.Comment
+				);
+
+				return Ok(response);
+			}
+			catch (InvalidOperationException ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
+	}
 }
