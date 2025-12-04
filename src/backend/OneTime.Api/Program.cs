@@ -36,7 +36,7 @@ else
     // Add services to the container.
     builder.Services.AddDbContext<OneTimeContext>(options =>
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+        options.UseSqlServer(Secret.ConnectionString);
     });
 }
 
