@@ -34,10 +34,7 @@ onMounted(() => {
         :projects="projectStore.projects"
     ></Timesheet>
 
-      <button @click="timesheetStore.addRow" class="btn btn-outline-secondary w-100 mt-3">
-        <i class="bi bi-plus-lg me-1"></i> Tilf�j nyt projekt
-      </button>
-    </div>
+      
   </div>
   
 </template>

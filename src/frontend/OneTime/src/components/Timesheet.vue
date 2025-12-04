@@ -88,9 +88,6 @@ const grandTotal = computed(() =>
         <tr v-if="props.rows.length === 0">
           <td colspan="9" class="text-center py-4 text-muted fst-italic">Ingen registreringer.</td>
         </tr>
-        <tr class="fw-semibold project-row">
-          <td class="text-center">Daglige timer:</td>
-
         <tr class="table-info fw-semibold">
           <td class="text-end">Daglige timer:</td>
 
@@ -106,7 +103,7 @@ const grandTotal = computed(() =>
       </tbody>
     </table>
   </div>
-  <button v-if="!props.readonly" @click="timesheetStore.addRow" class="btn bg-white w-100 mt-3">
+  <button v-if="!props.readonly" @click="timesheetStore.addRow" class="btn btn-outline-secondary w-100 mt-3">
     <i class="bi bi-plus-lg me-1"></i> Tilføj nyt projekt
   </button>
 </template>

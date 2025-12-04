@@ -19,7 +19,6 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     return {
       projectId: 0,
       hours: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
-    })
     }
   }
 
@@ -41,7 +40,6 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   const currentWeekStart = ref(dayjs().startOf('isoWeek'))
 
   const weekDays = computed<WeekDay[]>(() => {
-    const days: WeekDay[] = []
     const keys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
     return keys.map((key, index) => {
@@ -49,10 +47,8 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       return {
         key,
         name: dayToAdd.format('ddd'),
-        key: keys[i],
         date: dayToAdd.format('DD/MM'),
         fullDate: dayToAdd.format('YYYY-MM-DD'),
-      })
       }
     })
   })
@@ -86,9 +82,9 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     const usersData = result.data?.users
 
     const normalized: UsersCollection = {}
+    if(usersData)
     for (const [user, rows] of Object.entries(usersData)) {
       normalized[user] = rows.map((row) => ({
-        id: row.id,
         projectId: row.project.projectId,
         hours: row.hours,
       }))
@@ -109,17 +105,6 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     const end = currentWeekStart.value.add(6, 'day').format('DD MMM YYYY')
     return `Periode: ${start} - ${end}`
   })
-
-  function nextWeek() {
-    currentWeekStart.value = currentWeekStart.value.add(1, 'week')
-    // TODO: Her skal du senere kalde en funktion der henter nye data (rows) fra API'et
-    // fetchWeekData()
-  }
-
-  function previousWeek() {
-    currentWeekStart.value = currentWeekStart.value.subtract(1, 'week')
-    // TODO: fetchWeekData()
-  }
 
   return {
     myRows,
