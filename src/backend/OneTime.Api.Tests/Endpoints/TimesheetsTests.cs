@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using OneTime.Core.Models.Enums;
 
 namespace OneTime.Api.Tests.Endpoints
 {
@@ -77,7 +78,7 @@ namespace OneTime.Api.Tests.Endpoints
             Assert.Equal(1, result.UserId);
             Assert.Equal(new DateOnly(2025, 10, 1), result.PeriodStart);
             Assert.Equal(new DateOnly(2025, 10, 30), result.PeriodEnd);
-            Assert.Equal("Pending", result.Status);
+            Assert.Equal(TimesheetStatus.Pending, result.Status);
             Assert.Null(result.DecidedAt);
             Assert.Null(result.Comment);
         }

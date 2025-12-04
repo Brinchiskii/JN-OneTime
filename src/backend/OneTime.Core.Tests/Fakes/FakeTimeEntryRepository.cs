@@ -29,5 +29,10 @@ namespace OneTime.Core.Tests.Fakes
             LastUserIdRequested = userId;
             return Task.FromResult<IEnumerable<TimeEntry>>(new List<TimeEntry>(EntriesToReturn));
         }
+
+        public Task<IEnumerable<TimeEntry>> GetLeaderWithDetailsForPeriod(int leaderId, DateOnly start, DateOnly end)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

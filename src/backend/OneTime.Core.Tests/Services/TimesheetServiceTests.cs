@@ -4,6 +4,7 @@ using System.Text;
 using OneTime.Core.Services.Repository;
 using Microsoft.EntityFrameworkCore;
 using OneTime.Core.Models;
+using OneTime.Core.Models.Enums;
 using OneTime.Core.Tests.TestHelpers;
 namespace OneTime.Core.Tests.Services
 {
@@ -24,7 +25,7 @@ namespace OneTime.Core.Tests.Services
                 UserId = userId,
                 PeriodStart = periodStart,
                 PeriodEnd = periodEnd,
-                Status = "Pending"
+                Status = TimesheetStatus.Pending
             });
 
             await context.SaveChangesAsync();
@@ -85,7 +86,7 @@ namespace OneTime.Core.Tests.Services
             Assert.Equal(userId, review.UserId);
             Assert.Equal(periodStart, review.PeriodStart);
             Assert.Equal(periodEnd, review.PeriodEnd);
-            Assert.Equal("Pending", review.Status);
+            Assert.Equal(TimesheetStatus.Pending, review.Status);
         }
     }
 }

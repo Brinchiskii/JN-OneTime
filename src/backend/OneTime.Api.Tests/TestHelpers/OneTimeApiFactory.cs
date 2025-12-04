@@ -49,7 +49,7 @@ namespace OneTime.Api.Tests.TestHelpers
             );
 
             context.Timesheets.AddRange(
-                new Timesheet { UserId = 1, PeriodStart = new DateOnly(2025, 11, 1), PeriodEnd = new DateOnly(2025, 11, 30), Status = "Pending" }
+                new Timesheet { UserId = 1, PeriodStart = new DateOnly(2025, 11, 1), PeriodEnd = new DateOnly(2025, 11, 30), Status = TimesheetStatus.Pending }
             );
 
             context.SaveChanges();
