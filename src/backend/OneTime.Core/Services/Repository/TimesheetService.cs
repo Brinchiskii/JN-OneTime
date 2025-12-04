@@ -18,15 +18,15 @@ namespace OneTime.Core.Services.Repository
         }
 
         /// <summary>
-        /// Submits a new monthly review for the specified user and period.
+        /// Creates new timesheet for the specified user and period.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="periodStart">The start date of the review period.</param>
         /// <param name="periodEnd">The end date of the review period.</param>
-        /// <returns>A <see cref="MonthlyReview"/> object representing the newly created monthly review.</returns>
+        /// <returns>A <see cref="Timesheet"/> object representing the newly created timesheet.</returns>
         /// <exception cref="InvalidOperationException">Thrown if a monthly review already exists or if there are no registered
         /// time entries for the period.</exception>
-        public async Task<Timesheet> SubmitMonthlyReviewAsync(int userId, DateOnly periodStart, DateOnly periodEnd)
+        public async Task<Timesheet> CreateTimesheet(int userId, DateOnly periodStart, DateOnly periodEnd)
         {
             // Check if already existing review for this period.
             var existingReview = _context.Timesheets
@@ -37,7 +37,7 @@ namespace OneTime.Core.Services.Repository
 
             if (existingReview is not null)
             {
-                throw new InvalidOperationException("Monthly review already exists for the specified user and period.");
+                throw new InvalidOperationException("Timesheet already exists for the specified user and period.");
             }
 
             // Check if there are any time entries for this specific period.

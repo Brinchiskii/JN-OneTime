@@ -38,7 +38,7 @@ namespace OneTime.Api.Controllers
 
             try
             {
-                var review = await _service.SubmitMonthlyReviewAsync(dto.UserId, dto.PeriodStart, dto.PeriodEnd);
+                var review = await _service.CreateTimesheet(dto.UserId, dto.PeriodStart, dto.PeriodEnd);
 
                 var response = new TimesheetDto(
                     review.TimesheetId,

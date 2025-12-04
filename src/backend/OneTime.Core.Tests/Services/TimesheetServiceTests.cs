@@ -34,7 +34,7 @@ namespace OneTime.Core.Tests.Services
 
             // Act + Assert 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.SubmitMonthlyReviewAsync(userId, periodStart, periodEnd));
+                service.CreateTimesheet(userId, periodStart, periodEnd));
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace OneTime.Core.Tests.Services
 
             // Act + Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.SubmitMonthlyReviewAsync(userId, periodStart, periodEnd));
+                service.CreateTimesheet(userId, periodStart, periodEnd));
 
         }
 
@@ -79,7 +79,7 @@ namespace OneTime.Core.Tests.Services
             var service = new TimesheetService(context);
 
             // Act
-            var review = await service.SubmitMonthlyReviewAsync(userId, periodStart, periodEnd);
+            var review = await service.CreateTimesheet(userId, periodStart, periodEnd);
 
             // Assert
             Assert.NotNull(review);
