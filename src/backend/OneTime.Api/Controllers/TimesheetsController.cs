@@ -57,10 +57,10 @@ namespace OneTime.Api.Controllers
             }
         }
 
-		[HttpPost("decide")]
+		[HttpPost("update/{timesheetId:int}")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
-		public async Task<IActionResult> Decide([FromBody] TimesheetDecisionDto dto)
+		public async Task<IActionResult> Update([FromBody] TimesheetDecisionDto dto, int timesheetId)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
