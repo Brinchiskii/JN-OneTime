@@ -67,7 +67,7 @@ namespace OneTime.Api.Controllers
 
 			try
 			{
-				var sheet = await _service.UpdateTimeSheet(dto.TimesheetId, dto.LeaderId, dto.Status, dto.Comment);
+				var sheet = await _service.UpdateTimeSheet(dto.TimesheetId, dto.Status, dto.Comment, dto.LeaderId);
 
 				var response = new TimesheetDto(
 					sheet.TimesheetId,

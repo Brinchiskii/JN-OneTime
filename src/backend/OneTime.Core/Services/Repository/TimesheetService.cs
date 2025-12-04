@@ -71,7 +71,7 @@ namespace OneTime.Core.Services.Repository
             return review;
         }
 
-		public async Task<Timesheet> UpdateTimeSheet(int timesheetId, int leaderId, int status, string? comment)
+		public async Task<Timesheet> UpdateTimeSheet(int timesheetId, int status, string? comment, int leaderId = 0)
 		{
 			var sheet = await _context.Timesheets.FindAsync(timesheetId);
 
@@ -86,7 +86,10 @@ namespace OneTime.Core.Services.Repository
                 _ => throw new ArgumentOutOfRangeException(nameof(status), "Invalid timesheet status value.")
             };
 
-			sheet.DecidedByUserId = leaderId;
+            if (leaderId != 0)
+            {
+                sheet.DecidedByUserId = leaderId;
+            }
 			sheet.DecidedAt = DateTime.Now;
 			sheet.Comment = comment;
 

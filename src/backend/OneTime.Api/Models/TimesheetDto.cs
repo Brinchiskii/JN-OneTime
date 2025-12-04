@@ -6,7 +6,7 @@ namespace OneTime.Api.Models
     /// Data transfer object for a monthly review.
     /// </summary>
     public record TimesheetDto(
-        int MonthlyReviewId,
+        int TimesheetId,
         int UserId,
         DateOnly PeriodStart,
         DateOnly PeriodEnd,
