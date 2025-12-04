@@ -5,9 +5,10 @@ import { ref } from 'vue'
 import type { Project } from '../types'
 
 export const useProjectStore = defineStore('project', () => {
+  
   const projects = ref<Project[]>([])
   
-  async function fetchProjects() {
+  const fetchProjects = async () => {
     const res = await projectService.getProjects()
     projects.value = res.data
   }

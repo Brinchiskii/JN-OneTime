@@ -498,3 +498,4 @@ yarn-error.log
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,rider,csharp,vuejs,vue
 /src/backend/OneTime.Api/appsettings.Development.json
+/src/backend/OneTime.Core/Models/Secret.cs

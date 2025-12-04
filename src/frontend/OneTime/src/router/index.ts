@@ -1,10 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import EmployeeDashboardView from '../views/EmployeeDashboard.vue'
+import ManagerDashboardView from '@/views/ManagerDashboard.vue'
+import LoginView from '@/views/login.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', name: 'timesheet', component: EmployeeDashboardView },
-  ]
+    { path: '/', redirect: '/login' },
+    { path: '/login', component: LoginView },
+    { path: '/manager', component: ManagerDashboardView },
+    { path: '/employee', component: EmployeeDashboardView },
+  ],
 })
 
 export default router
