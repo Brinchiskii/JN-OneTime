@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using OneTime.Core.Models.Enums;
+using OneTime.Api.Models.TimeSheetDto;
 
 namespace OneTime.Api.Tests.Endpoints
 {

@@ -1,6 +1,6 @@
 ﻿using OneTime.Core.Models.Enums;
 
-namespace OneTime.Api.Models
+namespace OneTime.Api.Models.TimeEntries
 {
     /// <summary>
     /// Data transfer object for a time entry.

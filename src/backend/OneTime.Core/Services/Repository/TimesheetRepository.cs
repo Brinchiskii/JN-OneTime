@@ -8,11 +8,11 @@ using System.Text;
 
 namespace OneTime.Core.Services.Repository
 {
-    public class TimesheetService : ITimesheetService
+    public class TimesheetRepository : ITimesheetRepository
     {
         private readonly OneTimeContext _context;
 
-        public TimesheetService(OneTimeContext context)
+        public TimesheetRepository(OneTimeContext context)
         {
             _context = context;
         }

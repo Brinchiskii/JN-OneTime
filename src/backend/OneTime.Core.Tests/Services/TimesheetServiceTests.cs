@@ -30,7 +30,7 @@ namespace OneTime.Core.Tests.Services
 
             await context.SaveChangesAsync();
 
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
 
             // Act + Assert 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -47,7 +47,7 @@ namespace OneTime.Core.Tests.Services
 
             var context = OneTimeContextFactory.CreateInMemoryContext();
 
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
 
             // Act + Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -76,7 +76,7 @@ namespace OneTime.Core.Tests.Services
 
             await context.SaveChangesAsync();
 
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
 
             // Act
             var review = await service.SubmitMonthlyReviewAsync(userId, periodStart, periodEnd);

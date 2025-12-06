@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using OneTime.Api.Models;
+using OneTime.Api.Models.TimeEntryDto;
 using OneTime.Api.Tests.TestHelpers;
 using System;
 using System.Collections.Generic;

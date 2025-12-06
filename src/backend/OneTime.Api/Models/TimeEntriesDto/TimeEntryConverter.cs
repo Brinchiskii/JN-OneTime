@@ -1,8 +1,9 @@
-﻿using OneTime.Api.Models.OneTime.Api.Models;
+﻿using OneTime.Api.Models.TimeEntriesDto;
 using OneTime.Core.Models;
 using OneTime.Core.Models.Enums;
 
-namespace OneTime.Api.Models
+
+namespace OneTime.Api.Models.TimeEntries
 {
 	public static class TimeEntryConverter
 	{

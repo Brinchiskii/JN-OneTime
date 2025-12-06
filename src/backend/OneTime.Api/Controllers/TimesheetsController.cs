@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OneTime.Api.Models;
+using OneTime.Api.Models.TimeSheetDto;
 using OneTime.Core.Services.Interfaces;
 
 namespace OneTime.Api.Controllers
@@ -11,9 +11,9 @@ namespace OneTime.Api.Controllers
     [ApiController]
     public class TimesheetsController : ControllerBase
     {
-        private readonly ITimesheetService _service;
+        private readonly ITimesheetRepository _service;
 
-        public TimesheetsController(ITimesheetService monthlyReviewService)
+        public TimesheetsController(ITimesheetRepository monthlyReviewService)
         {
             _service = monthlyReviewService;
         }
