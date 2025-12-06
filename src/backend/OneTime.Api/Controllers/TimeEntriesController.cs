@@ -72,10 +72,7 @@ namespace OneTime.Api.Controllers
 		[HttpGet("leader/{leaderId}/team")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(204)]
-		public async Task<IActionResult> GetLeaderPeriodProjectsOverview(
-			int leaderId,
-			[FromQuery] DateOnly startDate,
-			[FromQuery] DateOnly endDate)
+		public async Task<IActionResult> GetLeaderPeriodProjectsOverview(int leaderId, [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
 		{
 			var entries = await _timeEntryRepository
 				.GetLeaderWithDetailsForPeriod(leaderId, startDate, endDate);
