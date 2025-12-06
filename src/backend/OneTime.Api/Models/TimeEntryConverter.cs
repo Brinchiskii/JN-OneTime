@@ -40,7 +40,7 @@ namespace OneTime.Api.Models
 				entity.UserId,
 				entity.User?.Name ?? string.Empty,
 				entity.User?.Email ?? string.Empty,
-				entity.User?.Role ?? string.Empty,
+				(int)(entity.User?.Role ?? UserRole.Employee),
 				entity.ProjectId,
 				entity.Project?.Name ?? string.Empty,
 				entity.Project != null ? (ProjectStatus)entity.Project.Status : ProjectStatus.Active,
@@ -49,6 +49,5 @@ namespace OneTime.Api.Models
 				entity.Hours,
 				(TimeEntryStatus)entity.Status);
 		}
-
 	}
 }

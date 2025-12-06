@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneTime.Core.Models;
+using OneTime.Core.Models.Enums;
 using OneTime.Core.Services.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Globalization;
+using System.Text;
 
 namespace OneTime.Core.Services.Repository
 {
@@ -48,7 +49,7 @@ namespace OneTime.Core.Services.Repository
 			return await _context.TimeEntries.Include(t => t.Project).Include(t => t.User)
 				.Where(t =>
 					t.User != null &&
-					t.User.Role.ToLower() == "employee" &&
+					t.User.Role == UserRole.Employee &&
 					t.User.ManagerId == leaderId &&
 					t.Date >= start &&
 					t.Date <= end)

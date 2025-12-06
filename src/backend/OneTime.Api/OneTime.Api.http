@@ -38,3 +38,58 @@ Accept: application/json
   "status": 0,
   "comment": "Looks good to me xD."
 }
+###
+GET http://localhost:5273/api/users
+Accept: application/json
+###
+
+GET http://localhost:5273/api/users/3
+Accept: application/json
+###
+
+POST http://localhost:5273/api/users
+Content-Type: application/json
+
+{
+  "name": "Peter",
+  "email": "PELE@jndata.dk",
+  "password": "test123",
+  "role": 2,
+  "managerId": 4
+}
+###
+POST http://localhost:5273/api/users
+Content-Type: application/json
+
+{
+  "name": "DummyTest",
+  "email": "dummytest",
+  "password": "dummytest",
+  "role": 2,
+  "managerId":4
+}
+###
+
+POST http://localhost:5273/api/users
+Content-Type: application/json
+
+{
+  "name": "Admin",
+  "email": "admin@jndata.dk",
+  "password": "Admin",
+  "role": 0,
+  "managerId": null
+}
+###
+PUT http://localhost:5273/api/users/3
+Content-Type: application/json
+
+{
+  "name": "Marco Updated",
+  "email": "mdg@jndata.dk",
+  "password":"test",
+  "role": 2,
+  "managerId": 4
+}
+###
+DELETE http://localhost:5273/api/users/11
