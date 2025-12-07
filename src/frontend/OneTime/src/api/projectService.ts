@@ -1,9 +1,9 @@
-import https from "./https";
+import http from "./http";
 import type { Project } from "../types/index";
 
 export default {
     getProjects() {
-        return https.get<Project[]>("/Timeentries/projects");
+        return http.get<Project[]>("/Timeentries/projects");
     },
     
 }

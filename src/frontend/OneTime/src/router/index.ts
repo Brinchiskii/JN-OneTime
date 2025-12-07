@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import EmployeeDashboardView from '../views/EmployeeDashboard.vue'
-import ManagerDashboardView from '@/views/ManagerDashboard.vue'
-import LoginView from '@/views/login.vue'
+import ManagerDashboardView from '../views/ManagerDashboard.vue'
+import LoginView from '../views/Login.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
