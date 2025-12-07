@@ -32,7 +32,7 @@ namespace OneTime.Core.Tests.Fakes
 
         public Task<IEnumerable<TimeEntry>> GetLeaderWithDetailsForPeriod(int leaderId, DateOnly start, DateOnly end)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<IEnumerable<TimeEntry>>(new List<TimeEntry>());
         }
     }
 }

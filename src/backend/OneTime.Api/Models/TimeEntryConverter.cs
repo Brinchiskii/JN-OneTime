@@ -40,7 +40,7 @@ namespace OneTime.Api.Models
 				entity.UserId,
 				entity.User?.Name ?? string.Empty,
 				entity.User?.Email ?? string.Empty,
-				entity.User?.Role ?? string.Empty,
+				entity.User.Role,
 				entity.ProjectId,
 				entity.Project?.Name ?? string.Empty,
 				entity.Project != null ? (ProjectStatus)entity.Project.Status : ProjectStatus.Active,

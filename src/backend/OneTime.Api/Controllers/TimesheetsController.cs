@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Globalization;
+using Microsoft.AspNetCore.Mvc;
 using OneTime.Api.Models;
 using OneTime.Core.Services.Interfaces;
 
@@ -85,6 +86,50 @@ namespace OneTime.Api.Controllers
 			{
 				return BadRequest(ex.Message);
 			}
+		}
+		
+		[HttpGet("leader/{leaderId}/team/")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(204)]
+		public async Task<IActionResult> GetTimeentriesForPendingTimesheet(int leaderId, [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+		{
+			var entries = await _service.GetTimeentriesForPendingTimesheet(leaderId, startDate, endDate);
+
+			if (!entries.Any())
+				return NoContent();
+
+			var usersDict = entries
+				.GroupBy(e => e.User!.Name) 
+				.ToDictionary(
+					userGroup => userGroup.Key,
+					userGroup =>
+						userGroup
+							.GroupBy(e => new { e.ProjectId, ProjectName = e.Project!.Name, ProjectStatus = (int)e.Project.Status })
+							.Select(projectGroup =>
+							{
+								var hoursByDate = new Dictionary<string, decimal>();
+
+								foreach (var entry in projectGroup)
+								{
+									var key = entry.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+									if (!hoursByDate.ContainsKey(key))
+										hoursByDate[key] = 0;
+
+									hoursByDate[key] += entry.Hours;
+								}
+
+								return new ProjectHoursByDateDto(
+									new ProjectSimpleDto(projectGroup.Key.ProjectId, projectGroup.Key.ProjectName, projectGroup.Key.ProjectStatus),
+									hoursByDate
+								);
+							})
+							.ToList()
+				);
+
+			var response = new LeaderUsersProjectsResponseDto(usersDict);
+
+			return Ok(response);
 		}
 	}
 }

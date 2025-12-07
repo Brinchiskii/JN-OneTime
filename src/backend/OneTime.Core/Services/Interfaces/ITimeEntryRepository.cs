@@ -14,6 +14,5 @@ namespace OneTime.Core.Services.Interfaces
         /// <returns>The added time entry.</returns>
         Task<TimeEntry> Add(TimeEntry entry);
 		Task<IEnumerable<TimeEntry>> GetByUserWithDetails(int userId);
-		Task<IEnumerable<TimeEntry>> GetLeaderWithDetailsForPeriod(int leaderId, DateOnly start, DateOnly end);
 	}
 }

@@ -29,9 +29,7 @@ public partial class JNUser
     [StringLength(255)]
     public string PasswordSalt { get; set; }
 
-    [Required]
-    [StringLength(50)]
-    public string Role { get; set; }
+    public int Role { get; set; }
 
     public int? ManagerId { get; set; }
 

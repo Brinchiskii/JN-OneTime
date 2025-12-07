@@ -97,6 +97,51 @@ namespace OneTime.Core.Services.Repository
 
 			return sheet;
 		}
+        
+        /// <summary>
+        /// Retrieves time entries for a specific leader, including related project and user details.
+        /// </summary>
+        /// <param name="leaderId">The unique identifier for the leader.</param>
+        /// <param name="start">The start date for the period.</param>
+        /// <param name="end">The end date for the period.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task<IEnumerable<TimeEntry>> GetTimeentriesForPendingTimesheet(int leaderId, DateOnly start, DateOnly end)
+        {
+            if (leaderId <= 0)
+            {
+                throw new ArgumentOutOfRangeException("Leader ID must be greater than zero.");
+            }
+
+            if (start > end)
+            {
+                throw new ArgumentOutOfRangeException("Start date must be before or equal to end date.");
+            }
+			
+            var entries =  await _context.TimeEntries
+                .Include(t => t.Project)
+                .Include(t => t.User)
+                .Where(t =>
+                    t.User != null &&
+                    t.User.ManagerId == leaderId &&
+                    t.User.Role == 2 &&
+                    t.Date >= start &&
+                    t.Date <= end && 
+                           _context.Timesheets.Any(ts => 
+                                   ts.UserId == ts.UserId &&
+                                   ts.Status == TimesheetStatus.Pending &&
+                                   ts.PeriodStart <= start &&
+                                   ts.PeriodEnd >= end
+                                   ))
+                .OrderBy(t => t.User.Name)
+                .ThenBy(t => t.Project.Name)
+                .ThenBy(t => t.Date)
+                .ToListAsync();
+
+            // Returns empty list if no entries were found.
+            return entries.Count == 0 ? [] : entries;
+        }
 	}
 
 }

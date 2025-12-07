@@ -17,5 +17,7 @@ namespace OneTime.Core.Services.Interfaces
         Task<Timesheet> CreateTimesheet(int userId, DateOnly periodStart, DateOnly periodEnd);
         Task<Timesheet> UpdateTimeSheet(int timesheetId, int status, string? comment, int leaderId);
 
-	}
+        Task<IEnumerable<TimeEntry>> GetTimeentriesForPendingTimesheet(int leaderId, DateOnly start, DateOnly end);
+
+    }
 }
