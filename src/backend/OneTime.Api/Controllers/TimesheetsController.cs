@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using OneTime.Api.Models;
+using OneTime.Api.Models.TimesheetsDto;
 using OneTime.Core.Services.Interfaces;
 
 namespace OneTime.Api.Controllers
@@ -12,9 +13,9 @@ namespace OneTime.Api.Controllers
     [ApiController]
     public class TimesheetsController : ControllerBase
     {
-        private readonly ITimesheetService _service;
+        private readonly ITimesheetRepository _service;
 
-        public TimesheetsController(ITimesheetService monthlyReviewService)
+        public TimesheetsController(ITimesheetRepository monthlyReviewService)
         {
             _service = monthlyReviewService;
         }
@@ -61,14 +62,14 @@ namespace OneTime.Api.Controllers
 		[HttpPost("update/{timesheetId:int}")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
-		public async Task<IActionResult> Update([FromBody] TimesheetDecisionDto dto, int timesheetId)
+		public async Task<IActionResult> Update(int timesheetId, [FromBody] TimesheetDecisionDto dto)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
 			try
 			{
-				var sheet = await _service.UpdateTimeSheet(dto.TimesheetId, dto.Status, dto.Comment, dto.LeaderId);
+				var sheet = await _service.UpdateTimeSheet(timesheetId, dto.Status, dto.Comment, dto.LeaderId);
 
 				var response = new TimesheetDto(
 					sheet.TimesheetId,
@@ -87,7 +88,7 @@ namespace OneTime.Api.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
-		
+
 		[HttpGet("leader/{leaderId}/team/")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(204)]
@@ -123,8 +124,7 @@ namespace OneTime.Api.Controllers
 									new ProjectSimpleDto(projectGroup.Key.ProjectId, projectGroup.Key.ProjectName, projectGroup.Key.ProjectStatus),
 									hoursByDate
 								);
-							})
-							.ToList()
+							}).ToList()
 				);
 
 			var response = new LeaderUsersProjectsResponseDto(usersDict);

@@ -1,5 +1,4 @@
-﻿using OneTime.Api.Models;
-using OneTime.Api.Tests.TestHelpers;
+﻿using OneTime.Api.Tests.TestHelpers;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,6 +6,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using OneTime.Core.Models.Enums;
+using OneTime.Api.Models.TimesheetsDto;
 
 namespace OneTime.Api.Tests.Endpoints
 {

@@ -30,7 +30,7 @@ namespace OneTime.Core.Tests.Services
 
             await context.SaveChangesAsync();
 
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
 
             // Act + Assert 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -47,7 +47,7 @@ namespace OneTime.Core.Tests.Services
 
             var context = OneTimeContextFactory.CreateInMemoryContext();
 
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
 
             // Act + Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -76,7 +76,7 @@ namespace OneTime.Core.Tests.Services
 
             await context.SaveChangesAsync();
 
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
 
             // Act
             var review = await service.CreateTimesheet(userId, periodStart, periodEnd);
@@ -97,7 +97,7 @@ namespace OneTime.Core.Tests.Services
             
             var context = OneTimeContextFactory.CreateInMemoryContext();
             
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
             
             var ex1 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetTimeentriesForPendingTimesheet(0, periodStart, periodEnd));
             Assert.Equal("Leader ID must be greater than zero.", ex1.ParamName);
@@ -110,7 +110,7 @@ namespace OneTime.Core.Tests.Services
         {
             var context = OneTimeContextFactory.CreateInMemoryContext();
             
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
             
             var ex = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetTimeentriesForPendingTimesheet(1, new DateOnly(2025, 12, 10), new DateOnly(2025, 12, 7)));
             Assert.Equal("Start date must be before or equal to end date.", ex.ParamName);
@@ -175,7 +175,7 @@ namespace OneTime.Core.Tests.Services
 
             
             // Act + Assert
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
 
             var entries = await service.GetTimeentriesForPendingTimesheet(
                 leaderId: 1,
@@ -233,7 +233,7 @@ namespace OneTime.Core.Tests.Services
             await context.SaveChangesAsync();
             
             // Act + Assert
-            var service = new TimesheetService(context);
+            var service = new TimesheetRepository(context);
             
             var entries = await service.GetTimeentriesForPendingTimesheet(
                 leaderId: 1,

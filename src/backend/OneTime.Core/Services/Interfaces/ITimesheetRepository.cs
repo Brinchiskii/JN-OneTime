@@ -5,7 +5,7 @@ using System.Text;
 
 namespace OneTime.Core.Services.Interfaces
 {
-    public interface ITimesheetService
+    public interface ITimesheetRepository
     {
         /// <summary>
         /// submits a monthly review for the specified user and period.

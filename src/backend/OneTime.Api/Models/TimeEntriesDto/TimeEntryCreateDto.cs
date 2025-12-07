@@ -1,4 +1,4 @@
-﻿namespace OneTime.Api.Models
+﻿namespace OneTime.Api.Models.TimeEntriesDto
 {
 	/// <summary>
 	/// Data transfer object for creating a new time entry through the API.

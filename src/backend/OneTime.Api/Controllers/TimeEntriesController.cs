@@ -1,72 +1,53 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OneTime.Api.Models;
+using OneTime.Api.Models.TimeEntriesDto;
 using OneTime.Core.Models;
+using OneTime.Core.Models.Enums;
 using OneTime.Core.Services.Interfaces;
-using OneTime.Core.Services.Repository;
-using System.Globalization;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace OneTime.Api.Controllers
 {
-    /// <summary>
-    /// Handles time entry related operations through API endpoints.
-    /// </summary>
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TimeEntriesController : ControllerBase
-    {
-        private readonly ITimeEntryService _service;
+	[Route("api/[controller]")]
+	[ApiController]
+	public class TimeEntriesController : ControllerBase
+	{
+		private readonly ITimeEntryRepository _timeEntryRepo;
+		private readonly IProjectRepository _projectRepo;
 
-        /// <summary>
-        /// Initializes a new instance of the TimeEntriesController class using the specified time entry service.
-        /// </summary>
-        /// <param name="timeEntryService">The time entry service.</param>
-        public TimeEntriesController(ITimeEntryService timeEntryService)
-        {
-			_service = timeEntryService;
-		}
-
-        /// <summary>
-        /// Retrieves a list of all available projects.
-        /// </summary>
-        /// <returns>
-		/// Returns 200 OK with JSON array of projects if any exist.
-		/// Return 204 No Content if no projects are found.
-		/// </returns>
-        [HttpGet("projects")]
-        [ProducesResponseType(200)]
-		[ProducesResponseType(204)]
-		public async Task<IActionResult> GetAvailableProjects()
+		public TimeEntriesController(ITimeEntryRepository timeEntryRepo, IProjectRepository projectRepo)
 		{
-			var projects = await _service.GetAvailableProjects();
-
-			return !projects.Any() ? NoContent() : Ok(projects);
+			_timeEntryRepo = timeEntryRepo;
+			_projectRepo = projectRepo;
 		}
 
-        /// <summary>
-        /// Creates a new time entry based on the provided data.
-        /// </summary>
-        /// <param name="dto">The data used to create the time entry.</param>
-        /// <returns>
-		/// Return 200 OK with the created time entry in JSON format.
-		/// Return 400 Bad Request if the input data is invalid or an error occurs.
-		/// </returns>
-        [HttpPost]
+
+		/// <summary>
+		/// Opretter en ny time entry.
+		/// </summary>
+		[HttpPost]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		public async Task<IActionResult> CreateTimeEntry([FromBody] TimeEntryCreateDto dto)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
+
 			try
 			{
 				var entity = TimeEntryConverter.ToEntity(dto);
 
-				var created = await _service.CreateTimeEntry(entity);
+				var project = await _projectRepo.GetById(entity.ProjectId);
+				if (project == null)
+					return BadRequest("Projekt not found");
+
+				if (entity.Hours <= 0 || entity.Hours > 24)
+					return BadRequest("Hours must be greater than zero and less than 24");
+
+				entity.Status = (int)TimeEntryStatus.Pending;
+				entity.Date = entity.Date == default ? DateOnly.FromDateTime(DateTime.Now) : entity.Date;
+
+				var created = await _timeEntryRepo.Add(entity);
 
 				var response = TimeEntryConverter.ToDto(created);
-
 				return Ok(response);
 			}
 			catch (Exception ex)
@@ -80,7 +61,7 @@ namespace OneTime.Api.Controllers
 		[ProducesResponseType(204)]
 		public async Task<IActionResult> GetTimeEntriesForUser(int userId)
 		{
-			var entries = await _service.GetTimeEntriesForUser(userId);
+			var entries = await _timeEntryRepo.GetByUserWithDetails(userId);
 
 			if (!entries.Any())
 				return NoContent();

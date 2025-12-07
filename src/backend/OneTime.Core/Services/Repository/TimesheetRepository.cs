@@ -8,11 +8,11 @@ using System.Text;
 
 namespace OneTime.Core.Services.Repository
 {
-    public class TimesheetService : ITimesheetService
+    public class TimesheetRepository : ITimesheetRepository
     {
         private readonly OneTimeContext _context;
 
-        public TimesheetService(OneTimeContext context)
+        public TimesheetRepository(OneTimeContext context)
         {
             _context = context;
         }
@@ -125,7 +125,7 @@ namespace OneTime.Core.Services.Repository
                 .Where(t =>
                     t.User != null &&
                     t.User.ManagerId == leaderId &&
-                    t.User.Role == 2 &&
+                    t.User.Role == UserRole.Employee &&
                     t.Date >= start &&
                     t.Date <= end && 
                            _context.Timesheets.Any(ts => 

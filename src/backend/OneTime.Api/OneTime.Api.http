@@ -1,7 +1,7 @@
 @OneTime.Api_HostAddress = http://localhost:5273
 
 
-GET {{OneTime.Api_HostAddress}}/api/TimeEntries/projects
+GET {{OneTime.Api_HostAddress}}/api/projects
 Accept: application/json
 
 ###
@@ -23,21 +23,21 @@ GET {{OneTime.Api_HostAddress}}/api/TimeEntries/user/3
 Accept: application/json
 ###
 
-GET {{OneTime.Api_HostAddress}}/api/TimeEntries/leader/4/team?startDate=2025-11-09&endDate=2025-11-20
+GET {{OneTime.Api_HostAddress}}/api/TimeSheets/leader/4/team?startDate=2025-11-01&endDate=2025-11-30
 Accept: application/json
 ###
 
 ###
-POST {{OneTime.Api_HostAddress}}/api/Timesheets/decide
+POST {{OneTime.Api_HostAddress}}/api/Timesheets/update/2
 Content-Type: application/json
 Accept: application/json
 
 {
-  "timesheetId":2,
   "leaderId": 4,
-  "status": 0,
+  "status": 1,
   "comment": "Looks good to me xD."
 }
+
 ###
 GET http://localhost:5273/api/users
 Accept: application/json
@@ -92,4 +92,4 @@ Content-Type: application/json
   "managerId": 4
 }
 ###
-DELETE http://localhost:5273/api/users/11
+DELETE http://localhost:5273/api/users/12

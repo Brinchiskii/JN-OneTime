@@ -1,4 +1,4 @@
-﻿namespace OneTime.Api.Models
+﻿namespace OneTime.Api.Models.TimesheetsDto
 {
 	public record ProjectSimpleDto(int ProjectId, string Name, int Status);
 

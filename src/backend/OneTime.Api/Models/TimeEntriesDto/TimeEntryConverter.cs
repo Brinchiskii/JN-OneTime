@@ -2,7 +2,7 @@
 using OneTime.Core.Models;
 using OneTime.Core.Models.Enums;
 
-namespace OneTime.Api.Models
+namespace OneTime.Api.Models.TimeEntriesDto
 {
 	public static class TimeEntryConverter
 	{

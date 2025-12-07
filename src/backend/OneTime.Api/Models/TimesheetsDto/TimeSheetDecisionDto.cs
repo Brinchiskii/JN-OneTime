@@ -1,4 +1,4 @@
-﻿namespace OneTime.Api.Models
+﻿namespace OneTime.Api.Models.TimesheetsDto
 {
 	public record TimesheetDecisionDto(
 		int TimesheetId,

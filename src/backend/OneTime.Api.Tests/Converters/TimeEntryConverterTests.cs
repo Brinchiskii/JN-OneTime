@@ -1,4 +1,4 @@
-﻿using OneTime.Api.Models;
+﻿using OneTime.Api.Models.TimeEntriesDto;
 using OneTime.Core.Models;
 using OneTime.Core.Models.Enums;
 using System;

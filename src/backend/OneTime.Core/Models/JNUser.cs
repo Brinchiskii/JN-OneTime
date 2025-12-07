@@ -31,9 +31,6 @@ public partial class JNUser
     public string PasswordSalt { get; set; }
 
 	public UserRole Role { get; set; }
-    [StringLength(50)]
-    public string Role { get; set; }
-
 	public int? ManagerId { get; set; }
 
     // Self-reference: én manager til mange TeamMembers
