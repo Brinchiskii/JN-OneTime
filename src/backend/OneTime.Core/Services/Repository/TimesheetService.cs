@@ -129,7 +129,7 @@ namespace OneTime.Core.Services.Repository
                     t.Date >= start &&
                     t.Date <= end && 
                            _context.Timesheets.Any(ts => 
-                                   ts.UserId == ts.UserId &&
+                                   ts.UserId == t.UserId &&
                                    ts.Status == TimesheetStatus.Pending &&
                                    ts.PeriodStart <= start &&
                                    ts.PeriodEnd >= end
