@@ -1,19 +1,15 @@
 import { defineStore } from 'pinia'
-import { ref, computed, customRef } from 'vue'
+import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/da'
 import isoWeek from 'dayjs/plugin/isoWeek'
-import type { TimesheetRow, WeekDay, UsersCollection, Project } from '../types'
+import type { TimesheetRow, WeekDay, UsersCollection, DecisionPayload } from '../types'
 import api from '@/api/TimeRegistration'
-import { useProjectStore } from './projectStore'
 
 dayjs.locale('da')
 dayjs.extend(isoWeek)
 
 export const useTimesheetStore = defineStore('timesheet', () => {
-  const projectStore = useProjectStore()
-
-  const projects = computed<Project[]>(() => projectStore.projects)
 
   const createEmptyRow = (): TimesheetRow => {
     return {
@@ -53,7 +49,12 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     })
   })
 
-  const setWeek = (isoWeekNumber: number, year: number = dayjs().year()) => {
+  const setWeekFromDate = (date: any) => {
+    const week = dayjs(date).isoWeek()
+    setWeek(week)
+  }
+
+  const setWeek = (isoWeekNumber: number = dayjs().isoWeek(), year: number = dayjs().year()) => {
     currentWeekStart.value = dayjs().year(year).isoWeek(isoWeekNumber).startOf('isoWeek')
   }
 
@@ -62,12 +63,19 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     // TODO: Her skal vi senere kalde en funktion der henter nye data (rows) fra API'et
     // fetchWeekData()
   }
-
+  
   const previousWeek = () => {
     currentWeekStart.value = currentWeekStart.value.subtract(1, 'week')
     // TODO: fetchWeekData()
   }
 
+  const weekHeader = computed(() => {
+    const start = currentWeekStart.value.format('DD MMM')
+    const end = currentWeekStart.value.add(6, 'day').format('DD MMM YYYY')
+    const week = currentWeekStart.value.isoWeek()
+    return `${start} - ${end} - uge ${week}`
+  })
+  
   // Manager timesheets
   const teamRows = ref<UsersCollection>({})
 
@@ -89,22 +97,21 @@ export const useTimesheetStore = defineStore('timesheet', () => {
         hours: row.hours,
       }))
     }
-
     teamRows.value = normalized
   }
 
-  const weekHeader = computed(() => {
-    const start = currentWeekStart.value.format('DD MMM')
-    const end = currentWeekStart.value.add(6, 'day').format('DD MMM YYYY')
-    const week = currentWeekStart.value.isoWeek()
-    return `${start} - ${end} - uge ${week}`
-  })
+  const submitDecision = async (timesheetId: number, status: number, comment: string,) => {
+    
+    const currentLeaderId = 4;
 
-  const periodText = computed(() => {
-    const start = currentWeekStart.value.format('DD MMM YYYY')
-    const end = currentWeekStart.value.add(6, 'day').format('DD MMM YYYY')
-    return `Periode: ${start} - ${end}`
-  })
+    const payload: DecisionPayload = {
+      timesheetId: timesheetId,
+      leaderId: currentLeaderId,
+      status: status,
+      comment: comment
+    }
+    await api.updateTimeSheet(payload)
+  }
 
   return {
     myRows,
@@ -116,10 +123,12 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     currentWeekStart,
     weekDays,
     weekHeader,
-    periodText,
     nextWeek,
     previousWeek,
     setWeek,
+    setWeekFromDate,
+    
     loadTeamRows,
+    submitDecision,
   }
 })

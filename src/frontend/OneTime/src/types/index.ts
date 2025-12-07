@@ -25,3 +25,10 @@ export interface WeekDay {
   date: string
   fullDate: string
 }
+
+export interface DecisionPayload {
+  timesheetId: number;
+  leaderId: number;
+  status: number;
+  comment: string;
+}
