@@ -18,15 +18,15 @@ namespace OneTime.Core.Services.Repository
         }
 
         /// <summary>
-        /// Submits a new monthly review for the specified user and period.
+        /// Creates new timesheet for the specified user and period.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="periodStart">The start date of the review period.</param>
         /// <param name="periodEnd">The end date of the review period.</param>
-        /// <returns>A <see cref="MonthlyReview"/> object representing the newly created monthly review.</returns>
+        /// <returns>A <see cref="Timesheet"/> object representing the newly created timesheet.</returns>
         /// <exception cref="InvalidOperationException">Thrown if a monthly review already exists or if there are no registered
         /// time entries for the period.</exception>
-        public async Task<Timesheet> SubmitMonthlyReviewAsync(int userId, DateOnly periodStart, DateOnly periodEnd)
+        public async Task<Timesheet> CreateTimesheet(int userId, DateOnly periodStart, DateOnly periodEnd)
         {
             // Check if already existing review for this period.
             var existingReview = _context.Timesheets
@@ -37,7 +37,7 @@ namespace OneTime.Core.Services.Repository
 
             if (existingReview is not null)
             {
-                throw new InvalidOperationException("Monthly review already exists for the specified user and period.");
+                throw new InvalidOperationException("Timesheet already exists for the specified user and period.");
             }
 
             // Check if there are any time entries for this specific period.
@@ -49,7 +49,7 @@ namespace OneTime.Core.Services.Repository
 
             if (!hasEntries)
             {
-                throw new InvalidOperationException("There are now registrered entries for this period.");
+                throw new InvalidOperationException("There are no registered entries for this period.");
             }
 
             // Creates a new monthly review.
@@ -71,7 +71,7 @@ namespace OneTime.Core.Services.Repository
             return review;
         }
 
-		public async Task<Timesheet> UpdateTimeSheet(int timesheetId, int leaderId, int status, string? comment)
+		public async Task<Timesheet> UpdateTimeSheet(int timesheetId, int status, string? comment, int leaderId = 0)
 		{
 			var sheet = await _context.Timesheets.FindAsync(timesheetId);
 
@@ -86,7 +86,10 @@ namespace OneTime.Core.Services.Repository
                 _ => throw new ArgumentOutOfRangeException(nameof(status), "Invalid timesheet status value.")
             };
 
-			sheet.DecidedByUserId = leaderId;
+            if (leaderId != 0)
+            {
+                sheet.DecidedByUserId = leaderId;
+            }
 			sheet.DecidedAt = DateTime.Now;
 			sheet.Comment = comment;
 
@@ -94,6 +97,51 @@ namespace OneTime.Core.Services.Repository
 
 			return sheet;
 		}
+        
+        /// <summary>
+        /// Retrieves time entries for a specific leader, including related project and user details.
+        /// </summary>
+        /// <param name="leaderId">The unique identifier for the leader.</param>
+        /// <param name="start">The start date for the period.</param>
+        /// <param name="end">The end date for the period.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task<IEnumerable<TimeEntry>> GetTimeentriesForPendingTimesheet(int leaderId, DateOnly start, DateOnly end)
+        {
+            if (leaderId <= 0)
+            {
+                throw new ArgumentOutOfRangeException("Leader ID must be greater than zero.");
+            }
+
+            if (start > end)
+            {
+                throw new ArgumentOutOfRangeException("Start date must be before or equal to end date.");
+            }
+			
+            var entries =  await _context.TimeEntries
+                .Include(t => t.Project)
+                .Include(t => t.User)
+                .Where(t =>
+                    t.User != null &&
+                    t.User.ManagerId == leaderId &&
+                    t.User.Role == 2 &&
+                    t.Date >= start &&
+                    t.Date <= end && 
+                           _context.Timesheets.Any(ts => 
+                                   ts.UserId == t.UserId &&
+                                   ts.Status == TimesheetStatus.Pending &&
+                                   ts.PeriodStart <= start &&
+                                   ts.PeriodEnd >= end
+                                   ))
+                .OrderBy(t => t.User.Name)
+                .ThenBy(t => t.Project.Name)
+                .ThenBy(t => t.Date)
+                .ToListAsync();
+
+            // Returns empty list if no entries were found.
+            return entries.Count == 0 ? [] : entries;
+        }
 	}
 
 }

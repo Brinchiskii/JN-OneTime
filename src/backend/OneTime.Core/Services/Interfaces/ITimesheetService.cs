@@ -14,8 +14,10 @@ namespace OneTime.Core.Services.Interfaces
         /// <param name="periodStart">Start of the review period.</param>
         /// <param name="periodEnd">End of the review period.</param>
         /// <returns>The monthly review object.</returns>
-        Task<Timesheet> SubmitMonthlyReviewAsync(int userId, DateOnly periodStart, DateOnly periodEnd);
-        Task<Timesheet> UpdateTimeSheet(int timesheetId, int leaderId, int status, string? comment);
+        Task<Timesheet> CreateTimesheet(int userId, DateOnly periodStart, DateOnly periodEnd);
+        Task<Timesheet> UpdateTimeSheet(int timesheetId, int status, string? comment, int leaderId);
 
-	}
+        Task<IEnumerable<TimeEntry>> GetTimeentriesForPendingTimesheet(int leaderId, DateOnly start, DateOnly end);
+
+    }
 }

@@ -34,7 +34,7 @@ namespace OneTime.Core.Tests.Services
 
             // Act + Assert 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.SubmitMonthlyReviewAsync(userId, periodStart, periodEnd));
+                service.CreateTimesheet(userId, periodStart, periodEnd));
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace OneTime.Core.Tests.Services
 
             // Act + Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.SubmitMonthlyReviewAsync(userId, periodStart, periodEnd));
+                service.CreateTimesheet(userId, periodStart, periodEnd));
 
         }
 
@@ -79,7 +79,7 @@ namespace OneTime.Core.Tests.Services
             var service = new TimesheetService(context);
 
             // Act
-            var review = await service.SubmitMonthlyReviewAsync(userId, periodStart, periodEnd);
+            var review = await service.CreateTimesheet(userId, periodStart, periodEnd);
 
             // Assert
             Assert.NotNull(review);
@@ -87,6 +87,160 @@ namespace OneTime.Core.Tests.Services
             Assert.Equal(periodStart, review.PeriodStart);
             Assert.Equal(periodEnd, review.PeriodEnd);
             Assert.Equal(TimesheetStatus.Pending, review.Status);
+        }
+
+        [Fact]
+        public async Task GetTimeentriesForPendingTimesheet_LeaderId_Is_Zero_Or_Negative()
+        {
+            var periodStart = new DateOnly(2025, 12, 1);
+            var periodEnd = new DateOnly(2025, 12, 7);
+            
+            var context = OneTimeContextFactory.CreateInMemoryContext();
+            
+            var service = new TimesheetService(context);
+            
+            var ex1 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetTimeentriesForPendingTimesheet(0, periodStart, periodEnd));
+            Assert.Equal("Leader ID must be greater than zero.", ex1.ParamName);
+            var ex2 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetTimeentriesForPendingTimesheet(-1, periodStart, periodEnd));
+            Assert.Equal("Leader ID must be greater than zero.", ex2.ParamName);
+        }
+
+        [Fact]
+        public async Task GetTimeentriesForPendingTimesheet_StartPeriod_Is_After_EndPeriod()
+        {
+            var context = OneTimeContextFactory.CreateInMemoryContext();
+            
+            var service = new TimesheetService(context);
+            
+            var ex = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetTimeentriesForPendingTimesheet(1, new DateOnly(2025, 12, 10), new DateOnly(2025, 12, 7)));
+            Assert.Equal("Start date must be before or equal to end date.", ex.ParamName);
+        }
+        
+        [Fact]
+        public async Task GetTimeentriesForPendingTimesheet_Returns_TimeEntries()
+        {
+            // Arrange
+            var context = OneTimeContextFactory.CreateInMemoryContext();
+
+            // 1) Mock user
+            context.JNUsers.Add(new JNUser
+            {
+                UserId = 1,
+                Name = "Test Employee",
+                Email = "test@example.com",
+                PasswordHash = "",
+                PasswordSalt = "",
+                Role = 2,
+                ManagerId = 1
+            });
+
+            // 2) Mock project
+            context.Projects.Add(new Project
+            {
+                ProjectId = 1,
+                Name = "Test Project",
+                Status = 0
+            });
+
+            // 3) Mock timesheet
+            context.Timesheets.Add(new Timesheet
+            {
+                UserId = 1,
+                PeriodStart = new DateOnly(2025, 12, 1),
+                PeriodEnd = new DateOnly(2025, 12, 31),
+                Status = Models.Enums.TimesheetStatus.Pending // Pending
+            });
+
+            // 4) Mock time entry
+            context.TimeEntries.Add(new TimeEntry
+            {
+                UserId = 1,
+                ProjectId = 1,
+                Date = new DateOnly(2025, 12, 3),
+                Note = null,
+                Hours = 7,
+                Status = 0,
+            });
+            context.TimeEntries.Add(new TimeEntry
+            {
+                UserId = 1,
+                ProjectId = 1,
+                Date = new DateOnly(2025, 12, 4),
+                Note = null,
+                Hours = 8,
+                Status = 0,
+            });
+
+            await context.SaveChangesAsync();
+
+            
+            // Act + Assert
+            var service = new TimesheetService(context);
+
+            var entries = await service.GetTimeentriesForPendingTimesheet(
+                leaderId: 1,
+                start: new DateOnly(2025, 12, 1),
+                end: new DateOnly(2025, 12, 31));
+
+            Assert.Collection(entries,
+                item =>
+                {
+                    Assert.Equal(7, item.Hours);
+                    Assert.Equal(new DateOnly(2025, 12, 3), item.Date);
+                },
+                item =>
+                {
+                    Assert.Equal(8, item.Hours);
+                    Assert.Equal(new DateOnly(2025, 12, 4), item.Date);
+                });
+        }
+
+        [Fact]
+        public async Task GetTimeentriesForPendingTimesheet_Returns_EmptyList_When_No_Pending_Timesheets()
+        {
+            // Arrange
+            var context = OneTimeContextFactory.CreateInMemoryContext();
+
+            // 1) Mock user
+            context.JNUsers.Add(new JNUser
+            {
+                UserId = 1,
+                Name = "Test Employee",
+                Email = "test@example.com",
+                PasswordHash = "",
+                PasswordSalt = "",
+                Role = 2,
+                ManagerId = 1
+            });
+
+            // 2) Mock project
+            context.Projects.Add(new Project
+            {
+                ProjectId = 1,
+                Name = "Test Project",
+                Status = 0
+            });
+
+            // 3) Mock timesheet
+            context.Timesheets.Add(new Timesheet
+            {
+                UserId = 1,
+                PeriodStart = new DateOnly(2025, 12, 1),
+                PeriodEnd = new DateOnly(2025, 12, 31),
+                Status = Models.Enums.TimesheetStatus.Pending // Pending
+            });
+            
+            await context.SaveChangesAsync();
+            
+            // Act + Assert
+            var service = new TimesheetService(context);
+            
+            var entries = await service.GetTimeentriesForPendingTimesheet(
+                leaderId: 1,
+                start: new DateOnly(2025, 12, 1),
+                end: new DateOnly(2025, 12, 31));
+            
+            Assert.Empty(entries);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace OneTime.Core.Services.Interfaces
         Task<IEnumerable<Project>> GetAvailableProjects();
 		Task<IEnumerable<TimeEntry>> GetTimeEntriesForUser(int userId);
         
-		Task<IEnumerable<TimeEntry>> GetLeaderPeriodEntries(int leaderId, DateOnly start, DateOnly end);
+		//Task<IEnumerable<TimeEntry>> GetLeaderPeriodEntries(int leaderId, DateOnly start, DateOnly end);
 
 	}
 }

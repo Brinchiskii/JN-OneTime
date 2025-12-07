@@ -6,7 +6,6 @@ import { useTimesheetStore } from '../stores/timesheetStore'
 const timesheetStore = useTimesheetStore()
 
 onMounted(() => {
-  timesheetStore.setWeek(47)
   timesheetStore.loadTeamRows()
 })
 
