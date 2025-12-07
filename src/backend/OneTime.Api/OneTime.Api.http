@@ -34,7 +34,7 @@ Accept: application/json
 
 {
   "leaderId": 4,
-  "status": 1,
+  "status": 2,
   "comment": "Looks good to me xD."
 }
 
