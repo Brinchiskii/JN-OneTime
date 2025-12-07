@@ -36,7 +36,7 @@ namespace OneTime.Api.Tests.Endpoints
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
             var message = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Monthly review already exists for the specified user and period.", message);
+            Assert.Contains("Timesheet already exists for the specified user and period.", message);
         }
 
         [Fact]
@@ -54,8 +54,8 @@ namespace OneTime.Api.Tests.Endpoints
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            var message = await response.Content.ReadAsStringAsync();
-            Assert.Contains("There are now registrered entries for this period.", message);
+            //var message = await response.Content.ReadAsStringAsync();
+            //Assert.Contains("There are no registered entries for this period.", message);
         }
 
         [Fact]

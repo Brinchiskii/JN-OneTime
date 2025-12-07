@@ -49,7 +49,7 @@ namespace OneTime.Core.Services.Repository
 
             if (!hasEntries)
             {
-                throw new InvalidOperationException("There are now registrered entries for this period.");
+                throw new InvalidOperationException("There are no registered entries for this period.");
             }
 
             // Creates a new monthly review.
