@@ -14,11 +14,11 @@ namespace OneTime.Api.Controllers
     [ApiController]
     public class TimesheetsController : ControllerBase
     {
-        private readonly ITimesheetRepository _service;
+        private readonly ITimesheetService _service;
 
-        public TimesheetsController(ITimesheetRepository monthlyReviewService)
+        public TimesheetsController(ITimesheetService timesheetService)
         {
-            _service = monthlyReviewService;
+            _service = timesheetService;
         }
 
         /// <summary>

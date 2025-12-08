@@ -41,24 +41,12 @@ namespace OneTime.Core.Services.Repository
         /// <returns>A collection of all the time entries for the given user.</returns>
         public async Task<IEnumerable<TimeEntry>> GetByUserWithDetails(int userId)
 		{
-			return await _context.TimeEntries.Where(t => t.UserId == userId).Include(t => t.Project).Include(t => t.User).OrderBy(t => t.Date).ToListAsync();
+			return await _context.TimeEntries
+                .Where(t => t.UserId == userId)
+                .Include(t => t.Project)
+                .Include(t => t.User)
+                .OrderBy(t => t.Date)
+                .ToListAsync();
 		}
-
-		public async Task<IEnumerable<TimeEntry>> GetLeaderWithDetailsForPeriod(int leaderId, DateOnly start, DateOnly end)
-		{
-			return await _context.TimeEntries.Include(t => t.Project).Include(t => t.User)
-				.Where(t =>
-					t.User != null &&
-					t.User.Role == (int)UserRole.Employee &&
-					t.User.ManagerId == leaderId &&
-					t.Date >= start &&
-					t.Date <= end)
-				.OrderBy(t => t.User.Name)
-				.ThenBy(t => t.Project.Name)
-				.ThenBy(t => t.Date)
-				.ToListAsync();
-		}
-
-        
 	}
 }

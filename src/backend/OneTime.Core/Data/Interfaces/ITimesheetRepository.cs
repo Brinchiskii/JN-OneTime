@@ -14,10 +14,17 @@ namespace OneTime.Core.Services.Interfaces
         /// <param name="periodStart">Start of the review period.</param>
         /// <param name="periodEnd">End of the review period.</param>
         /// <returns>The monthly review object.</returns>
-        Task<Timesheet> CreateTimesheet(int userId, DateOnly periodStart, DateOnly periodEnd);
+        // Task<Timesheet> CreateTimesheet(int userId, DateOnly periodStart, DateOnly periodEnd);
+        Task<Timesheet> Add(Timesheet timesheet);
         Task<Timesheet> UpdateTimeSheet(int timesheetId, int status, string? comment, int leaderId);
 
         Task<IEnumerable<TimeEntry>> GetTimeentriesForPendingTimesheet(int leaderId, DateOnly start, DateOnly end);
+
+        // Data-access helpers for service-layer business logic
+        Task<bool> ExistsForPeriod(int userId, DateOnly periodStart, DateOnly periodEnd);
+        Task<bool> HasTimeEntriesInPeriod(int userId, DateOnly periodStart, DateOnly periodEnd);
+        Task<Timesheet?> GetById(int timesheetId);
+        Task Update(Timesheet sheet);
 
     }
 }

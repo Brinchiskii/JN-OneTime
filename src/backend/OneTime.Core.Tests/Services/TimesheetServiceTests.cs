@@ -5,13 +5,14 @@ using OneTime.Core.Services.Repository;
 using Microsoft.EntityFrameworkCore;
 using OneTime.Core.Models;
 using OneTime.Core.Models.Enums;
+using OneTime.Core.Services.Implementations;
 using OneTime.Core.Tests.TestHelpers;
 namespace OneTime.Core.Tests.Services
 {
     public class TimesheetServiceTests
     {
         [Fact]
-        public async Task SubmitMonthlyReview_Already_Exists_Throws()
+        public async Task SubmitTimesheet_Already_Exists_Throws()
         {
             // Arrange
             var userId = 1;
@@ -30,15 +31,16 @@ namespace OneTime.Core.Tests.Services
 
             await context.SaveChangesAsync();
 
-            var service = new TimesheetRepository(context);
+            var _timesheetRepo = new TimesheetRepository(context);
+            var _service = new TimesheetService(_timesheetRepo);
 
             // Act + Assert 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.CreateTimesheet(userId, periodStart, periodEnd));
+                _service.CreateTimesheet(userId, periodStart, periodEnd));
         }
 
         [Fact]
-        public async Task SubmitMonthlyReview_No_TimeEntries_Throws()
+        public async Task SubmitTimesheet_No_TimeEntries_Throws()
         {
             // Arrange
             var userId = 1;
@@ -47,16 +49,17 @@ namespace OneTime.Core.Tests.Services
 
             var context = OneTimeContextFactory.CreateInMemoryContext();
 
-            var service = new TimesheetRepository(context);
+            var _timesheetRepo = new TimesheetRepository(context);
+            var _service = new TimesheetService(_timesheetRepo);
 
             // Act + Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.CreateTimesheet(userId, periodStart, periodEnd));
+                _service.CreateTimesheet(userId, periodStart, periodEnd));
 
         }
 
         [Fact]
-        public async Task SubmitMonthlyReview_Succeeds()
+        public async Task SubmitTimesheet_Succeeds()
         {
             // Arrange
             var userId = 1;
@@ -76,17 +79,18 @@ namespace OneTime.Core.Tests.Services
 
             await context.SaveChangesAsync();
 
-            var service = new TimesheetRepository(context);
+            var _timesheetRepo = new TimesheetRepository(context);
+            var _service = new TimesheetService(_timesheetRepo);
 
             // Act
-            var review = await service.CreateTimesheet(userId, periodStart, periodEnd);
+            var timesheet = await _service.CreateTimesheet(userId, periodStart, periodEnd);
 
             // Assert
-            Assert.NotNull(review);
-            Assert.Equal(userId, review.UserId);
-            Assert.Equal(periodStart, review.PeriodStart);
-            Assert.Equal(periodEnd, review.PeriodEnd);
-            Assert.Equal((int)TimesheetStatus.Pending, review.Status);
+            Assert.NotNull(timesheet);
+            Assert.Equal(userId, timesheet.UserId);
+            Assert.Equal(periodStart, timesheet.PeriodStart);
+            Assert.Equal(periodEnd, timesheet.PeriodEnd);
+            Assert.Equal((int)TimesheetStatus.Pending, timesheet.Status);
         }
 
         [Fact]
@@ -97,11 +101,12 @@ namespace OneTime.Core.Tests.Services
             
             var context = OneTimeContextFactory.CreateInMemoryContext();
             
-            var service = new TimesheetRepository(context);
+            var timesheetRepo = new TimesheetRepository(context);
+            var timesheetService = new TimesheetService(timesheetRepo);
             
-            var ex1 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetTimeentriesForPendingTimesheet(0, periodStart, periodEnd));
+            var ex1 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => timesheetService.GetTimeentriesForPendingTimesheet(0, periodStart, periodEnd));
             Assert.Equal("Leader ID must be greater than zero.", ex1.ParamName);
-            var ex2 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetTimeentriesForPendingTimesheet(-1, periodStart, periodEnd));
+            var ex2 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => timesheetService.GetTimeentriesForPendingTimesheet(-1, periodStart, periodEnd));
             Assert.Equal("Leader ID must be greater than zero.", ex2.ParamName);
         }
 
@@ -110,9 +115,10 @@ namespace OneTime.Core.Tests.Services
         {
             var context = OneTimeContextFactory.CreateInMemoryContext();
             
-            var service = new TimesheetRepository(context);
+            var timesheetRepository = new TimesheetRepository(context);
+            var timesheetService = new TimesheetService(timesheetRepository);
             
-            var ex = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetTimeentriesForPendingTimesheet(1, new DateOnly(2025, 12, 10), new DateOnly(2025, 12, 7)));
+            var ex = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => timesheetService.GetTimeentriesForPendingTimesheet(1, new DateOnly(2025, 12, 10), new DateOnly(2025, 12, 7)));
             Assert.Equal("Start date must be before or equal to end date.", ex.ParamName);
         }
         
@@ -159,6 +165,7 @@ namespace OneTime.Core.Tests.Services
                 Date = new DateOnly(2025, 12, 3),
                 Note = null,
                 Hours = 7,
+                TimesheetId = 1
             });
             context.TimeEntries.Add(new TimeEntry
             {
@@ -167,15 +174,17 @@ namespace OneTime.Core.Tests.Services
                 Date = new DateOnly(2025, 12, 4),
                 Note = null,
                 Hours = 8,
+                TimesheetId = 1
             });
 
             await context.SaveChangesAsync();
 
             
             // Act + Assert
-            var service = new TimesheetRepository(context);
+            var timesheetRepository = new TimesheetRepository(context);
+            var timesheetService = new TimesheetService(timesheetRepository);
 
-            var entries = await service.GetTimeentriesForPendingTimesheet(
+            var entries = await timesheetService.GetTimeentriesForPendingTimesheet(
                 leaderId: 1,
                 start: new DateOnly(2025, 12, 1),
                 end: new DateOnly(2025, 12, 31));

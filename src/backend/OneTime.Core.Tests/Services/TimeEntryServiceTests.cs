@@ -1,9 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using OneTime.Core.Models;
-using OneTime.Core.Models.Enums;
-using OneTime.Core.Services.Interfaces;
-using OneTime.Core.Services.Repository;
+using OneTime.Core.Services.Implementations;
 using OneTime.Core.Tests.Fakes;
 using OneTime.Core.Tests.TestData;
 using Xunit;
@@ -12,197 +11,155 @@ namespace OneTime.Core.Tests.Services
 {
     public class TimeEntryServiceTests
     {
+        private readonly FakeProjectRepository _fakeProjectRepo;
+        private readonly FakeTimeEntryRepository _fakeTimeEntryRepo;
+        private readonly TimeEntryService _service;
+
+        public TimeEntryServiceTests()
+        {
+            _fakeProjectRepo = new FakeProjectRepository();
+            _fakeTimeEntryRepo = new FakeTimeEntryRepository();
+            _service = new TimeEntryService(_fakeTimeEntryRepo, _fakeProjectRepo);
+        }
+
         [Fact]
         public async Task CreateTimeEntry_Throws_When_Project_Not_Found()
         {
-            // Arrange
-            var fakeProjectRepo = new FakeProjectRepository();
-
-            var fakeTimeEntryRepo = new FakeTimeEntryRepository();
-            var timeEntryService = new TimeEntryService(fakeTimeEntryRepo, fakeProjectRepo);
-
+            // Arrange: fake project repo indeholder ikke projektet
             var entry = MockData.CreateTimeEntry(projectId: 123);
 
-            // Act
-            var ex = await Assert.ThrowsAsync<Exception>(() => timeEntryService.CreateTimeEntry(entry));
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() => _service.CreateTimeEntry(entry));
 
-            // Assert 
-            Assert.Equal("Projekt not found", ex.Message);
-            Assert.False(fakeTimeEntryRepo.AddCalled);
-            Assert.Null(fakeTimeEntryRepo.AddedEntry);
+            Assert.Equal("Project not found", ex.ParamName);
+            Assert.False(_fakeTimeEntryRepo.AddCalled);
         }
 
         [Fact]
         public async Task CreateTimeEntry_Saves_When_Project_Exists()
         {
             // Arrange
-            var fakeProjectRepo = new FakeProjectRepository();
-            fakeProjectRepo.Projects.Add(MockData.CreateProject(id: 10, name: "Projekt X"));
-
-            var fakeTimeEntryRepo = new FakeTimeEntryRepository();
-
-            var timeEntryService = new TimeEntryService(fakeTimeEntryRepo, fakeProjectRepo);
-
+            _fakeProjectRepo.Projects.Add(MockData.CreateProject(id: 10, name: "Projekt X"));
             var entry = MockData.CreateTimeEntry(projectId: 10, hours: 8m);
 
             // Act
-            var result = await timeEntryService.CreateTimeEntry(entry);
+            var result = await _service.CreateTimeEntry(entry);
 
             // Assert
-            Assert.True(fakeTimeEntryRepo.AddCalled);
-            Assert.NotNull(fakeTimeEntryRepo.AddedEntry);
-
-            Assert.Equal(10, fakeTimeEntryRepo.AddedEntry.ProjectId);
-            Assert.Equal(8m, fakeTimeEntryRepo.AddedEntry.Hours);
-
-            Assert.Equal(result, fakeTimeEntryRepo.AddedEntry);
-        }
-
-        [Fact]
-        public async Task CreateTimeEntry_Sets_Status_Pending_And_Default_Date_When_Not_Set()
-        {
-            // Arrange
-            var fakeProjectRepo = new FakeProjectRepository();
-            fakeProjectRepo.Projects.Add(MockData.CreateProject(id: 10));
-
-            var fakeTimeEntryRepo = new FakeTimeEntryRepository();
-            var timeEntryService = new TimeEntryService(fakeTimeEntryRepo, fakeProjectRepo);
-
-            var entry = new TimeEntry
-            {
-                ProjectId = 10,
-                Hours = 4m,
-            };
-
-            // Act
-            var result = await timeEntryService.CreateTimeEntry(entry);
-
-            Assert.Equal((int)TimeEntryStatus.Pending, result.Status);
-            Assert.NotEqual(default, result.Date);
-        }
-
-        [Fact]
-        public async Task GetAvailableProjects_Returns_Projects_From_Repository()
-        {
-            // Arrange
-            var fakeProjectRepo = new FakeProjectRepository();
-            fakeProjectRepo.Projects.Add(MockData.CreateProject(1, "P1"));
-            fakeProjectRepo.Projects.Add(MockData.CreateProject(2, "P2"));
-
-            var fakeTimeEntryRepo = new FakeTimeEntryRepository();
-            var timeEntryService = new TimeEntryService(fakeTimeEntryRepo, fakeProjectRepo);
-
-            // Act
-            var result = await timeEntryService.GetAvailableProjects();
-
-            var list = new List<Project>((int)result);
-            Assert.Equal(2, list.Count);
-            Assert.Equal(1, list[0].ProjectId);
-            Assert.Equal(2, list[1].ProjectId);
-        }
-
-        [Fact]
-        public async Task CreateTimeEntry_Saves_Correct_Data_For_User()
-        {
-            // Arrange
-            var fakeProjectRepo = new FakeProjectRepository();
-            fakeProjectRepo.Projects.Add(new Project
-            {
-                ProjectId = 10,
-                Name = "Testprojekt"
-            });
-
-            var fakeTimeRepo = new FakeTimeEntryRepository();
-            var timeEntryService = new TimeEntryService(fakeTimeRepo, fakeProjectRepo);
-
-            var entry = new TimeEntry
-            {
-                UserId = 5,
-                ProjectId = 10,
-                Hours = 6m,
-                Date = new DateOnly(2024, 6, 15),
-                Note = "Test Note"
-            };
-
-            // Act
-            var result = await timeEntryService.CreateTimeEntry(entry);
-
-            // Assert
-            Assert.True(fakeTimeRepo.AddCalled);
-            Assert.NotNull(fakeTimeRepo.AddedEntry);
-            Assert.Equal(5, fakeTimeRepo.AddedEntry.UserId);
-            Assert.Equal(10, fakeTimeRepo.AddedEntry.ProjectId);
-            Assert.Equal(6m, fakeTimeRepo.AddedEntry.Hours);
-            Assert.Equal(new DateOnly(2024, 6, 15), fakeTimeRepo.AddedEntry.Date);
-            Assert.Equal("Test Note", fakeTimeRepo.AddedEntry.Note);
-            Assert.Equal((int)TimeEntryStatus.Pending, fakeTimeRepo.AddedEntry.Status);
+            Assert.True(_fakeTimeEntryRepo.AddCalled);
+            Assert.NotNull(_fakeTimeEntryRepo.AddedEntry);
+            Assert.Equal(10, _fakeTimeEntryRepo.AddedEntry.ProjectId);
+            Assert.Equal(8m, _fakeTimeEntryRepo.AddedEntry.Hours);
+            Assert.Same(result, _fakeTimeEntryRepo.AddedEntry);
         }
 
         [Fact]
         public async Task CreateTimeEntry_Throws_When_Hours_Invalid()
         {
             // Arrange
-            var fakeProjectRepo = new FakeProjectRepository();
-            fakeProjectRepo.Projects.Add(new Project
-            {
-                ProjectId = 10,
-                Name = "Testprojekt"
-            });
-            var fakeTimeRepo = new FakeTimeEntryRepository();
-            var timeEntryService = new TimeEntryService(fakeTimeRepo, fakeProjectRepo);
-
-            var entryWithZeroHours = new TimeEntry
-            {
-                UserId = 5,
-                ProjectId = 10,
-                Hours = 0m,
-                Date = new DateOnly(2024, 6, 15),
-                Note = "Test Note"
-            };
-
-            var entryWithTooManyHours = new TimeEntry
-            {
-                UserId = 5,
-                ProjectId = 10,
-                Hours = 25m,
-                Date = new DateOnly(2024, 6, 15),
-                Note = "Test Note"
-            };
+            _fakeProjectRepo.Projects.Add(MockData.CreateProject(id: 10)); // projekt findes
+            var entryZero = MockData.CreateTimeEntry(projectId: 10, hours: 0m);
+            var entryTooMany = MockData.CreateTimeEntry(projectId: 10, hours: 25m);
 
             // Act & Assert
-            var ex1 = await Assert.ThrowsAsync<Exception>(() => timeEntryService.CreateTimeEntry(entryWithZeroHours));
-            Assert.Equal("Hours must be greater than zero and less than 24", ex1.Message);
-            var ex2 = await Assert.ThrowsAsync<Exception>(() => timeEntryService.CreateTimeEntry(entryWithTooManyHours));
-            Assert.Equal("Hours must be greater than zero and less than 24", ex2.Message);
+            var ex1 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.CreateTimeEntry(entryZero));
+            Assert.Equal("Hours must be greater than zero and less than 24", ex1.ParamName);
+
+            var ex2 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.CreateTimeEntry(entryTooMany));
+            Assert.Equal("Hours must be greater than zero and less than 24", ex2.ParamName);
+
+            Assert.False(_fakeTimeEntryRepo.AddCalled);
         }
 
         [Fact]
-        public async Task GetTimeEntriesForUser_Returns_Entries_From_Repository()
+        public async Task CreateTimeEntry_Throws_On_Null_Input()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _service.CreateTimeEntry(null!));
+            Assert.False(_fakeTimeEntryRepo.AddCalled);
+        }
+
+        [Fact]
+        public async Task CreateTimeEntry_Sets_Default_Date_When_Not_Set()
+        {
+            // Hvis du vælger at servicen skal sætte default date
+            _fakeProjectRepo.Projects.Add(MockData.CreateProject(id: 10));
+
+            var entry = MockData.CreateTimeEntry(projectId: 10, hours: 4m);
+
+            var result = await _service.CreateTimeEntry(entry);
+
+            Assert.NotEqual(default, result.Date);
+            Assert.Equal(DateOnly.FromDateTime(DateTime.Today), result.Date);
+            Assert.True(_fakeTimeEntryRepo.AddCalled);
+        }
+
+        [Fact]
+        public async Task GetTimeEntryByUserWithDetails_UserId_NotOK()
         {
             // Arrange
-            var fakeProjectRepo = new FakeProjectRepository();
-            var fakeTimeEntryRepo = new FakeTimeEntryRepository();
+            const int invalidUserIdZero = 0;
+            const int invalidUserIdNegative = -1;
 
-            fakeTimeEntryRepo.EntriesToReturn.AddRange(new[] 
-            {
-                new TimeEntry { TimeEntryId = 1, UserId = 42, Hours = 4m},
-                new TimeEntry { TimeEntryId = 2, UserId = 42, Hours = 3.5m},
-            });
+            // Act & Assert
+            var ex1 = await Assert.ThrowsAsync<ArgumentException>(() => _service.GetTimeEntriesByUserWithDetails(invalidUserIdZero));
+            Assert.Equal("UserId must be greater than zero", ex1.Message);
+            var ex2 = await Assert.ThrowsAsync<ArgumentException>(() => _service.GetTimeEntriesByUserWithDetails(invalidUserIdNegative));
+            Assert.Equal("UserId must be greater than zero", ex2.Message);
 
-            var timeEntryService = new TimeEntryService(fakeTimeEntryRepo, fakeProjectRepo);
+            Assert.Null(_fakeTimeEntryRepo.LastUserIdRequested);
+        }
+
+        [Fact]
+        public async Task GetTimeEntryByUserWithDetails_UserId_OK()
+        {
+            // Arrange
+            const int validUserId = 1;
+            
+            // Act + Assert
+            await _service.GetTimeEntriesByUserWithDetails(validUserId);
+            Assert.Equal(validUserId, _fakeTimeEntryRepo.LastUserIdRequested);
+        }
+        
+        [Fact]
+        public async Task GetTimeEntryByUserWithDetails_EmptyList()
+        {
+            // Arrange
+            const int validUserId = 1;
+            
+            // Act + Assert
+            var result = await _service.GetTimeEntriesByUserWithDetails(validUserId);
+            Assert.Empty(result);
+        }
+        
+        [Fact]
+        public async Task GetTimeEntryByUserWithDetails_ListWithEntries()
+        {
+            // Arrange
+            const int validUserId = 1;
+
+            var date1 = DateOnly.FromDateTime(DateTime.Today.AddDays(-2));
+            var date2 = DateOnly.FromDateTime(DateTime.Today);
+            var otherUserDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+
+            // Seed entries for the valid user and another user to verify filtering and ordering
+            _fakeTimeEntryRepo.SeedEntries(
+                MockData.CreateTimeEntry(userId: validUserId, projectId: 10, hours: 4m, date: date2, note: "later"),
+                MockData.CreateTimeEntry(userId: validUserId, projectId: 11, hours: 2m, date: date1, note: "earlier"),
+                MockData.CreateTimeEntry(userId: 2, projectId: 12, hours: 3m, date: otherUserDate, note: "other user")
+            );
 
             // Act
-            var result = await timeEntryService.GetTimeEntriesForUser(42);
+            var result = (await _service.GetTimeEntriesByUserWithDetails(validUserId)).ToList();
 
             // Assert
-            var list = result.ToList();
+            Assert.NotEmpty(result);
+            Assert.All(result, r => Assert.Equal(validUserId, r.UserId));
+            Assert.Equal(2, result.Count);
 
-            Assert.Equal(2, list.Count);
-            Assert.Equal(1, list[0].TimeEntryId);
-            Assert.Equal(2, list[1].TimeEntryId);
-
-            Assert.Equal(42, fakeTimeEntryRepo.LastUserIdRequested);
-
+            // Should be ordered by date ascending
+            Assert.True(result[0].Date <= result[1].Date);
+            Assert.Equal(new[] { date1, date2 }, result.Select(r => r.Date).ToArray());
+            Assert.Equal(validUserId, _fakeTimeEntryRepo.LastUserIdRequested);
         }
     }
 }

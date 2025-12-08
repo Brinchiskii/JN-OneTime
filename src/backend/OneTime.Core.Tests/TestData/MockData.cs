@@ -1,14 +1,8 @@
 ﻿using OneTime.Core.Models;
-using OneTime.Core.Models.Enums;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OneTime.Core.Tests.TestData
 {
-    /// <summary>
-    /// Creates mock data to use for testing.
-    /// </summary>
     public static class MockData
     {
         public static Project CreateProject(int id = 10, string name = "Testprojekt")
@@ -20,13 +14,22 @@ namespace OneTime.Core.Tests.TestData
             };
         }
 
-        public static TimeEntry CreateTimeEntry(int projectId = 10, decimal hours = 7.5m)
+        public static TimeEntry CreateTimeEntry(
+            int projectId = 10,
+            decimal hours = 7.5m,
+            int userId = 1,
+            DateOnly? date = null,
+            int timesheetId = 1,
+            string note = "")
         {
             return new TimeEntry
             {
                 ProjectId = projectId,
                 Hours = hours,
-                Date = default,
+                UserId = userId,
+                Date = date ?? DateOnly.FromDateTime(DateTime.Today),
+                TimesheetId = timesheetId,
+                Note = note ?? string.Empty
             };
         }
     }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OneTime.Core.Models;
+using OneTime.Core.Services.Implementations;
 using OneTime.Core.Services.Interfaces;
 using OneTime.Core.Services.Repository;
 
@@ -45,6 +46,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<ITimeEntryRepository, TimeEntryRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITimesheetService, TimesheetService>();
 builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 var app = builder.Build();
