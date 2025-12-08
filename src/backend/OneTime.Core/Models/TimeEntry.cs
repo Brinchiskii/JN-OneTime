@@ -24,11 +24,15 @@ public partial class TimeEntry
     [Column(TypeName = "decimal(4, 2)")]
     public decimal Hours { get; set; }
 
-    public int Status { get; set; }
+    public int TimesheetId { get; set; }
 
     [ForeignKey("ProjectId")]
     [InverseProperty("TimeEntries")]
     public virtual Project Project { get; set; }
+
+    [ForeignKey("TimesheetId")]
+    [InverseProperty("TimeEntries")]
+    public virtual Timesheet Timesheet { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("TimeEntries")]
