@@ -20,6 +20,7 @@ namespace OneTime.Api.Models.TimeEntriesDto
 				Date = dto.Date,
 				Note = dto.Note,
 				Hours = dto.Hours,
+				TimesheetId = dto.TimesheetId,
 			};
 		}
 
