@@ -30,7 +30,8 @@ namespace OneTime.Api.Tests.Endpoints
                 ProjectId: 1,
                 Date: default,
                 Note: "Integration test",
-                Hours: 7.5m
+                Hours: 7.5m,
+                TimesheetId: 1
             );
 
             // Act
@@ -53,7 +54,8 @@ namespace OneTime.Api.Tests.Endpoints
                 ProjectId: 999,                              
                 Date: DateOnly.FromDateTime(DateTime.Today),
                 Note: "Invalid project",
-                Hours: 5m
+                Hours: 5m,
+                TimesheetId: 1
             );
 
             // Act

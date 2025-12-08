@@ -18,7 +18,8 @@ namespace OneTime.Api.Tests.Converters
                 ProjectId: 10,
                 Date: DateOnly.FromDateTime(new DateTime(2025, 3, 5)),
                 Note: "Test Note",
-                Hours: 7.5m
+                Hours: 7.5m,
+                TimesheetId: 1
             );
 
             // Act
