@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OneTime.Api.Models;
 using OneTime.Api.Models.TimesheetsDto;
+using OneTime.Core.Models.Enums;
 using OneTime.Core.Services.Interfaces;
 
 namespace OneTime.Api.Controllers
@@ -47,7 +48,7 @@ namespace OneTime.Api.Controllers
                     review.UserId,
                     review.PeriodStart,
                     review.PeriodEnd,
-                    review.Status,
+                    (TimesheetStatus)review.Status,
                     review.DecidedAt,
                     review.Comment
                 );
@@ -76,7 +77,7 @@ namespace OneTime.Api.Controllers
 					sheet.UserId,
 					sheet.PeriodStart,
 					sheet.PeriodEnd,
-					sheet.Status,
+					(TimesheetStatus)sheet.Status,
 					sheet.DecidedAt,
 					sheet.Comment
 				);

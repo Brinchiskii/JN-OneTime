@@ -64,7 +64,7 @@ namespace OneTime.Api.Tests.TestHelpers
                 Email = "teamlead@example.com",
                 PasswordHash = "hash",
                 PasswordSalt = "salt",
-                Role = 1
+                Role = (int)UserRole.Manager
             };
 
             var employee = new JNUser
@@ -74,7 +74,7 @@ namespace OneTime.Api.Tests.TestHelpers
                 Email = "teammember@example.com",
                 PasswordHash = "hash",
                 PasswordSalt = "salt",
-                Role = 2,
+                Role = (int)UserRole.Employee,
                 ManagerId = leader.UserId
             };
 
@@ -86,15 +86,15 @@ namespace OneTime.Api.Tests.TestHelpers
             );
 
             context.TimeEntries.AddRange(
-                new TimeEntry { TimeEntryId = 1, UserId = 1, ProjectId = 1, Date = new DateOnly(2025, 10, 15), Hours = 8m, Note = "Worked on feature A", Status = (int)TimeEntryStatus.Pending },
-                new TimeEntry { TimeEntryId = 2, UserId = 1, ProjectId = 2, Date = new DateOnly(2025, 10, 20), Hours = 6m, Note = "Fixed bug B", Status = (int)TimeEntryStatus.Approved },
-                new TimeEntry { TimeEntryId = 3, UserId = 2, ProjectId = 1, Date = new DateOnly(2025, 12, 5), Hours = 7m, Note = "Team member task 1", Status = (int)TimeEntryStatus.Pending },
-                new TimeEntry { TimeEntryId = 4, UserId = 2, ProjectId = 1, Date = new DateOnly(2025, 12, 6), Hours = 8m, Note = "Team member task 2", Status = (int)TimeEntryStatus.Pending }
+                new TimeEntry { TimeEntryId = 1, UserId = 1, ProjectId = 1, Date = new DateOnly(2025, 10, 15), Hours = 8m, Note = "Worked on feature A",  },
+                new TimeEntry { TimeEntryId = 2, UserId = 1, ProjectId = 2, Date = new DateOnly(2025, 10, 20), Hours = 6m, Note = "Fixed bug B",  },
+                new TimeEntry { TimeEntryId = 3, UserId = 2, ProjectId = 1, Date = new DateOnly(2025, 12, 5), Hours = 7m, Note = "Team member task 1", },
+                new TimeEntry { TimeEntryId = 4, UserId = 2, ProjectId = 1, Date = new DateOnly(2025, 12, 6), Hours = 8m, Note = "Team member task 2", }
             );
 
             context.Timesheets.AddRange(
-                new Timesheet { UserId = 1, PeriodStart = new DateOnly(2025, 11, 1), PeriodEnd = new DateOnly(2025, 11, 30), Status = TimesheetStatus.Pending },
-                new Timesheet { UserId = 2, PeriodStart = new DateOnly(2025, 12, 1), PeriodEnd = new DateOnly(2025, 12, 31), Status = TimesheetStatus.Pending }
+                new Timesheet { UserId = 1, PeriodStart = new DateOnly(2025, 11, 1), PeriodEnd = new DateOnly(2025, 11, 30), Status = (int)TimesheetStatus.Pending },
+                new Timesheet { UserId = 2, PeriodStart = new DateOnly(2025, 12, 1), PeriodEnd = new DateOnly(2025, 12, 31), Status = (int)TimesheetStatus.Pending }
             );
 
             context.SaveChanges();

@@ -49,7 +49,7 @@ namespace OneTime.Core.Services.Repository
 			return await _context.TimeEntries.Include(t => t.Project).Include(t => t.User)
 				.Where(t =>
 					t.User != null &&
-					t.User.Role == UserRole.Employee &&
+					t.User.Role == (int)UserRole.Employee &&
 					t.User.ManagerId == leaderId &&
 					t.Date >= start &&
 					t.Date <= end)

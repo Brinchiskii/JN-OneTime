@@ -27,7 +27,6 @@ namespace OneTime.Core.Tests.TestData
                 ProjectId = projectId,
                 Hours = hours,
                 Date = default,
-                Status = (int)TimeEntryStatus.Pending
             };
         }
     }

@@ -25,7 +25,7 @@ namespace OneTime.Core.Tests.Services
                 UserId = userId,
                 PeriodStart = periodStart,
                 PeriodEnd = periodEnd,
-                Status = TimesheetStatus.Pending
+                Status = (int)TimesheetStatus.Pending
             });
 
             await context.SaveChangesAsync();
@@ -86,7 +86,7 @@ namespace OneTime.Core.Tests.Services
             Assert.Equal(userId, review.UserId);
             Assert.Equal(periodStart, review.PeriodStart);
             Assert.Equal(periodEnd, review.PeriodEnd);
-            Assert.Equal(TimesheetStatus.Pending, review.Status);
+            Assert.Equal((int)TimesheetStatus.Pending, review.Status);
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace OneTime.Core.Tests.Services
                 UserId = 1,
                 PeriodStart = new DateOnly(2025, 12, 1),
                 PeriodEnd = new DateOnly(2025, 12, 31),
-                Status = Models.Enums.TimesheetStatus.Pending // Pending
+                Status = (int)Models.Enums.TimesheetStatus.Pending // Pending
             });
 
             // 4) Mock time entry
@@ -159,7 +159,6 @@ namespace OneTime.Core.Tests.Services
                 Date = new DateOnly(2025, 12, 3),
                 Note = null,
                 Hours = 7,
-                Status = 0,
             });
             context.TimeEntries.Add(new TimeEntry
             {
@@ -168,7 +167,6 @@ namespace OneTime.Core.Tests.Services
                 Date = new DateOnly(2025, 12, 4),
                 Note = null,
                 Hours = 8,
-                Status = 0,
             });
 
             await context.SaveChangesAsync();
@@ -227,7 +225,7 @@ namespace OneTime.Core.Tests.Services
                 UserId = 1,
                 PeriodStart = new DateOnly(2025, 12, 1),
                 PeriodEnd = new DateOnly(2025, 12, 31),
-                Status = Models.Enums.TimesheetStatus.Pending // Pending
+                Status = (int)Models.Enums.TimesheetStatus.Pending // Pending
             });
             
             await context.SaveChangesAsync();
