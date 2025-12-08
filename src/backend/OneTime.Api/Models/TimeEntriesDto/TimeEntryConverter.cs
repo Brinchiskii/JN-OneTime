@@ -30,7 +30,7 @@ namespace OneTime.Api.Models.TimeEntriesDto
         /// <returns>The <see cref="TimeEntryDto"/>.</returns>
         public static TimeEntryDto ToDto(TimeEntry entity)
 		{
-			return new TimeEntryDto(entity.TimeEntryId, entity.UserId, entity.ProjectId, entity.Date, entity.Note, entity.Hours, TimeEntryStatus.Pending);
+			return new TimeEntryDto(entity.TimeEntryId, entity.UserId, entity.ProjectId, entity.Date, entity.Note, entity.Hours, entity.TimesheetId);
 		}
 
 		public static TimeEntryDetailsDto ToDetailsDto(TimeEntry entity)
@@ -40,14 +40,16 @@ namespace OneTime.Api.Models.TimeEntriesDto
 				entity.UserId,
 				entity.User?.Name ?? string.Empty,
 				entity.User?.Email ?? string.Empty,
-				(int)(entity.User?.Role ?? UserRole.Employee),
+				(int)entity.User?.Role,
 				entity.ProjectId,
 				entity.Project?.Name ?? string.Empty,
 				entity.Project != null ? (ProjectStatus)entity.Project.Status : ProjectStatus.Active,
 				entity.Date,
 				entity.Note,
 				entity.Hours,
-				(TimeEntryStatus)entity.Status);
+				entity.TimesheetId
+				);
+			//(TimeEntryStatus)entity.Status);
 		}
 	}
 }

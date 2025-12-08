@@ -42,7 +42,7 @@ namespace OneTime.Api.Controllers
 				if (entity.Hours <= 0 || entity.Hours > 24)
 					return BadRequest("Hours must be greater than zero and less than 24");
 
-				entity.Status = (int)TimeEntryStatus.Pending;
+				//entity.Status = (int)TimeEntryStatus.Pending;
 				entity.Date = entity.Date == default ? DateOnly.FromDateTime(DateTime.Now) : entity.Date;
 
 				var created = await _timeEntryRepo.Add(entity);

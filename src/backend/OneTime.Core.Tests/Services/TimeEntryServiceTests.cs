@@ -95,7 +95,7 @@ namespace OneTime.Core.Tests.Services
             // Act
             var result = await timeEntryService.GetAvailableProjects();
 
-            var list = new List<Project>(result);
+            var list = new List<Project>((int)result);
             Assert.Equal(2, list.Count);
             Assert.Equal(1, list[0].ProjectId);
             Assert.Equal(2, list[1].ProjectId);

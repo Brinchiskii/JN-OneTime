@@ -18,7 +18,7 @@ namespace OneTime.Core.Services.Repository
         {
             return await _context.JNUsers
                 .Include(u => u.Manager)
-                .Include(u => u.TeamMembers)
+                //.Include(u => u.TeamMembers)
                 .ToListAsync();
         }
 
@@ -26,7 +26,7 @@ namespace OneTime.Core.Services.Repository
         {
             var user = await _context.JNUsers
                 .Include(u => u.Manager)
-                .Include(u => u.TeamMembers)
+                //.Include(u => u.TeamMembers)
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
             if (user == null)
@@ -46,7 +46,7 @@ namespace OneTime.Core.Services.Repository
 			{
 				Name = name,
 				Email = email,
-				Role = role,
+				Role = (int)role,
 				ManagerId = managerId,
 				// midlertidig løsning uden password hashing... vi hasher når vi implementerer login
 				PasswordHash = password,
@@ -74,7 +74,7 @@ namespace OneTime.Core.Services.Repository
 
             user.Name = name;
             user.Email = email;
-			user.Role = role;
+			user.Role = (int)role;
             user.ManagerId = managerId;
 
             _context.JNUsers.Update(user);
@@ -90,7 +90,7 @@ namespace OneTime.Core.Services.Repository
                 throw new InvalidOperationException("User not found.");
 
             // mnager må ikke slettes hvis han har medarbejdere
-            if (user.Role == UserRole.Manager)
+            if ((int)user.Role == (int)UserRole.Manager)
             {
                 bool hasTeam = await _context.JNUsers.AnyAsync(u => u.ManagerId == id);
                 if (hasTeam)

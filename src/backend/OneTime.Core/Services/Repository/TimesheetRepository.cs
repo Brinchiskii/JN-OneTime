@@ -58,7 +58,7 @@ namespace OneTime.Core.Services.Repository
                 UserId = userId,
                 PeriodStart = periodStart,
                 PeriodEnd = periodEnd,
-                Status = TimesheetStatus.Pending,
+                Status = (int)TimesheetStatus.Pending,
                 DecidedByUserId = null,
                 DecidedAt = null,
                 Comment = null
@@ -80,9 +80,9 @@ namespace OneTime.Core.Services.Repository
 
             sheet.Status = status switch
             {
-                0 => TimesheetStatus.Pending,
-                1 => TimesheetStatus.Approved,
-                2 => TimesheetStatus.Rejected,
+                0 => (int)TimesheetStatus.Pending,
+                1 => (int)TimesheetStatus.Approved,
+                2 => (int)TimesheetStatus.Rejected,
                 _ => throw new ArgumentOutOfRangeException(nameof(status), "Invalid timesheet status value.")
             };
 
@@ -119,25 +119,23 @@ namespace OneTime.Core.Services.Repository
                 throw new ArgumentOutOfRangeException("Start date must be before or equal to end date.");
             }
 			
-            var entries =  await _context.TimeEntries
+            var entries = await _context.TimeEntries
                 .Include(t => t.Project)
                 .Include(t => t.User)
+                .Include(t => t.Timesheet)
                 .Where(t =>
-                    t.User != null &&
                     t.User.ManagerId == leaderId &&
-                    t.User.Role == UserRole.Employee &&
-                    t.Date >= start &&
-                    t.Date <= end && 
-                           _context.Timesheets.Any(ts => 
-                                   ts.UserId == t.UserId &&
-                                   ts.Status == TimesheetStatus.Pending &&
-                                   ts.PeriodStart <= start &&
-                                   ts.PeriodEnd >= end
-                                   ))
+                    t.User.Role == (int)UserRole.Employee &&
+                    t.Timesheet.Status == (int)TimesheetStatus.Pending &&
+                    t.Timesheet.PeriodStart == start &&
+                    t.Timesheet.PeriodEnd == end
+                )
                 .OrderBy(t => t.User.Name)
                 .ThenBy(t => t.Project.Name)
                 .ThenBy(t => t.Date)
                 .ToListAsync();
+
+
 
             // Returns empty list if no entries were found.
             return entries.Count == 0 ? [] : entries;
