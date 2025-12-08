@@ -3,7 +3,7 @@ import type { Project } from "../types/index";
 
 export default {
     getProjects() {
-        return http.get<Project[]>("/Timeentries/projects");
+        return http.get<Project[]>("/projects");
     },
     
 }
