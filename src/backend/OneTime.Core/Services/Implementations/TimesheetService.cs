@@ -6,14 +6,16 @@ namespace OneTime.Core.Services.Implementations;
 
 public class TimesheetService : ITimesheetService
 {
-    private readonly ITimesheetRepository _timesheetRepository;
+	private readonly ITimesheetRepository _timesheetRepository;
+	private readonly IAuditLogService _auditLogService;
 
-    public TimesheetService(ITimesheetRepository timesheetRepository)
-    {
-        _timesheetRepository = timesheetRepository;
-    }
+	public TimesheetService(ITimesheetRepository timesheetRepository,IAuditLogService auditLogService)
+	{
+		_timesheetRepository = timesheetRepository;
+		_auditLogService = auditLogService;
+	}
 
-    public async Task<Timesheet> CreateTimesheet(int userId, DateOnly periodStart, DateOnly periodEnd)
+	public async Task<Timesheet> CreateTimesheet(int userId, DateOnly periodStart, DateOnly periodEnd)
     {
         // Validate basic input
         if (userId <= 0)
@@ -50,8 +52,16 @@ public class TimesheetService : ITimesheetService
         };
 
         await _timesheetRepository.Add(timesheet);
-        
-        return timesheet;
+
+		// logging timesheet creation
+		await _auditLogService.Log(
+			actorUserId: userId,
+			action: "TimesheetCreated",
+			entityType: "Timesheet",
+			entityId: timesheet.TimesheetId,
+			details: $"Timesheet created for period {periodStart:yyyy-MM-dd} to {periodEnd:yyyy-MM-dd}");
+
+		return timesheet;
     }
 
     public async Task<Timesheet> UpdateTimeSheet(int timesheetId, int status, string? comment, int leaderId = 0)
@@ -64,8 +74,10 @@ public class TimesheetService : ITimesheetService
         if (sheet is null)
             throw new InvalidOperationException("Timesheet not found.");
 
-        // Validate and map status
-        TimesheetStatus newStatus = status switch
+		var oldStatus = (TimesheetStatus)sheet.Status;
+
+		// Validate and map status
+		TimesheetStatus newStatus = status switch
         {
             0 => TimesheetStatus.Pending,
             1 => TimesheetStatus.Approved,
@@ -85,7 +97,15 @@ public class TimesheetService : ITimesheetService
 
         await _timesheetRepository.Update(sheet);
 
-        return sheet;
+		// logging timesheet update
+		await _auditLogService.Log(
+		   actorUserId: leaderId == 0 ? null : leaderId,
+		   action: "TimesheetStatusChanged",
+		   entityType: "Timesheet",
+		   entityId: sheet.TimesheetId,
+		   details: $"Status changed from {oldStatus} to {newStatus}. Comment: {comment}");
+
+		return sheet;
     }
     
     public async Task<IEnumerable<TimeEntry>> GetTimeentriesForPendingTimesheet(int leaderId, DateOnly start, DateOnly end)

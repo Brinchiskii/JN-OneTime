@@ -13,8 +13,9 @@ public partial class OneTimeContext : DbContext
         : base(options)
     {
     }
+	public virtual DbSet<AuditLog> AuditLogs { get; set; }
 
-    public virtual DbSet<JNUser> JNUsers { get; set; }
+	public virtual DbSet<JNUser> JNUsers { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
@@ -28,7 +29,16 @@ public partial class OneTimeContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<JNUser>(entity =>
+		modelBuilder.Entity<AuditLog>(entity =>
+		{
+			entity.HasKey(e => e.AuditLogId).HasName("PK_AuditLogs");
+
+			entity.HasOne(d => d.ActorUser)
+				  .WithMany(p => p.AuditLogs)
+				  .HasConstraintName("FK_AuditLogs_ActorUser");
+		});
+
+		modelBuilder.Entity<JNUser>(entity =>
         {
             entity.HasKey(e => e.UserId).HasName("PK_User");
 

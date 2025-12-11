@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using OneTime.Core.Data.Interfaces;
+using OneTime.Core.Data.Repository;
 using OneTime.Core.Models;
 using OneTime.Core.Services.Implementations;
 using OneTime.Core.Services.Interfaces;
@@ -46,9 +48,12 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<ITimeEntryRepository, TimeEntryRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITimeEntryService, TimeEntryService>();
 builder.Services.AddScoped<ITimesheetService, TimesheetService>();
 builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 var app = builder.Build();
 
 app.UseCors("AllowLocalhost");

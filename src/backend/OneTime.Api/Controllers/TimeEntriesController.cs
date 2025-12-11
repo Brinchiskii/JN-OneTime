@@ -10,13 +10,11 @@ namespace OneTime.Api.Controllers
 	[ApiController]
 	public class TimeEntriesController : ControllerBase
 	{
-		private readonly ITimeEntryRepository _timeEntryRepo;
-		private readonly IProjectRepository _projectRepo;
+		private readonly ITimeEntryService _timeEntryService;
 
-		public TimeEntriesController(ITimeEntryRepository timeEntryRepo, IProjectRepository projectRepo)
+		public TimeEntriesController(ITimeEntryService timeEntryService)
 		{
-			_timeEntryRepo = timeEntryRepo;
-			_projectRepo = projectRepo;
+			_timeEntryService = timeEntryService;
 		}
 
 
@@ -35,17 +33,9 @@ namespace OneTime.Api.Controllers
 			{
 				var entity = TimeEntryConverter.ToEntity(dto);
 
-				var project = await _projectRepo.GetById(entity.ProjectId);
-				if (project == null)
-					return BadRequest("Projekt not found");
-
-				if (entity.Hours <= 0 || entity.Hours > 24)
-					return BadRequest("Hours must be greater than zero and less than 24");
-
-				//entity.Status = (int)TimeEntryStatus.Pending;
 				entity.Date = entity.Date == default ? DateOnly.FromDateTime(DateTime.Now) : entity.Date;
 
-				var created = await _timeEntryRepo.Add(entity);
+				var created = await _timeEntryService.CreateTimeEntry(entity);
 
 				var response = TimeEntryConverter.ToDto(created);
 				return Ok(response);
@@ -56,12 +46,15 @@ namespace OneTime.Api.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Henter time entries for en given bruger med projekt- og bruger-detaljer.
+		/// </summary>
 		[HttpGet("user/{userId}")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(204)]
 		public async Task<IActionResult> GetTimeEntriesForUser(int userId)
 		{
-			var entries = await _timeEntryRepo.GetByUserWithDetails(userId);
+			var entries = await _timeEntryService.GetTimeEntriesByUserWithDetails(userId);
 
 			if (!entries.Any())
 				return NoContent();

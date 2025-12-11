@@ -51,4 +51,6 @@ public partial class JNUser
 
     [InverseProperty("User")]
     public virtual ICollection<Timesheet> TimesheetUsers { get; set; } = new List<Timesheet>();
+	public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+
 }
