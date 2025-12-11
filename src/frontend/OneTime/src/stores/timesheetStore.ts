@@ -3,18 +3,18 @@ import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/da'
 import isoWeek from 'dayjs/plugin/isoWeek'
-import type { TimesheetRow, WeekDay, UsersCollection, DecisionPayload } from '../types'
-import api from '@/api/TimeRegistration'
+import type { TimesheetRow, WeekDay, UsersCollection, DecisionPayload, TimeEntry, TimesheetPayload, ApiRow } from '../types'
+import timesheetService from '@/api/timesheetService'
+import timeEntriesService from '@/api/timeEntriesService'
 
 dayjs.locale('da')
 dayjs.extend(isoWeek)
 
 export const useTimesheetStore = defineStore('timesheet', () => {
-
   const createEmptyRow = (): TimesheetRow => {
     return {
       projectId: 0,
-      hours: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      hours: { },
     }
   }
 
@@ -28,9 +28,21 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     myRows.value.splice(index, 1)
   }
 
-  const getTotalHours = (row: TimesheetRow) => {
-    return Object.values(row.hours).reduce((acc, val) => acc + (Number(val) || 0), 0)
+  const validateRows = (): boolean => {
+  for (const row of myRows.value) { 
+    if (!row.projectId || row.projectId === 0) {
+      alert("Du har en række, hvor der mangler at blive valgt et projekt.")
+      return false
+    }
+    const hasHours = Object.values(row.hours).some(hours => hours > 0)
+
+    if (!hasHours) {
+      alert("Du har valgt et projekt, men ikke skrevet nogen timer på det.")
+      return false
+    }
   }
+  return true
+}
 
   // Date management
   const currentWeekStart = ref(dayjs().startOf('isoWeek'))
@@ -49,9 +61,10 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     })
   })
 
-  const setWeekFromDate = (date: any) => {
+  const setWeekFromDate = (date: Date) => {
     const week = dayjs(date).isoWeek()
-    setWeek(week)
+    const year = dayjs(date).year()
+    setWeek(week, year)
   }
 
   const setWeek = (isoWeekNumber: number = dayjs().isoWeek(), year: number = dayjs().year()) => {
@@ -63,7 +76,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     // TODO: Her skal vi senere kalde en funktion der henter nye data (rows) fra API'et
     // fetchWeekData()
   }
-  
+
   const previousWeek = () => {
     currentWeekStart.value = currentWeekStart.value.subtract(1, 'week')
     // TODO: fetchWeekData()
@@ -75,7 +88,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     const week = currentWeekStart.value.isoWeek()
     return `${start} - ${end} - uge ${week}`
   })
-  
+
   // Manager timesheets
   const teamRows = ref<UsersCollection>({})
 
@@ -85,32 +98,78 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     const startStr = startObj.format('YYYY-MM-DD')
     const endStr = endObj.format('YYYY-MM-DD')
 
-    const result = await api.getWeeklyTimeSheet(4, startStr, endStr)
+    const result = await timesheetService.getWeeklyTimeSheet(4, startStr, endStr)
 
-    const usersData = result.data?.users
+    const usersData = result.data?.users as Record<string, ApiRow[]> | undefined
 
     const normalized: UsersCollection = {}
-    if(usersData)
-    for (const [user, rows] of Object.entries(usersData)) {
-      normalized[user] = rows.map((row) => ({
-        projectId: row.project.projectId,
-        hours: row.hours,
-      }))
-    }
+    if (usersData)
+      for (const [user, rows] of Object.entries(usersData)) {
+        normalized[user] = rows.map(row => ({
+          projectId: row.project.projectId,
+          hours: row.hours,
+        }))
+      }
     teamRows.value = normalized
   }
 
-  const submitDecision = async (timesheetId: number, status: number, comment: string,) => {
-    
-    const currentLeaderId = 4;
+  const submitDecision = async (timesheetId: number, status: number, comment: string) => {
+    const currentLeaderId = 4
 
     const payload: DecisionPayload = {
       timesheetId: timesheetId,
       leaderId: currentLeaderId,
       status: status,
-      comment: comment
+      comment: comment,
     }
-    await api.updateTimeSheet(payload)
+    await timesheetService.updateTimeSheet(payload)
+  }
+
+  const submitTimesheet = async () => {
+
+    if(!validateRows()) return
+
+    const startObj = currentWeekStart.value
+    const endObj = startObj.endOf('isoWeek')
+    const startStr = startObj.format('YYYY-MM-DD')
+    const endStr = endObj.format('YYYY-MM-DD')
+
+    const payload: TimesheetPayload = {
+      userId: 3,
+      periodStart: startStr,
+      periodEnd: endStr
+    }
+    
+    const timesheet = await timesheetService.createTimeSheet(payload)
+
+    const apiCalls: Promise<any>[] = []
+
+    for (const row of myRows.value) {
+      if (!row.projectId) continue
+
+      for (const day of weekDays.value) {
+        const hours = row.hours[day.fullDate]
+
+        if (hours && hours > 0) {
+          const payload: TimeEntry = {
+            userId: timesheet.data.userId,
+            projectId: row.projectId,
+            date: day.fullDate,
+            note: "",
+            hours: hours,
+            timesheetId: timesheet.data.timesheetId
+          }
+          apiCalls.push(timeEntriesService.CreateTimeEntry(payload))
+        }
+      }
+    }
+
+    try {
+      await Promise.all(apiCalls)
+      alert("Tidsregistrering sendt!")
+    } catch (error) {
+      console.error("Fejl ved indsendelse", error)
+    }
   }
 
   return {
@@ -118,7 +177,6 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     teamRows,
     addRow,
     removeRow,
-    getTotalHours,
 
     currentWeekStart,
     weekDays,
@@ -127,8 +185,9 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     previousWeek,
     setWeek,
     setWeekFromDate,
-    
+
     loadTeamRows,
     submitDecision,
+    submitTimesheet,
   }
 })

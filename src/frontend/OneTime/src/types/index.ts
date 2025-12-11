@@ -5,12 +5,23 @@ export interface Project {
   timeEntries: Array<number>
 }
 
-// export interface TimeEntry {
-//   id: number;
-//   project: Project; 
-//   date: string; 
-//   hours: number;
-// }
+export interface TimeEntry {
+  userId: number;
+  projectId: number; 
+  note: string,
+  date: string; 
+  hours: number;
+  timesheetId: number;
+}
+
+export interface ApiRow{
+  project: {
+    projectId: number;
+    name: string;
+    status: number;
+  }
+  hours: Record<string, number>
+}
 
 export interface TimesheetRow {
     projectId: number;
@@ -31,4 +42,10 @@ export interface DecisionPayload {
   leaderId: number;
   status: number;
   comment: string;
+}
+
+export interface TimesheetPayload {
+  userId: number;
+  periodStart: string;
+  periodEnd: string;
 }
