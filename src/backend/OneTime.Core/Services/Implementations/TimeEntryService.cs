@@ -34,7 +34,7 @@ public class TimeEntryService : ITimeEntryService
 			throw new ArgumentOutOfRangeException(nameof(timeEntry.Hours),
 				"Hours must be greater than zero and less than 24");
 		}
-
+		  
 		var created = await _timeEntryRepository.Add(timeEntry);
 
 		await _auditLogService.Log(
