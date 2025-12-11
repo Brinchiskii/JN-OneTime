@@ -20,10 +20,13 @@ onMounted(async () => {
 const getColumnTotal = (dayKey: string) =>
   props.rows.reduce((acc, row) => acc + (Number(row.hours[dayKey]) || 0), 0)
 
-const grandTotal = computed(() =>
-  props.rows.reduce((acc, row) => acc + timesheetStore.getTotalHours(row), 0),
-)
+  const getTotalHours = (row: TimesheetRow) => {
+    return Object.values(row.hours).reduce((acc, val) => acc + (Number(val) || 0), 0)
+  }
 
+const grandTotal = computed(() =>
+  props.rows.reduce((acc, row) => acc + getTotalHours(row), 0),
+)
 </script>
 
 <template>
@@ -72,7 +75,7 @@ const grandTotal = computed(() =>
           </td>
 
           <td class="text-center">
-            <span class="badge bg-secondary">{{ timesheetStore.getTotalHours(row) }}t</span>
+            <span class="badge bg-secondary">{{ getTotalHours(row) }}t</span>
           </td>
 
           <td class="text-center" v-if="!props.readonly">

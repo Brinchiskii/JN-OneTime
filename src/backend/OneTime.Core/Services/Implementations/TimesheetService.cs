@@ -34,12 +34,6 @@ public class TimesheetService : ITimesheetService
             throw new InvalidOperationException("Timesheet already exists for the specified user and period.");
         }
 
-        var hasEntries = await _timesheetRepository.HasTimeEntriesInPeriod(userId, periodStart, periodEnd);
-        if (!hasEntries)
-        {
-            throw new InvalidOperationException("There are no registered entries for this period.");
-        }
-
         var timesheet = new Timesheet
         {
             UserId = userId,
