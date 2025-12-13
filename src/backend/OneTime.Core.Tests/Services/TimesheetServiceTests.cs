@@ -18,8 +18,11 @@ namespace OneTime.Core.Tests.Services
             var userId = 1;
             var periodStart = new DateOnly(2025, 11, 1);
             var periodEnd = new DateOnly(2025, 11, 30);
-
+            
             var context = OneTimeContextFactory.CreateInMemoryContext();
+            
+            var _timesheetRepo = new TimesheetRepository(context);
+            var _service = new TimesheetService(_timesheetRepo);
 
             context.Timesheets.Add(new Timesheet
             {
@@ -30,10 +33,7 @@ namespace OneTime.Core.Tests.Services
             });
 
             await context.SaveChangesAsync();
-
-            var _timesheetRepo = new TimesheetRepository(context);
-            var _service = new TimesheetService(_timesheetRepo);
-
+            
             // Act + Assert 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.CreateTimesheet(userId, periodStart, periodEnd));

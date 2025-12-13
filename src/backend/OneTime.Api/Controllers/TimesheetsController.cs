@@ -84,6 +84,10 @@ namespace OneTime.Api.Controllers
 
 				return Ok(response);
 			}
+			catch (ArgumentOutOfRangeException ex)
+			{
+				return BadRequest(ex.Message);
+			}
 			catch (InvalidOperationException ex)
 			{
 				return BadRequest(ex.Message);
