@@ -80,6 +80,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddScoped<IUserService, UserService>();
 var app = builder.Build();
 
 app.UseCors("AllowLocalhost");

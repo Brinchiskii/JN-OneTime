@@ -33,17 +33,18 @@ namespace OneTime.Core.Services.Repository
                 .Include(u => u.Manager)
                 //.Include(u => u.TeamMembers)
                 .FirstOrDefaultAsync(u => u.UserId == id);
-
-            if (user == null)
-                throw new InvalidOperationException("User not found.");
-
+            
             return user;
         }
 
         public async Task<JNUser> Create(string name, string email, string passwordHash, string passwordSalt ,UserRole role, int? managerId)
+        
+        public async Task<JNUser> GetByEmail(string email)
         {
-			if (await _context.JNUsers.AnyAsync(u => u.Email == email))
-				throw new InvalidOperationException("Email is already in use.");
+            // Case-insensitive email lookup to align with common expectations and tests
+            var normalized = email.ToLower();
+            return await _context.JNUsers.FirstOrDefaultAsync(u => u.Email.ToLower() == normalized);
+        }
 
 			ValidateRoleAndManager(role, managerId);
 
@@ -57,68 +58,44 @@ namespace OneTime.Core.Services.Repository
 				PasswordSalt = passwordSalt
 			};
 
+        public async Task<JNUser> Create(JNUser user)
+        {
 			_context.JNUsers.Add(user);
 			await _context.SaveChangesAsync();
 
 			return user;
 		}
-        public async Task<JNUser> Update(int id, string name,string email, UserRole role, int? managerId)
+
+        public async Task<JNUser> Update(JNUser user, string name,string email, UserRole role, int? managerId)
         {
-            var user = await _context.JNUsers.FindAsync(id);
-
-            if (user == null)
-                throw new InvalidOperationException("User not found.");
-
-            // Check email
-            var other = await _context.JNUsers.FirstOrDefaultAsync(u => u.Email == email);
-            if (other != null && other.UserId != id)
-                throw new InvalidOperationException("Email already used by another user.");
-
-            ValidateRoleAndManager(role, managerId);
-
+            // Update user details
             user.Name = name;
             user.Email = email;
 			user.Role = (int)role;
             user.ManagerId = managerId;
 
-            _context.JNUsers.Update(user);
+            //_context.JNUsers.Update(user); <-- dont think this is needed
             await _context.SaveChangesAsync();
 
             return user;
         }
-        public async Task Delete(int id)
+
+        public async Task<JNUser> Delete(int id)
         {
-            var user = await _context.JNUsers.FindAsync(id);
-
+            var user = await _context.JNUsers.FirstOrDefaultAsync(u => u.UserId == id);
             if (user == null)
-                throw new InvalidOperationException("User not found.");
-
-            // mnager må ikke slettes hvis han har medarbejdere
-            if ((int)user.Role == (int)UserRole.Manager)
             {
-                bool hasTeam = await _context.JNUsers.AnyAsync(u => u.ManagerId == id);
-                if (hasTeam)
-                    throw new InvalidOperationException("Cannot delete manager with employees assigned.");
+                throw new InvalidOperationException("User not found.");
             }
 
             _context.JNUsers.Remove(user);
             await _context.SaveChangesAsync();
+            return user;
         }
-        private static void ValidateRoleAndManager(UserRole role, int? managerId)
-        {
-            switch (role)
-            {
-                case UserRole.Admin:
-                case UserRole.Manager:
-                    if (managerId.HasValue)
-                        throw new InvalidOperationException("Admins/managers cannot have a manager.");
-                    break;
 
-                case UserRole.Employee:
-                    if (!managerId.HasValue)
-                        throw new InvalidOperationException("Employees must have a manager.");
-                    break;
-            }
+        public async Task<bool> CheckManagersTeam(int managerId)
+        {
+            return await _context.JNUsers.AnyAsync(u => u.ManagerId == managerId);
         }
     }
 }
