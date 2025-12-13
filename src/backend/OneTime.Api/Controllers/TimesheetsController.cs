@@ -14,11 +14,11 @@ namespace OneTime.Api.Controllers
     [ApiController]
     public class TimesheetsController : ControllerBase
     {
-        private readonly ITimesheetService _service;
+        private readonly ITimesheetService _timeSheetService;
 
         public TimesheetsController(ITimesheetService timesheetService)
         {
-            _service = timesheetService;
+            _timeSheetService = timesheetService;
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace OneTime.Api.Controllers
 
             try
             {
-                var review = await _service.CreateTimesheet(dto.UserId, dto.PeriodStart, dto.PeriodEnd);
+                var review = await _timeSheetService.CreateTimesheet(dto.UserId, dto.PeriodStart, dto.PeriodEnd);
 
                 var response = new TimesheetDto(
                     review.TimesheetId,
@@ -70,7 +70,7 @@ namespace OneTime.Api.Controllers
 
 			try
 			{
-				var sheet = await _service.UpdateTimeSheet(timesheetId, dto.Status, dto.Comment, dto.LeaderId);
+				var sheet = await _timeSheetService.UpdateTimeSheet(timesheetId, dto.Status, dto.Comment, dto.LeaderId);
 
 				var response = new TimesheetDto(
 					sheet.TimesheetId,
@@ -99,7 +99,7 @@ namespace OneTime.Api.Controllers
 		[ProducesResponseType(204)]
 		public async Task<IActionResult> GetTimeentriesForPendingTimesheet(int leaderId, [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
 		{
-			var entries = await _service.GetTimeentriesForPendingTimesheet(leaderId, startDate, endDate);
+			var entries = await _timeSheetService.GetTimeentriesForPendingTimesheet(leaderId, startDate, endDate);
 
 			if (!entries.Any())
 				return NoContent();

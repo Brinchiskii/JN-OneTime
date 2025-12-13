@@ -1,9 +1,20 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/AuthStore';
+import { type User } from '@/types'
+const AuthStore = useAuthStore()
+  const login = (role: string) => {
+    const user: User = {
+      userId: 1,
+      username: "a",
+      role,
+      token: "asdf"
+    }
+    AuthStore.login(user)
+  }
+</script>
 
 <template>
-  <div
-    class="container d-flex justify-content-center align-items-center vh-100"
-  >
+  <div class="container d-flex justify-content-center align-items-center vh-100">
     <div class="card select-role-card shadow">
       <div class="card-body text-center p-4">
         <h5 class="card-title">JN OneTime</h5>
@@ -13,6 +24,7 @@
             class="btn btn-outline-dark d-flex flex-column align-items-center py-4 px-5"
             to="/employee"
             aria-label="Employee dashboard"
+            @click="login('employee')"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -39,6 +51,7 @@
             class="btn btn-outline-dark d-flex flex-column align-items-center py-4 px-5"
             to="/manager"
             aria-label="Manager dashboard"
+            @click="login('manager')"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -67,6 +80,32 @@
             </svg>
             <span>Manager</span>
           </router-link>
+
+          <router-link
+            class="btn btn-outline-dark d-flex flex-column align-items-center py-4 px-5"
+            to="/admin"
+            aria-label="Admin dashboard"
+            @click="login('admin')"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-shield h-8 w-8"
+              aria-hidden="true"
+            >
+              <path
+                d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+              ></path>
+            </svg>
+            <span>Administrator</span>
+          </router-link>
         </div>
       </div>
     </div>
@@ -79,4 +118,3 @@
   width: 100%;
 }
 </style>
-

@@ -14,7 +14,8 @@ Accept: application/json
 	"projectId": 5,
 	"date": "2025-11-20",
 	"note": "Worked on API integration",
-	"hours": 4
+	"hours": 4,
+  "timesheetId": 1
 }
 
 ###
@@ -34,7 +35,7 @@ Accept: application/json
 
 {
   "leaderId": 4,
-  "status": 2,
+  "status": 0,
   "comment": "Looks good to me xD."
 }
 
@@ -93,3 +94,11 @@ Content-Type: application/json
 }
 ###
 DELETE http://localhost:5273/api/users/12
+
+### filtering logs afhængig af hvad man søger.. kan være efter entitytype, userid, dato osv.
+GET {{OneTime.Api_HostAddress}}/api/AuditLogs?entityType=TimeEntry
+Accept: application/json
+
+### henter alle logs ..
+GET {{OneTime.Api_HostAddress}}/api/AuditLogs/all
+Accept: application/json
