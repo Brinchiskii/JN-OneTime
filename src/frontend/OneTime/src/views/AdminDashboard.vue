@@ -77,7 +77,7 @@ const filteredLogs = computed(() => {
                     <td>{{ log.entityType }}</td>
                     <td>{{ log.entityId }}</td>
                     <td>{{ log.actorUserId }}</td>
-                    <td>{{ log.actorUsername }}</td>
+                    <td>{{ log.actorUserName }}</td>
                     <td>{{ log.details }}</td>
                 </tr>
                 </tbody>

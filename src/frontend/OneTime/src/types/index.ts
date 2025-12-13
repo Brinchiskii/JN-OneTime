@@ -64,6 +64,6 @@ export interface Log {
   entityType: string;
   entityId: number;
   actorUserId: number;
-  actorUsername: string;
+  actorUserName: string;
   details: string;
 }
