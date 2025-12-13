@@ -28,7 +28,6 @@ GET {{OneTime.Api_HostAddress}}/api/TimeSheets/leader/4/team?startDate=2025-11-0
 Accept: application/json
 ###
 
-###
 POST {{OneTime.Api_HostAddress}}/api/Timesheets/update/2
 Content-Type: application/json
 Accept: application/json
@@ -102,3 +101,33 @@ Accept: application/json
 ### henter alle logs ..
 GET {{OneTime.Api_HostAddress}}/api/AuditLogs/all
 Accept: application/json
+###
+
+POST {{OneTime.Api_HostAddress}}/api/auths/register
+Content-Type: application/json
+
+{
+  "name": "Employee Test",
+  "email": "Employee@jndata.dk",
+  "password": "!1234Test",
+  "role": 2,
+  "managerId": 13
+}
+###
+
+POST {{OneTime.Api_HostAddress}}/api/auths/login
+Content-Type: application/json
+
+{
+  "email": "manager@jndata.dk",
+  "password": "Test1234!"
+}
+###
+
+POST {{OneTime.Api_HostAddress}}/api/auths/login
+Content-Type: application/json
+
+{
+  "email": "Employee@jndata.dk",
+  "password": "!1234Test"
+}

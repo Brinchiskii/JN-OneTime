@@ -22,7 +22,12 @@ namespace OneTime.Core.Services.Repository
                 .ToListAsync();
         }
 
-        public async Task<JNUser> GetById(int id)
+		public async Task<JNUser?> GetByEmail(string email)
+		{
+			return await _context.JNUsers.FirstOrDefaultAsync(u => u.Email == email);
+		}
+
+		public async Task<JNUser> GetById(int id)
         {
             var user = await _context.JNUsers
                 .Include(u => u.Manager)
@@ -35,7 +40,7 @@ namespace OneTime.Core.Services.Repository
             return user;
         }
 
-        public async Task<JNUser> Create(string name, string email, string password ,UserRole role, int? managerId)
+        public async Task<JNUser> Create(string name, string email, string passwordHash, string passwordSalt ,UserRole role, int? managerId)
         {
 			if (await _context.JNUsers.AnyAsync(u => u.Email == email))
 				throw new InvalidOperationException("Email is already in use.");
@@ -48,9 +53,8 @@ namespace OneTime.Core.Services.Repository
 				Email = email,
 				Role = (int)role,
 				ManagerId = managerId,
-				// midlertidig løsning uden password hashing... vi hasher når vi implementerer login
-				PasswordHash = password,
-				PasswordSalt = string.Empty
+				PasswordHash = passwordHash,
+				PasswordSalt = passwordSalt
 			};
 
 			_context.JNUsers.Add(user);
