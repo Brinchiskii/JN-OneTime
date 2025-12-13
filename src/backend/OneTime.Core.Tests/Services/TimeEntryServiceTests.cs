@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using OneTime.Core.Data.Repository;
 using OneTime.Core.Models;
 using OneTime.Core.Services.Implementations;
 using OneTime.Core.Services.Repository;
@@ -23,7 +24,9 @@ namespace OneTime.Core.Tests.Services
             var context = OneTimeContextFactory.CreateInMemoryContext();
             var projectRepository = new ProjectRepository(context);
             var timeEntryRepository = new TimeEntryRepository(context);
-            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository, auditService);
 
             
             var timeEntry = new TimeEntry
@@ -50,7 +53,9 @@ namespace OneTime.Core.Tests.Services
             var context = OneTimeContextFactory.CreateInMemoryContext();
             var projectRepository = new ProjectRepository(context);
             var timeEntryRepository = new TimeEntryRepository(context);
-            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository, auditService);
 
             context.Projects.Add(new Project
             {
@@ -89,10 +94,11 @@ namespace OneTime.Core.Tests.Services
         {
             // Arrange
             var context = OneTimeContextFactory.CreateInMemoryContext();
-            
             var projectRepository = new ProjectRepository(context);
             var timeEntryRepository = new TimeEntryRepository(context);
-            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository, auditService);
 
             context.Projects.Add(new Project
             {
@@ -139,10 +145,11 @@ namespace OneTime.Core.Tests.Services
         {
             // Arrange
             var context = OneTimeContextFactory.CreateInMemoryContext();
-            
             var projectRepository = new ProjectRepository(context);
             var timeEntryRepository = new TimeEntryRepository(context);
-            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository, auditService);
 
             
             await Assert.ThrowsAsync<ArgumentNullException>(() => timeEntryService.CreateTimeEntry(null!));
@@ -153,10 +160,11 @@ namespace OneTime.Core.Tests.Services
         {
             // Arrange
             var context = OneTimeContextFactory.CreateInMemoryContext();
-            
             var projectRepository = new ProjectRepository(context);
             var timeEntryRepository = new TimeEntryRepository(context);
-            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository, auditService);
 
             context.Projects.Add(new Project
             {
@@ -188,10 +196,11 @@ namespace OneTime.Core.Tests.Services
         {
             // Arrange
             var context = OneTimeContextFactory.CreateInMemoryContext();
-            
             var projectRepository = new ProjectRepository(context);
             var timeEntryRepository = new TimeEntryRepository(context);
-            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository, auditService);
 
             const int invalidUserIdZero = 0;
             const int invalidUserIdNegative = -1;
@@ -210,7 +219,9 @@ namespace OneTime.Core.Tests.Services
             var context = OneTimeContextFactory.CreateInMemoryContext();
             var projectRepository = new ProjectRepository(context);
             var timeEntryRepository = new TimeEntryRepository(context);
-            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository, auditService);
 
             // Adds user to the db
             context.JNUsers.Add(new JNUser
@@ -257,7 +268,9 @@ namespace OneTime.Core.Tests.Services
             var context = OneTimeContextFactory.CreateInMemoryContext();
             var projectRepository = new ProjectRepository(context);
             var timeEntryRepository = new TimeEntryRepository(context);
-            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository, auditService);
             
             // Act + Assert
             var result = await timeEntryService.GetTimeEntriesByUserWithDetails(1);
@@ -271,7 +284,9 @@ namespace OneTime.Core.Tests.Services
             var context = OneTimeContextFactory.CreateInMemoryContext();
             var projectRepository = new ProjectRepository(context);
             var timeEntryRepository = new TimeEntryRepository(context);
-            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var timeEntryService = new TimeEntryService(timeEntryRepository, projectRepository, auditService);
             
             // Adds user to the db
             context.JNUsers.Add(new JNUser

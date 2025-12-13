@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using OneTime.Core.Services.Repository;
 using Microsoft.EntityFrameworkCore;
+using OneTime.Core.Data.Repository;
 using OneTime.Core.Models;
 using OneTime.Core.Models.Enums;
 using OneTime.Core.Services.Implementations;
@@ -20,9 +21,13 @@ namespace OneTime.Core.Tests.Services
             var periodEnd = new DateOnly(2025, 11, 30);
             
             var context = OneTimeContextFactory.CreateInMemoryContext();
-            
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
             var _timesheetRepo = new TimesheetRepository(context);
-            var _service = new TimesheetService(_timesheetRepo);
+            var _service = new TimesheetService(_timesheetRepo, auditService);
+            
+ 
+            
 
             context.Timesheets.Add(new Timesheet
             {
@@ -48,9 +53,10 @@ namespace OneTime.Core.Tests.Services
             var periodEnd = new DateOnly(2025, 12, 31);
 
             var context = OneTimeContextFactory.CreateInMemoryContext();
-
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
             var _timesheetRepo = new TimesheetRepository(context);
-            var _service = new TimesheetService(_timesheetRepo);
+            var _service = new TimesheetService(_timesheetRepo, auditService);
 
             // Act + Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -67,6 +73,10 @@ namespace OneTime.Core.Tests.Services
             var periodEnd = new DateOnly(2025, 10, 31);
 
             var context = OneTimeContextFactory.CreateInMemoryContext();
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var _timesheetRepo = new TimesheetRepository(context);
+            var _service = new TimesheetService(_timesheetRepo, auditService);
 
             context.TimeEntries.Add(new TimeEntry
             {
@@ -78,9 +88,6 @@ namespace OneTime.Core.Tests.Services
             });
 
             await context.SaveChangesAsync();
-
-            var _timesheetRepo = new TimesheetRepository(context);
-            var _service = new TimesheetService(_timesheetRepo);
 
             // Act
             var timesheet = await _service.CreateTimesheet(userId, periodStart, periodEnd);
@@ -100,13 +107,14 @@ namespace OneTime.Core.Tests.Services
             var periodEnd = new DateOnly(2025, 12, 7);
             
             var context = OneTimeContextFactory.CreateInMemoryContext();
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var _timesheetRepo = new TimesheetRepository(context);
+            var _service = new TimesheetService(_timesheetRepo, auditService);
             
-            var timesheetRepo = new TimesheetRepository(context);
-            var timesheetService = new TimesheetService(timesheetRepo);
-            
-            var ex1 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => timesheetService.GetTimeentriesForPendingTimesheet(0, periodStart, periodEnd));
+            var ex1 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _timesheetRepo.GetTimeentriesForPendingTimesheet(0, periodStart, periodEnd));
             Assert.Equal("Leader ID must be greater than zero.", ex1.ParamName);
-            var ex2 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => timesheetService.GetTimeentriesForPendingTimesheet(-1, periodStart, periodEnd));
+            var ex2 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _timesheetRepo.GetTimeentriesForPendingTimesheet(-1, periodStart, periodEnd));
             Assert.Equal("Leader ID must be greater than zero.", ex2.ParamName);
         }
 
@@ -114,11 +122,12 @@ namespace OneTime.Core.Tests.Services
         public async Task GetTimeentriesForPendingTimesheet_StartPeriod_Is_After_EndPeriod()
         {
             var context = OneTimeContextFactory.CreateInMemoryContext();
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var _timesheetRepo = new TimesheetRepository(context);
+            var _service = new TimesheetService(_timesheetRepo, auditService);
             
-            var timesheetRepository = new TimesheetRepository(context);
-            var timesheetService = new TimesheetService(timesheetRepository);
-            
-            var ex = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => timesheetService.GetTimeentriesForPendingTimesheet(1, new DateOnly(2025, 12, 10), new DateOnly(2025, 12, 7)));
+            var ex = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.GetTimeentriesForPendingTimesheet(1, new DateOnly(2025, 12, 10), new DateOnly(2025, 12, 7)));
             Assert.Equal("Start date must be before or equal to end date.", ex.ParamName);
         }
         
@@ -181,10 +190,12 @@ namespace OneTime.Core.Tests.Services
 
             
             // Act + Assert
-            var timesheetRepository = new TimesheetRepository(context);
-            var timesheetService = new TimesheetService(timesheetRepository);
+            var auditRepository = new AuditLogRepository(context);
+            var auditService = new AuditLogService(auditRepository);
+            var _timesheetRepo = new TimesheetRepository(context);
+            var _service = new TimesheetService(_timesheetRepo, auditService);
 
-            var entries = await timesheetService.GetTimeentriesForPendingTimesheet(
+            var entries = await _service.GetTimeentriesForPendingTimesheet(
                 leaderId: 1,
                 start: new DateOnly(2025, 12, 1),
                 end: new DateOnly(2025, 12, 31));
