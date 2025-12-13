@@ -1,3 +1,16 @@
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/AuthStore';
+const AuthStore = useAuthStore()
+
+const Role = AuthStore.userRole
+
+const menuItems = [
+]
+
+
+
+</script>
+
 <template>
   <div class="sidebar d-flex flex-column p-4 d-none d-lg-block">
     <a href="#" class="d-flex align-items-center mb-5 text-decoration-none">
