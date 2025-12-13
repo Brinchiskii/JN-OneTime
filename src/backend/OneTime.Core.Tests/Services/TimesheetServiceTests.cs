@@ -59,7 +59,7 @@ namespace OneTime.Core.Tests.Services
             var _service = new TimesheetService(_timesheetRepo, auditService);
 
             // Act + Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
                 _service.CreateTimesheet(userId, periodStart, periodEnd));
 
         }
@@ -112,9 +112,9 @@ namespace OneTime.Core.Tests.Services
             var _timesheetRepo = new TimesheetRepository(context);
             var _service = new TimesheetService(_timesheetRepo, auditService);
             
-            var ex1 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _timesheetRepo.GetTimeentriesForPendingTimesheet(0, periodStart, periodEnd));
+            var ex1 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.GetTimeentriesForPendingTimesheet(0, periodStart, periodEnd));
             Assert.Equal("Leader ID must be greater than zero.", ex1.ParamName);
-            var ex2 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _timesheetRepo.GetTimeentriesForPendingTimesheet(-1, periodStart, periodEnd));
+            var ex2 = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.GetTimeentriesForPendingTimesheet(-1, periodStart, periodEnd));
             Assert.Equal("Leader ID must be greater than zero.", ex2.ParamName);
         }
 

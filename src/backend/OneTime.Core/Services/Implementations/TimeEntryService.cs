@@ -26,13 +26,12 @@ public class TimeEntryService : ITimeEntryService
 		var project = await _projectRepository.GetById(timeEntry.ProjectId);
 		if (project == null)
 		{
-			throw new ArgumentNullException(nameof(timeEntry.ProjectId), "Project not found");
+			throw new ArgumentNullException("Project not found");
 		}
 
 		if (timeEntry.Hours <= 0 || timeEntry.Hours > 24)
 		{
-			throw new ArgumentOutOfRangeException(nameof(timeEntry.Hours),
-				"Hours must be greater than zero and less than 24");
+			throw new ArgumentOutOfRangeException("Hours must be greater than zero and less than 24");
 		}
 		  
 		var created = await _timeEntryRepository.Add(timeEntry);
@@ -51,7 +50,7 @@ public class TimeEntryService : ITimeEntryService
 	{
 		if (userId <= 0)
 		{
-			throw new ArgumentException("UserId must be greater than zero", nameof(userId));
+			throw new ArgumentException("UserId must be greater than zero");
 		}
 
 		var entries = await _timeEntryRepository.GetByUserWithDetails(userId);
