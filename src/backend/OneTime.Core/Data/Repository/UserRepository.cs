@@ -22,11 +22,6 @@ namespace OneTime.Core.Services.Repository
                 .ToListAsync();
         }
 
-		public async Task<JNUser?> GetByEmail(string email)
-		{
-			return await _context.JNUsers.FirstOrDefaultAsync(u => u.Email == email);
-		}
-
 		public async Task<JNUser> GetById(int id)
         {
             var user = await _context.JNUsers
@@ -36,8 +31,6 @@ namespace OneTime.Core.Services.Repository
             
             return user;
         }
-
-        public async Task<JNUser> Create(string name, string email, string passwordHash, string passwordSalt ,UserRole role, int? managerId)
         
         public async Task<JNUser> GetByEmail(string email)
         {
@@ -45,18 +38,6 @@ namespace OneTime.Core.Services.Repository
             var normalized = email.ToLower();
             return await _context.JNUsers.FirstOrDefaultAsync(u => u.Email.ToLower() == normalized);
         }
-
-			ValidateRoleAndManager(role, managerId);
-
-			var user = new JNUser
-			{
-				Name = name,
-				Email = email,
-				Role = (int)role,
-				ManagerId = managerId,
-				PasswordHash = passwordHash,
-				PasswordSalt = passwordSalt
-			};
 
         public async Task<JNUser> Create(JNUser user)
         {

@@ -14,7 +14,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
 
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
 
         context.JNUsers.Add(new JNUser
         {
@@ -51,7 +52,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
 
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         var users = await userService.GetAllUsers();
         
@@ -64,7 +66,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => userService.GetUserById(0));
         Assert.Equal("UserId must be greater than zero", ex.Message);
@@ -76,7 +79,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => userService.GetUserById(-1));
         Assert.Equal("UserId must be greater than zero", ex.Message);
@@ -88,7 +92,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.GetUserById(1));
         Assert.Equal("User not found.", ex.Message);
@@ -100,7 +105,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         context.JNUsers.Add(new JNUser
         {
@@ -146,19 +152,22 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         string name = "Test User";
         string email = "test@test.com";
+        string password = "x";
         UserRole role = UserRole.Employee;
         int? managerId = 1;
         
-        var userCreated = await userService.Create(name, email, role, managerId);
+        var userCreated = await userService.Create(name, email, password, role, managerId);
         
         Assert.NotNull(userCreated);
         Assert.NotEqual(0, userCreated.UserId);
         Assert.Equal(userCreated.Name, name);
         Assert.Equal(userCreated.Email, email);
+        Assert.NotEqual(userCreated.PasswordHash, password);
         Assert.Equal(userCreated.Role, (int)role);
         Assert.Equal(userCreated.ManagerId, managerId);
     }
@@ -169,7 +178,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         // Adds user to the db
         context.JNUsers.Add(new JNUser
@@ -188,10 +198,11 @@ public class UserServiceTests
         // New user with same email
         string name = "Test User2";
         string email = "test@test.com";
+        string password = "x";
         UserRole role = UserRole.Employee;
         int? managerId = 1;
         
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.Create(name, email, role, managerId));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.Create(name, email, password, role, managerId));
         Assert.Equal("Email is already in use.", ex.Message);
     }
 
@@ -201,9 +212,10 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.Update(1, new JNUser()));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.Update(1, "Test User", "test@test.com", UserRole.Employee, 13 ));
         Assert.Equal("User not found.", ex.Message);
     }
 
@@ -213,7 +225,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         // Adds user to the db
         context.JNUsers.Add(new JNUser
@@ -229,9 +242,9 @@ public class UserServiceTests
         
         await context.SaveChangesAsync();
         
-        var user = new JNUser { UserId = 1, Name = "Test User Updated", Email = "test@test.com"};
+        var user = new JNUser { UserId = 1, Name = "Test User Updated", Email = "test@test.com", PasswordHash = "TestHash", PasswordSalt = "TestSalt", Role = 2, ManagerId = 1};
         
-        var userUpdated = await userService.Update(1, user);
+        var userUpdated = await userService.Update(user.UserId, user.Name, user.Email, (UserRole)user.Role, user.ManagerId);
         
         Assert.NotNull(userUpdated);
         Assert.Equal(1, userUpdated.UserId);
@@ -244,7 +257,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.Delete(1));
         Assert.Equal("User not found.", ex.Message);
@@ -256,7 +270,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         // Adds user to the db
         context.JNUsers.Add(new JNUser
@@ -283,7 +298,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         // Adds user to the db
         context.JNUsers.Add(new JNUser
@@ -320,7 +336,8 @@ public class UserServiceTests
         var context = OneTimeContextFactory.CreateInMemoryContext();
         
         var userRepository = new UserRepository(context);
-        var userService = new UserService(userRepository);
+        var passwordHasher = new PasswordHasher();
+        var userService = new UserService(userRepository, passwordHasher);
         
         // Adds user to the db
         context.JNUsers.Add(new JNUser

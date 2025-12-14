@@ -65,7 +65,7 @@ public class TimeEntriesControllerTests
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
         var msg = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Projekt not found", msg);
+        Assert.Contains("Project not found", msg);
     }
 
     [Fact]

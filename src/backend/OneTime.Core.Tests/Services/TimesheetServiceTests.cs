@@ -49,8 +49,8 @@ namespace OneTime.Core.Tests.Services
         {
             // Arrange
             var userId = 1;
-            var periodStart = new DateOnly(2025, 12, 1);
-            var periodEnd = new DateOnly(2025, 12, 31);
+            var periodStart = new DateOnly(2025, 12, 31);
+            var periodEnd = new DateOnly(2025, 12, 30);
 
             var context = OneTimeContextFactory.CreateInMemoryContext();
             var auditRepository = new AuditLogRepository(context);

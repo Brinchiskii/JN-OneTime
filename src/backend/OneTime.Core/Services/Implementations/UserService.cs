@@ -7,18 +7,20 @@ namespace OneTime.Core.Services.Implementations;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
+        _passwordHasher = passwordHasher;
     }
     
     public async Task<IEnumerable<JNUser>> GetAllUsers()
     {
         var users = await _userRepository.GetAll();
 
-        // Return empty array if no users were found
-        if (users == null)
+        // Return an empty array if no users were found
+        if (!users.Any())
         {
             return [];
         }
@@ -39,65 +41,28 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<JNUser> Create(JNUser user)
+    public async Task<JNUser> Create(string name, string email, string password, UserRole role, int? managerId)
     {
-        // Validate role/manager invariants as well for this overload
-        ValidateRoleAndManager((UserRole)user.Role, user.ManagerId);
-
-        var existingUser = await _userRepository.GetByEmail(user.Email);
-
-        if (existingUser != null)
-        {
-            throw new InvalidOperationException("Email is already in use.");
-        }
-
-        return await _userRepository.Create(user);
-    }
-
-    public async Task<JNUser> Create(string name, string email, UserRole role, int? managerId)
-    {
-        //ValidateRoleAndManager(role, managerId);
+       ValidateRoleAndManager(role, managerId);
 
         var existing = await _userRepository.GetByEmail(email);
         if (existing != null)
             throw new InvalidOperationException("Email is already in use.");
         
+        var (hash, generatedSalt) = _passwordHasher.HashPassword(password);
+
+        
         var user = new JNUser
         {
             Name = name,
             Email = email,
-            PasswordHash = "",
-            PasswordSalt = "",
+            PasswordHash = hash,
+            PasswordSalt = generatedSalt,
             Role = (int)role,
             ManagerId = managerId
         };
 
         return await _userRepository.Create(user);
-    }
-
-    public async Task<JNUser> Update(int id, JNUser user)
-    {
-        // Checking if a user exists
-        var existingUserById = await _userRepository.GetById(id);
-
-        if (existingUserById == null)
-            throw new InvalidOperationException("User not found.");
-
-        // Checking if email is already in use
-        var existingUserByEmail = await _userRepository.GetByEmail(user.Email);
-
-        if (existingUserByEmail != null && existingUserByEmail.UserId != id)
-        {
-            throw new InvalidOperationException("Email is already in use.");
-        }
-
-        // Validate role/manager invariants
-        ValidateRoleAndManager((UserRole)user.Role, user.ManagerId);
-
-        // Updating user
-        var updatedUser = await _userRepository.Update(existingUserById, user.Name, user.Email, (UserRole)user.Role, user.ManagerId);
-
-        return updatedUser;
     }
 
     public async Task<JNUser> Update(int id, string name, string email, UserRole role, int? managerId)

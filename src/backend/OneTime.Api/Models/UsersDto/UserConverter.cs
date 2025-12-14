@@ -9,6 +9,7 @@ namespace OneTime.Api.Models.UsersDto
 				user.UserId,
 				user.Name,
 				user.Email,
+				user.PasswordHash,
 				(int)user.Role, 
 				user.ManagerId
 			);

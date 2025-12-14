@@ -24,22 +24,6 @@ namespace OneTime.Core.Services.Implementations
 			_config = config;
 		}
 
-		public async Task<JNUser> Register(string name, string email, string password ,UserRole role, int? managerId)
-		{
-			var existing = await _usersRepository.GetByEmail(email);
-			if (existing != null)
-				throw new InvalidOperationException("Email is already in use.");
-
-			if (role == UserRole.Employee && !managerId.HasValue)
-				throw new InvalidOperationException("Employees must have a manager.");
-			if (role != UserRole.Employee && managerId.HasValue)
-				throw new InvalidOperationException("Only employees can have a manager.");
-
-			var (hash, generatedSalt) = _hasherRepository.HashPassword(password);
-
-			return await _usersRepository.Create(name, email, hash, generatedSalt, role, managerId);
-		}
-
 		public async Task<(JNUser User, string Token)> Login(string email, string password)
 		{
 			var user = await _usersRepository.GetByEmail(email);
