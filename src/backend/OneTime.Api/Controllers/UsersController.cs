@@ -10,11 +10,11 @@ namespace OneTime.Api.Controllers
 	[ApiController]
 	public class UsersController : ControllerBase
 	{
-		private readonly IUserRepository _userRepo;
+    	private readonly IUserService _userService;
 
-		public UsersController(IUserRepository userRepo)
+		public UsersController(IUserService userService)
 		{
-			_userRepo = userRepo;
+			_userService = userService;
 		}
 
 
@@ -23,7 +23,7 @@ namespace OneTime.Api.Controllers
 		[ProducesResponseType(204)]
 		public async Task<IActionResult> GetAll()
 		{
-			var users = await _userRepo.GetAll();
+			var users = await _userService.GetAllUsers();
 
 			if (!users.Any())
 				return NoContent();
@@ -42,7 +42,7 @@ namespace OneTime.Api.Controllers
 		{
 			try
 			{
-				var user = await _userRepo.GetById(id);
+				var user = await _userService.GetUserById(id);
 				var response = UserConverter.ToDto(user);
 				return Ok(response);
 			}
@@ -52,40 +52,39 @@ namespace OneTime.Api.Controllers
 			}
 		}
 
-		[HttpPost]
-		[ProducesResponseType(201)]
-		[ProducesResponseType(400)]
-		public async Task<IActionResult> Create([FromBody] UserCreateDto dto)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
+		//[HttpPost]
+		//[ProducesResponseType(201)]
+		//[ProducesResponseType(400)]
+		//public async Task<IActionResult> Create([FromBody] UserCreateDto dto)
+		//{
+		//	if (!ModelState.IsValid)
+		//		return BadRequest(ModelState);
 
-			try
-			{
-				if (!Enum.IsDefined(typeof(UserRole), dto.Role))
-					return BadRequest("Invalid role value.");
+		//	try
+		//	{
+		//		if (!Enum.IsDefined(typeof(UserRole), dto.Role))
+		//			return BadRequest("Invalid role value.");
 
-				var roleEnum = (UserRole)dto.Role;
+		//		var roleEnum = (UserRole)dto.Role;
 
-				var user = await _userRepo.Create(
-					dto.Name,
-					dto.Email,
-					dto.Password,
-					roleEnum,
-					dto.ManagerId
-				);
+				var user = await _userService.Create(
+                    dto.Name,
+                    dto.Email,
+                    roleEnum,
+                    dto.ManagerId
+                );
 
-				var response = UserConverter.ToDto(user);
+		//		var response = UserConverter.ToDto(user);
 
-				return CreatedAtAction(nameof(GetById),
-					new { id = response.UserId },
-					response);
-			}
-			catch (InvalidOperationException ex)
-			{
-				return BadRequest(ex.Message);
-			}
-		}
+		//		return CreatedAtAction(nameof(GetById),
+		//			new { id = response.UserId },
+		//			response);
+		//	}
+		//	catch (InvalidOperationException ex)
+		//	{
+		//		return BadRequest(ex.Message);
+		//	}
+		//}
 
 		[HttpPut("{id:int}")]
 		[ProducesResponseType(200)]
@@ -103,13 +102,13 @@ namespace OneTime.Api.Controllers
 
 				var roleEnum = (UserRole)dto.Role;
 
-				var user = await _userRepo.Update(
-					id,
-					dto.Name,
-					dto.Email,
-					roleEnum,
-					dto.ManagerId
-				);
+				var user = await _userService.Update(
+                    id,
+                    dto.Name,
+                    dto.Email,
+                    roleEnum,
+                    dto.ManagerId
+                );
 
 				var response = UserConverter.ToDto(user);
 
@@ -132,7 +131,7 @@ namespace OneTime.Api.Controllers
 		{
 			try
 			{
-				await _userRepo.Delete(id);
+				await _userService.Delete(id);
 
 				return Ok(new
 				{
@@ -147,6 +146,5 @@ namespace OneTime.Api.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
-
 	}
 }
