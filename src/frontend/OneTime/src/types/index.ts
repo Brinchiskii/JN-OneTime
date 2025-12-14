@@ -52,11 +52,19 @@ export interface TimesheetPayload {
 
 export interface User {
   userId: number
-  username: string
-  role: string
-  token: string
+  name: string
+  email: string
+  role: number
+  managerId: number
 }
 
+export interface UserPayload{
+  name: string
+  email: string
+  password: string | null
+  role: number
+  managerId: number | null
+}
 export interface Log {
   auditLogId: number;
   timestamp: string;

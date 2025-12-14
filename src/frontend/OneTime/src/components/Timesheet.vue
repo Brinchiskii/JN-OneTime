@@ -120,21 +120,6 @@ const grandTotal = computed(() =>
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.custom-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.custom-table thead th {
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #6b7280;
-  font-weight: 600;
-  padding: 16px 8px;
-}
-
 .project-row td {
   padding: 10px 5px;
   border-bottom: 1px solid #f3f4f6;

@@ -2,38 +2,35 @@
 import { useAuthStore } from '@/stores/AuthStore';
 const AuthStore = useAuthStore()
 
-const Role = AuthStore.userRole
+const role = AuthStore.userRole
 
 const menuItems = [
+  
 ]
-
-
 
 </script>
 
 <template>
   <div class="sidebar d-flex flex-column p-4 d-none d-lg-block">
-    <a href="#" class="d-flex align-items-center mb-5 text-decoration-none">
+    <router-link to="/admin" class="d-flex align-items-center mb-5 text-decoration-none">
       <div
         class="rounded-3 text-white d-flex align-items-center justify-content-center me-2"
         style="width: 40px; height: 40px; background-color: var(--primary-color)"
       >
         <i class="bi bi-building-fill fs-5"></i>
       </div>
-      <span class="fs-4 fw-bold text-dark" style="letter-spacing: -0.5px">TimeSync</span>
-    </a>
+      <span class="fs-4 fw-bold text-dark" style="letter-spacing: -0.5px">JN-Onetime</span>
+    </router-link>
 
-    <ul class="nav nav-pills flex-column mb-auto gap-1">
-      <li class="nav-item">
-        <a href="#" class="nav-link"> <i class="bi bi-speedometer2"></i> Dashboard </a>
-      </li>
-      <li>
-        <a href="#" class="nav-link active"> <i class="bi bi-people-fill"></i> Medarbejdere </a>
-      </li>
-      <li>
-        <a href="#" class="nav-link"> <i class="bi bi-file-earmark-text"></i> Rapporter </a>
-      </li>
-    </ul>
+    <template v-if="role === 0" class="nav nav-pills flex-column mb-auto gap-1">
+        <router-link to="/admin" class="nav-link" exact-active-class="active"> <i class="bi bi-speedometer2"></i> Dashboard </router-link>
+        <router-link to="/admin/users" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Medarbejdere </router-link>
+        <router-link to="/admin/logs" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Logs </router-link>
+    </template>
+
+    <template v-if="role === 1" class="nav nav-pills flex-column mb-auto gap-1">
+      manager
+    </template>
 
     <div class="mt-auto pt-4 border-top">
       <div class="d-flex align-items-center gap-3">

@@ -2,12 +2,13 @@
 import { useAuthStore } from '@/stores/AuthStore';
 import { type User } from '@/types'
 const AuthStore = useAuthStore()
-  const login = (role: string) => {
+  const login = (role: number) => {
     const user: User = {
       userId: 1,
-      username: "a",
+      name: "a",
       role,
-      token: "asdf"
+      email: "asdf",
+      managerId: 2
     }
     AuthStore.login(user)
   }
@@ -24,7 +25,7 @@ const AuthStore = useAuthStore()
             class="btn btn-outline-dark d-flex flex-column align-items-center py-4 px-5"
             to="/employee"
             aria-label="Employee dashboard"
-            @click="login('employee')"
+            @click="login(2)"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +52,7 @@ const AuthStore = useAuthStore()
             class="btn btn-outline-dark d-flex flex-column align-items-center py-4 px-5"
             to="/manager"
             aria-label="Manager dashboard"
-            @click="login('manager')"
+            @click="login(1)"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -85,7 +86,7 @@ const AuthStore = useAuthStore()
             class="btn btn-outline-dark d-flex flex-column align-items-center py-4 px-5"
             to="/admin"
             aria-label="Admin dashboard"
-            @click="login('admin')"
+            @click="login(0)"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

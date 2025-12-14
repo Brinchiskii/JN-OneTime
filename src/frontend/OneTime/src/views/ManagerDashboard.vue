@@ -5,6 +5,7 @@ import { useTimesheetStore } from '../stores/timesheetStore'
 import type { TimesheetRow } from '@/types'
 import ManagerTeamCard from '@/components/ManagerTeamCard.vue'
 import DatePicker from '@/components/DatePicker.vue' 
+import Sidebar from '@/components/Sidebar.vue'
 
 const timesheetStore = useTimesheetStore()
 
@@ -15,6 +16,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <Sidebar></Sidebar>
   <div class="flex-grow-1 p-4 p-lg-5 overflow-auto">
     <h5 class="my-1">{{ timesheetStore.weekHeader }}</h5>
     <DatePicker @change="timesheetStore.loadTeamRows" @click="timesheetStore.loadTeamRows"></DatePicker>

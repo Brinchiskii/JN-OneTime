@@ -1,4 +1,3 @@
-// src/stores/projectStore.ts
 import { defineStore } from 'pinia'
 import projectsService from '../api/projectsService'
 import { ref } from 'vue'
