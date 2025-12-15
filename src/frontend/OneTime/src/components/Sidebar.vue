@@ -4,15 +4,15 @@ const AuthStore = useAuthStore()
 
 const role = AuthStore.userRole
 
-const menuItems = [
-  
-]
+const logout = () => {
+  AuthStore.logout()
+}
 
 </script>
 
 <template>
   <div class="sidebar d-flex flex-column p-4 d-none d-lg-block">
-    <router-link to="/admin" class="d-flex align-items-center mb-5 text-decoration-none">
+    <router-link to="/" class="d-flex align-items-center mb-5 text-decoration-none">
       <div
         class="rounded-3 text-white d-flex align-items-center justify-content-center me-2"
         style="width: 40px; height: 40px; background-color: var(--primary-color)"
@@ -29,23 +29,31 @@ const menuItems = [
     </template>
 
     <template v-if="role === 1" class="nav nav-pills flex-column mb-auto gap-1">
-      manager
+      <router-link to="/manager" class="nav-link" exact-active-class="active"> <i class="bi bi-speedometer2"></i> Home </router-link>
+      <!-- <router-link to="/manager" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Medarbejdere </router-link>
+      <router-link to="/manager" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Logs </router-link> -->
+    </template>
+
+    <template v-if="role === 2" class="nav nav-pills flex-column mb-auto gap-1">
+      <router-link to="/employee" class="nav-link" exact-active-class="active"> <i class="bi bi-speedometer2"></i> Home </router-link>
+      <!-- <router-link to="/employee" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Medarbejdere </router-link>
+      <router-link to="/employee" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Logs </router-link> -->
     </template>
 
     <div class="mt-auto pt-4 border-top">
       <div class="d-flex align-items-center gap-3">
-        <div class="avatar bg-secondary">L</div>
+        <div class="avatar bg-secondary">{{ AuthStore.user?.name.charAt(0)}}</div>
         <div style="line-height: 1.2">
-          <div class="fw-bold text-dark">Lars</div>
-          <small class="text-muted">Manager</small>
+          <div class="fw-bold text-dark">{{ AuthStore.user?.name }}</div>
+          <small class="text-muted">{{ AuthStore.roleText }}</small>
         </div>
       </div>
     </div>
-    <router-link
+    <button
       class="btn btn-outline-danger mt-4"
-      to="/login"
       aria-label="Logout"
-    >Log ud</router-link>
+      @click="logout"
+    >Log ud</button>
   </div>
 </template>
 

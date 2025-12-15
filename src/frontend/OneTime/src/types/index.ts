@@ -58,13 +58,22 @@ export interface User {
   managerId: number
 }
 
-export interface UserPayload{
+export interface UserPayload {
   name: string
   email: string
   password: string | null
   role: number
   managerId: number | null
 }
+
+export interface UserLogin {
+  token: string
+  userId: number
+  name: string
+  email: string
+  role: number
+}
+
 export interface Log {
   auditLogId: number;
   timestamp: string;
@@ -75,3 +84,4 @@ export interface Log {
   actorUserName: string;
   details: string;
 }
+

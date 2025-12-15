@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/AuthStore';
+import { useAuthStore } from '@/stores/AuthStore'
 import { type User } from '@/types'
-const AuthStore = useAuthStore()
-  const login = (role: number) => {
-    const user: User = {
-      userId: 1,
-      name: "a",
-      role,
-      email: "asdf",
-      managerId: 2
-    }
-    AuthStore.login(user)
-  }
+
+const emit = defineEmits(['select-role']);
+const selectRole = (role: string) => {
+  emit('select-role', role)
+}
 </script>
 
 <template>
@@ -21,11 +15,10 @@ const AuthStore = useAuthStore()
         <h5 class="card-title">JN OneTime</h5>
         <p class="mb-4">Select your role to continue</p>
         <div class="d-grid gap-3 mx-auto mt-4">
-          <router-link
+          <button
             class="btn btn-outline-dark d-flex flex-column align-items-center py-4 px-5"
-            to="/employee"
             aria-label="Employee dashboard"
-            @click="login(2)"
+            @click="selectRole('employee')"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -46,13 +39,12 @@ const AuthStore = useAuthStore()
               <circle cx="9" cy="7" r="4"></circle>
             </svg>
             <span>Employee</span>
-          </router-link>
+          </button>
 
-          <router-link
+          <button
             class="btn btn-outline-dark d-flex flex-column align-items-center py-4 px-5"
-            to="/manager"
             aria-label="Manager dashboard"
-            @click="login(1)"
+            @click="selectRole('manager')"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -80,13 +72,12 @@ const AuthStore = useAuthStore()
               <circle cx="9" cy="7" r="4"></circle>
             </svg>
             <span>Manager</span>
-          </router-link>
+          </button>
 
-          <router-link
+          <button
             class="btn btn-outline-dark d-flex flex-column align-items-center py-4 px-5"
-            to="/admin"
             aria-label="Admin dashboard"
-            @click="login(0)"
+            @click="selectRole('admin')"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +97,7 @@ const AuthStore = useAuthStore()
               ></path>
             </svg>
             <span>Administrator</span>
-          </router-link>
+          </button>
         </div>
       </div>
     </div>
