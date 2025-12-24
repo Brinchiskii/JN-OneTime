@@ -28,9 +28,7 @@ namespace OneTime.Api.Controllers
 			if (!users.Any())
 				return NoContent();
 
-			var response = users
-				.Select(UserConverter.ToDto)
-				.ToList();
+			var response = users.Select(UserConverter.ToDto).ToList();
 
 			return Ok(response);
 		}
