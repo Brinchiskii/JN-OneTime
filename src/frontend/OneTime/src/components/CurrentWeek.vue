@@ -18,6 +18,7 @@ const handleSubmit = async () => {
     alert('Timesheet indsendt succesfuldt!')
   } catch (error) {
     console.error('Fejl under indsendelse:', error)
+    alert('Der opstod en fejl under indsendelse. Prøv igen.')
   } finally {
     isSubmitting.value = false
   }
