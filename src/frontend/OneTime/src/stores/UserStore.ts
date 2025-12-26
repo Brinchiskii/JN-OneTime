@@ -12,6 +12,11 @@ export const useUserStore = defineStore('user', () => {
     users.value = res.data
   }
 
+  const getNameById = (id: number) => {
+    const user = users.value.find(u => u.userId === id)
+    return user ? user.name : 'Ingen leder'
+  }
+
   const createUser = (user: UserPayload) => {
     return userService.createUser(user);
   }
@@ -24,5 +29,5 @@ export const useUserStore = defineStore('user', () => {
     return userService.updateUser(id, payload)
   }
 
-  return { users, fetchUsers, createUser, deleteUserById, updateUser }
+  return { users, fetchUsers, createUser, deleteUserById, updateUser, getNameById }
 })

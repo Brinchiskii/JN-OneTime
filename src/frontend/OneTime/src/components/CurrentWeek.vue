@@ -15,6 +15,7 @@ const handleSubmit = async () => {
 
   try {
     await timesheetStore.submitTimesheet()
+    alert('Timesheet indsendt succesfuldt!')
   } catch (error) {
     console.error('Fejl under indsendelse:', error)
   } finally {

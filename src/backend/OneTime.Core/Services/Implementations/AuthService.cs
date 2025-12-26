@@ -48,7 +48,7 @@ namespace OneTime.Core.Services.Implementations
 			new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
 			new Claim(ClaimTypes.Name, user.Name),
 			new Claim(ClaimTypes.Email, user.Email),
-			new Claim(ClaimTypes.Role, ((UserRole)user.Role).ToString())
+			new Claim(ClaimTypes.Role, user.Role.ToString())
 			};
 
 			var token = new JwtSecurityToken(

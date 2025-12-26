@@ -4,9 +4,12 @@ import { onMounted, computed, ref } from 'vue'
 import { type Log } from '@/types'
 
 const AuditlogsStore = useAuditLogsStore()
+const loading = ref(false)
 
 onMounted(async () => {
+  loading.value = true
   await AuditlogsStore.getLogs()
+  loading.value = false
 })
 
 const startDate = ref()
@@ -50,7 +53,6 @@ const filteredLogs = computed(() => {
       <i class="bi bi-calendar3"></i>
       <input type="date" class="date-input-hidden" @change="changeEndDate" />
     </div>
-
     <div class="card-body">
       <table class="custom-table">
         <thead>
@@ -66,6 +68,10 @@ const filteredLogs = computed(() => {
           </tr>
         </thead>
         <tbody>
+          <div v-if="loading">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            <span>Indlæser logfiler...</span>
+          </div>
           <tr v-for="log in filteredLogs">
             <td>{{ log.auditLogId }}</td>
             <td>{{ log.timestamp }}</td>

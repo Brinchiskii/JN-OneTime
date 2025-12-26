@@ -25,6 +25,7 @@ const userSelected = ref<User>()
 const showCreateModal = ref(false)
 const showDeleteModal = ref(false)
 const showUpdateModal = ref(false)
+const loading = ref(false)
 
 const openCreateModal = () => {
     showCreateModal.value = true
@@ -33,12 +34,17 @@ const openCreateModal = () => {
 
 const createUser = async () => {
   try {
+    loading.value = true
     await userStore.createUser(newUser.value)
     showCreateModal.value = false
     userStore.fetchUsers()
-  } catch (error) {}
-  finally{
     alert(newUser.value.name + " er nu blevet tilføjet")
+  } catch (error) {
+    console.error('Fejl under oprettelse:', error)
+    alert('Der opstod en fejl under oprettelse af brugeren. Prøv igen.')
+  }
+  finally{
+    loading.value = false
   }
 }
 
@@ -131,7 +137,7 @@ onMounted(() => {
             <th>Bruger</th>
             <th>Email</th>
             <th>Rolle</th>
-            <th>Leder Id</th>
+            <th>Leder</th>
             <th class="text-end">Handlinger</th>
           </tr>
         </thead>
@@ -154,7 +160,7 @@ onMounted(() => {
                 {{ roleText(user.role) }}
               </span>
             </td>
-            <td class="text-muted small">{{ user.managerId }}</td>
+            <td class="text-muted small">{{ userStore.getNameById(user.managerId) }}</td>
             <td class="text-end">
               <button class="btn btn-light btn-sm me-1 text-muted" @click="chooseUpdate(user.userId)">
                 <i class="bi bi-pencil"></i>
@@ -209,7 +215,7 @@ onMounted(() => {
               <option :value="0">Admin</option>
             </select>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6" :hidden="newUser.role != 2">
             <label class="form-label">Manager id</label>
             <input type="number" class="form-control" v-model="newUser.managerId" />
           </div>
@@ -218,7 +224,10 @@ onMounted(() => {
 
       <div class="modal-footer">
         <button class="btn btn-light border" @click="showCreateModal = false">Annuller</button>
-        <button type="submit" class="btn btn-primary-admin">Opret Bruger</button>
+        <button type="submit" class="btn btn-primary-admin" :disabled="loading">
+          <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ loading ? 'Opretter bruger...' : 'Opret Bruger' }}
+        </button>
       </div>
     </form>
   </div>
