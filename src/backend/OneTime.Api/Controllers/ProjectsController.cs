@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OneTime.Core.Services.Interfaces;
+using OneTime.Api.Models.ProjectsDto;
 using OneTime.Core.Models;
+using OneTime.Core.Models.Enums;
+using OneTime.Core.Services.Interfaces;
 
 namespace OneTime.Api.Controllers
 {
@@ -29,10 +31,95 @@ namespace OneTime.Api.Controllers
 		{
 			var projects = await _projectRepo.GetAll();
 
+
 			if (!projects.Any())
 				return NoContent();
 
 			return Ok(projects);
+		}
+
+		[HttpPost]
+		[ProducesResponseType(201)]
+		[ProducesResponseType(400)]
+		public async Task<IActionResult> Create([FromBody] ProjectCreateDto dto)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			try
+			{
+				if (!Enum.IsDefined(typeof(ProjectStatus), dto.Status))
+					return BadRequest("Invalid project status.");
+
+				var entity = new Project
+				{
+					Name = dto.Name,
+					Status = dto.Status
+				};
+
+				var created = await _projectRepo.Add(entity);
+
+				return CreatedAtAction(nameof(GetById), new { id = created.ProjectId }, created);
+			}
+			catch (InvalidOperationException ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
+
+		[HttpDelete("{id:int}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                await _projectRepo.Delete(id);
+				return Ok(new
+				{
+					Message = $"Project with ID {id} was successfully deleted."
+				});
+			}
+            catch (InvalidOperationException ex)
+            {
+                if (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                    return NotFound(ex.Message);
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+		[HttpPut("{id:int}")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(404)]
+		public async Task<IActionResult> Update(int id, [FromBody] ProjectUpdateDto dto)
+		{
+			if (!ModelState.IsValid) return BadRequest(ModelState);
+
+			if (!Enum.IsDefined(typeof(ProjectStatus), dto.Status))
+				return BadRequest("Invalid project status.");
+
+			var project = await _projectRepo.GetById(id);
+			if (project == null) return NotFound("Project not found.");
+
+			project.Name = dto.Name;
+			project.Status = dto.Status;
+
+			var updated = await _projectRepo.Update(project);
+			return Ok((updated));
+		}
+
+		[HttpGet("{id}")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(404)]
+		public async Task<IActionResult> GetById(int id)
+		{
+			var project = await _projectRepo.GetById(id);
+			if (project == null)
+				return NotFound();
+			return Ok(project);
 		}
 	}
 }

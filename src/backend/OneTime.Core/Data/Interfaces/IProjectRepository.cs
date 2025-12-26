@@ -19,5 +19,9 @@ namespace OneTime.Core.Services.Interfaces
         /// <param name="id">The unique identifier for the project.</param>
         /// <returns>The project, which matches the unique identifier.</returns>
         Task<Project> GetById(int id);
-    }
+		Task<Project> Add(Project project);
+        Task<Project> Delete(int id);
+        Task<Project> Update(Project project);
+
+	}
 }
