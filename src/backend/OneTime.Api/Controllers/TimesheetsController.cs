@@ -94,7 +94,7 @@ namespace OneTime.Api.Controllers
 			}
 		}
 
-		[HttpGet("leader/{leaderId}/team/")]
+		[HttpGet("leader/{leaderId}/team")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(204)]
 		public async Task<IActionResult> GetTimeentriesForPendingTimesheet(int leaderId, [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
@@ -136,5 +136,44 @@ namespace OneTime.Api.Controllers
 
 			return Ok(response);
 		}
+
+		[HttpGet("user/{userId}/time")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(204)]
+        public async Task<IActionResult> GetTimesheetByUserAndDate(int userId, [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+		{
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+			try
+			{
+				var timesheet = await _timeSheetService.GetTimesheetByUserAndDate(userId, startDate, endDate);
+
+                if (timesheet == null)
+                {
+                    return NoContent();
+                }
+
+                var response = new TimesheetDto(
+					timesheet.TimesheetId,
+					timesheet.UserId,
+					timesheet.PeriodStart,
+					timesheet.PeriodEnd,
+					(TimesheetStatus)timesheet.Status,
+					timesheet.DecidedAt,
+					timesheet.Comment
+					);
+
+				return Ok(response);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 	}
 }

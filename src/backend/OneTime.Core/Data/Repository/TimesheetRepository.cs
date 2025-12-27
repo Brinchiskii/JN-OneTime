@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using OneTime.Core.Models;
 using OneTime.Core.Models.Enums;
 using OneTime.Core.Services.Interfaces;
@@ -130,7 +131,7 @@ namespace OneTime.Core.Services.Repository
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<IEnumerable<TimeEntry>> GetTimeentriesForPendingTimesheet(int leaderId, DateOnly start, DateOnly end)
         {
-            var entries = await _context.TimeEntries
+            return await _context.TimeEntries
                 .Include(t => t.Project)
                 .Include(t => t.User)
                 .Include(t => t.Timesheet)
@@ -146,12 +147,20 @@ namespace OneTime.Core.Services.Repository
                 .ThenBy(t => t.Date)
                 .ToListAsync();
 
-
-
             // Returns empty list if no entries were found.
-            return entries.Count == 0 ? [] : entries;
+            //return entries.Count == 0 ? [] : entries;
         }
-	}
+
+        public async Task<Timesheet?> GetTimesheetByUserAndDate(int userId, DateOnly startDate, DateOnly endDate)
+        {
+            return await _context.Timesheets
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t =>
+                    t.UserId == userId &&
+                    t.PeriodStart == startDate &&
+                    t.PeriodEnd == endDate);
+        }
+    }
 
 }
 

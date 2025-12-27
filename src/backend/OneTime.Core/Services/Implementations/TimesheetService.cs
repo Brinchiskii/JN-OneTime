@@ -117,4 +117,16 @@ public class TimesheetService : ITimesheetService
         var entries = await _timesheetRepository.GetTimeentriesForPendingTimesheet(leaderId, start, end);
         return entries ?? Array.Empty<TimeEntry>();
     }
+    public async Task<Timesheet?> GetTimesheetByUserAndDate(int userId, DateOnly startDate, DateOnly endDate)
+    {
+        if(userId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero.");
+        }
+        if(startDate > endDate)
+        {
+            throw new ArgumentOutOfRangeException(nameof(startDate), "Start date must be before or equal to end date.");
+        }
+        return await _timesheetRepository.GetTimesheetByUserAndDate(userId, startDate, endDate);
+    }
 }
