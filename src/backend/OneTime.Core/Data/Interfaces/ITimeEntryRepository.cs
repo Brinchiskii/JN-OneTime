@@ -1,4 +1,5 @@
-﻿using OneTime.Core.Models;
+﻿using Microsoft.AspNetCore.Routing;
+using OneTime.Core.Models;
 
 namespace OneTime.Core.Services.Interfaces
 {
@@ -14,5 +15,8 @@ namespace OneTime.Core.Services.Interfaces
         /// <returns>The added time entry.</returns>
         Task<TimeEntry> Add(TimeEntry entry);
 		Task<IEnumerable<TimeEntry>> GetByUserWithDetails(int userId);
-	}
+        Task<IEnumerable<TimeEntry>> GetWeeklyTimeEntriesByUser(int userId, int timesheetId);
+
+
+    }
 }

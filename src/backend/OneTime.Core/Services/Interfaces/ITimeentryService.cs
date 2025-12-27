@@ -6,4 +6,5 @@ public interface ITimeEntryService
 {
     Task<TimeEntry> CreateTimeEntry(TimeEntry timeEntry);
     Task<IEnumerable<TimeEntry>> GetTimeEntriesByUserWithDetails(int userId);
+    Task<IEnumerable<TimeEntry>> GetTimeEntriesForAWeek(int userId, int timesheetId);
 }

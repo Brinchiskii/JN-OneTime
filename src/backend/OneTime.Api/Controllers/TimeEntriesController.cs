@@ -63,5 +63,15 @@ namespace OneTime.Api.Controllers
 
 			return Ok(response);
 		}
+
+		[HttpGet("user/{userId}/timesheet/{timesheetId}")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(204)]
+		public async Task<IActionResult> GetTimeSheetForUser(int userId, int timesheetId)
+		{
+			var entries = await _timeEntryService.GetTimeEntriesForAWeek(userId, timesheetId);
+			var response = entries.Select(TimeEntryConverter.ToDetailsDto).ToList();
+            return Ok(response);
+		}
 	}
 }

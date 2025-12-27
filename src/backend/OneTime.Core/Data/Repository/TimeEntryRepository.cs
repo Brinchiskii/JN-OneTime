@@ -3,6 +3,7 @@ using OneTime.Core.Models;
 using OneTime.Core.Models.Enums;
 using OneTime.Core.Services.Interfaces;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -48,5 +49,17 @@ namespace OneTime.Core.Services.Repository
                 .OrderBy(t => t.Date)
                 .ToListAsync();
 		}
+
+        public async Task<IEnumerable<TimeEntry>> GetWeeklyTimeEntriesByUser(int userId, int timesheetId)
+        {
+            return await _context.TimeEntries
+                .Include(t => t.Project)
+                .Include(t => t.User)
+                .Where(t =>
+                    t.UserId== userId &&
+                    t.TimesheetId == timesheetId
+                )
+                .ToListAsync();
+        }
 	}
 }

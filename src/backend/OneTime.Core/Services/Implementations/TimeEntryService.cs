@@ -62,4 +62,17 @@ public class TimeEntryService : ITimeEntryService
 
 		return entries;
 	}
+
+	public async Task<IEnumerable<TimeEntry>> GetTimeEntriesForAWeek(int userId, int timesheetId)
+	{
+		if (userId <= 0) 
+			throw new ArgumentException("UserId must be greater than zero");
+		if (timesheetId <= 0) 
+			throw new ArgumentException("TimeSheetId must be greater than zero");
+
+		var entries = await _timeEntryRepository.GetWeeklyTimeEntriesByUser(userId, timesheetId);
+
+		return entries;
+
+	}
 }
