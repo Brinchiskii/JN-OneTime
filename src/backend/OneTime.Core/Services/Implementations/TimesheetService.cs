@@ -39,7 +39,7 @@ public class TimesheetService : ITimesheetService
             UserId = userId,
             PeriodStart = periodStart,
             PeriodEnd = periodEnd,
-            Status = (int)TimesheetStatus.Pending,
+            Status = (int)TimesheetStatus.Draft,
             DecidedByUserId = null,
             DecidedAt = null,
             Comment = null
@@ -76,6 +76,7 @@ public class TimesheetService : ITimesheetService
             0 => TimesheetStatus.Pending,
             1 => TimesheetStatus.Approved,
             2 => TimesheetStatus.Rejected,
+            3 => TimesheetStatus.Draft,
             _ => throw new ArgumentOutOfRangeException(nameof(status), "Invalid timesheet status value.")
         };
 

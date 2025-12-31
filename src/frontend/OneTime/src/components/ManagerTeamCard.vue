@@ -4,27 +4,24 @@ import { useTimesheetStore } from '../stores/timesheetStore'
 import Timesheet from './Timesheet.vue'
 import type { TimesheetRow } from '@/types'
 
-// Vi tager imod data fra forælderen
 const props = defineProps<{
   userName: string
-  rows: TimesheetRow[]
+  rows: TimesheetRow
 }>()
 
 const timesheetStore = useTimesheetStore()
 const comment = ref("")
 
-const timesheetId = computed(() => {
-    return 1
-})
-
 const approve = () => {
-  if(!timesheetId.value) return
-  timesheetStore.submitDecision(timesheetId.value, 1, comment.value)
+  if (!props.rows?.timesheetId) return
+  timesheetStore.submitDecision(props.rows.timesheetId, 1, comment.value)
+  alert("Timesheet " + props.rows.timesheetId + " er blevet godkendt")
 }
 
 const deny = () => {
-  if(!timesheetId.value) return
-  timesheetStore.submitDecision(timesheetId.value, 2, comment.value)
+  if (!props.rows?.timesheetId) return
+  timesheetStore.submitDecision(props.rows.timesheetId, 2, comment.value)
+  alert("Timesheet " + props.rows.timesheetId + " er blevet afvist")
 }
 </script>
 
@@ -35,9 +32,6 @@ const deny = () => {
         <div class="avatar">{{ userName.charAt(0) }}</div>
         <div>
           <div class="fw-bold fs-5">{{ userName }}</div>
-          <div class="small text-muted">
-            Total: <span class="fw-bold text-dark">{{ '38' }}t</span>
-          </div>
         </div>
       </div>
       <div>
@@ -51,7 +45,7 @@ const deny = () => {
       </div>
     </div>
 
-    <Timesheet :rows="rows" :weekDays="timesheetStore.weekDays" :readonly="true"></Timesheet>
+    <Timesheet :timesheetrows="rows" :weekDays="timesheetStore.weekDays" :readonly="true"></Timesheet>
   </div>
 </template>
 

@@ -24,7 +24,7 @@ onMounted(() => {
       v-for="[userName, rows] in Object.entries(timesheetStore.teamRows)"
       :key="userName"
       :userName="userName"
-      :rows="rows"
+      :rows="rows[0]!"
     >
     </ManagerTeamCard>
   </div>

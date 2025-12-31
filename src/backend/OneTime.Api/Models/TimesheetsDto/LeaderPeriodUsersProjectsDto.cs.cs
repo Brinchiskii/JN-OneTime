@@ -6,9 +6,13 @@
 		ProjectSimpleDto Project,
 		Dictionary<string, decimal> Hours 
 	);
-
-	public record LeaderUsersProjectsResponseDto(
-		Dictionary<string, List<ProjectHoursByDateDto>> Users
+	public record PendingTimesheetDto(
+		int TimesheetId,
+		List<ProjectHoursByDateDto> Rows
 	);
+	public record LeaderUsersProjectsResponseDto(
+		Dictionary<string, List<PendingTimesheetDto>> Users
+	);
+
 }
 

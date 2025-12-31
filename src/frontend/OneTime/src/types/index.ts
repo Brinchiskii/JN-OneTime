@@ -14,7 +14,22 @@ export interface TimeEntry {
   timesheetId: number
 }
 
-export interface ApiRow {
+export interface TimesheetRow {
+  timesheetId: number
+  rows: Rows[]
+}
+
+export interface ApiTimesheetRow {
+  timesheetId: number
+  rows: ApiRows[]
+}
+
+export interface Rows {
+  projectId: number
+  hours: Record<string, number>
+}
+
+interface ApiRows {
   project: {
     projectId: number
     name: string
@@ -23,12 +38,8 @@ export interface ApiRow {
   hours: Record<string, number>
 }
 
-export interface TimesheetRow {
-  projectId: number
-  hours: Record<string, number>
-}
-
-export type UsersCollection = Record<string, TimesheetRow[]>
+export type TeamCollection = Record<string, TimesheetRow[]>
+export type ApiTeamCollection = Record<string, ApiTimesheetRow[]>
 
 export interface WeekDay {
   name: string
@@ -39,9 +50,9 @@ export interface WeekDay {
 
 export interface DecisionPayload {
   timesheetId: number
-  leaderId: number
-  status: number
-  comment: string
+  leaderId: number | null
+  status: number | null
+  comment: string | null
 }
 
 export interface TimesheetPayload {
@@ -88,15 +99,25 @@ export interface Log {
 export interface JwtPayload {
   // ClaimTypes.NameIdentifier bliver til denne URL:
   "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": string
-  
+
   // ClaimTypes.Name:
   "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": string
-  
+
   // ClaimTypes.Role:
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/role": string | string[]
-  
+
   // ClaimTypes.Email:
   "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": string
-  
+
   exp: number // Udløbstid (standard)
+}
+
+export interface Timesheet {
+  timesheetId: number
+  userId: number
+  periodStart: string
+  periodEnd: string
+  status: number
+  decidedAt: string | null
+  comment: string | null
 }

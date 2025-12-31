@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using OneTime.Core.Models;
 using OneTime.Core.Services.Interfaces;
 
@@ -46,7 +47,14 @@ public class TimeEntryService : ITimeEntryService
 		return created;
 	}
 
-	public async Task<IEnumerable<TimeEntry>> GetTimeEntriesByUserWithDetails(int userId)
+    public async Task ReplaceTimeEntries(int timesheetId, List<TimeEntry> newEntries)
+    {
+        await _timeEntryRepository.DeleteEntriesByTimesheetId(timesheetId);
+        await _timeEntryRepository.AddTimeEntries(newEntries);
+        await _timeEntryRepository.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<TimeEntry>> GetTimeEntriesByUserWithDetails(int userId)
 	{
 		if (userId <= 0)
 		{
@@ -63,7 +71,7 @@ public class TimeEntryService : ITimeEntryService
 		return entries;
 	}
 
-	public async Task<IEnumerable<TimeEntry>> GetTimeEntriesForAWeek(int userId, int timesheetId)
+	public async Task<IEnumerable<TimeEntry>> GetTimeEntriesForTimesheet(int userId, int timesheetId)
 	{
 		if (userId <= 0) 
 			throw new ArgumentException("UserId must be greater than zero");

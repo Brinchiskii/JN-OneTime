@@ -5,11 +5,12 @@ import { useProjectStore } from '@/stores/projectStore'
 import { useTimesheetStore } from '@/stores/timesheetStore'
 
 const props = defineProps<{
-  rows: TimesheetRow[]
+  timesheetrows: TimesheetRow
   weekDays: WeekDay[]
   readonly?: boolean
 }>()
 
+const rows = computed(() => props.timesheetrows?.rows)
 const projectStore = useProjectStore()
 const timesheetStore = useTimesheetStore()
 
@@ -18,15 +19,22 @@ onMounted(async () => {
 })
 
 const getColumnTotal = (dayKey: string) =>
-  props.rows.reduce((acc, row) => acc + (Number(row.hours[dayKey]) || 0), 0)
+  props.timesheetrows.rows?.reduce((acc, row) => acc + (Number(row.hours[dayKey]) || 0), 0)
 
-  const getTotalHours = (row: TimesheetRow) => {
-    return Object.values(row.hours).reduce((acc, val) => acc + (Number(val) || 0), 0)
-  }
+const getRowTotal = (row: any) => {
+  if (!row || !row.hours) return 0
 
-const grandTotal = computed(() =>
-  props.rows.reduce((acc, row) => acc + getTotalHours(row), 0),
-)
+  const total = Object.values(row.hours).reduce((acc: any, val: any) => {
+    return acc + (Number(val) || 0)
+  }, 0)
+
+  return total
+}
+
+const grandTotal = computed(() => {
+  return props.timesheetrows.rows.map(row => getRowTotal(row)).reduce((acc: any, val: any) => acc + val, 0)
+})
+
 </script>
 
 <template>
@@ -46,13 +54,9 @@ const grandTotal = computed(() =>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, index) in props.rows" :key="row.projectId" class="project-row">
+        <tr v-for="(row, index) in rows" :key="row.projectId" class="project-row">
           <td>
-            <select
-              class="project-select form-select"
-              :disabled="props.readonly"
-              v-model="row.projectId"
-            >
+            <select class="project-select form-select" :disabled="props.readonly" v-model="row.projectId">
               <option :value="0" hidden>Vælg projekt</option>
               <option v-for="p in projectStore.projects" :key="p.projectId" :value="p.projectId">
                 {{ p.name }}
@@ -61,34 +65,21 @@ const grandTotal = computed(() =>
           </td>
 
           <td v-for="day in props.weekDays" :key="day.key" class="text-center">
-            <input
-              type="number"
-              v-model="row.hours[day.fullDate]"
-              :class="!readonly ? 'day-input' : 'hours-cell'"
-              placeholder="0"
-              min="0"
-              max="24"
-              step="0.25"
-              :readonly="props.readonly"
-              :disabled="props.readonly"
-            />
+            <input type="number" v-model="row.hours[day.fullDate]" :class="!readonly ? 'day-input' : 'hours-cell'"
+              placeholder="0" min="0" max="24" step="0.25" :readonly="props.readonly" :disabled="props.readonly" />
           </td>
 
           <td class="text-center">
-            <span class="badge bg-secondary">{{ getTotalHours(row) }}t</span>
+            <span class="badge bg-secondary">{{ getRowTotal(row) }}t</span>
           </td>
 
           <td class="text-center" v-if="!props.readonly">
-            <button
-              @click="timesheetStore.removeRow(index)"
-              class="btn btn-outline-danger btn-sm"
-              title="Delete row"
-            >
+            <button @click="timesheetStore.removeRow(index)" class="btn btn-outline-danger btn-sm" title="Delete row">
               <i class="bi bi-trash"></i>
             </button>
           </td>
         </tr>
-        <tr v-if="props.rows.length === 0">
+        <tr v-if="rows?.length === 0">
           <td colspan="9" class="text-center py-4 text-muted fst-italic">Ingen registreringer.</td>
         </tr>
         <tr class="table-info fw-semibold">
@@ -116,7 +107,8 @@ const grandTotal = computed(() =>
   background: white;
   border-radius: 16px;
   box-shadow: var(--card-shadow);
-  overflow: hidden; /* Sikrer at indhold ikke stikker ud af de runde hjørner */
+  overflow: hidden;
+  /* Sikrer at indhold ikke stikker ud af de runde hjørner */
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -191,6 +183,7 @@ const grandTotal = computed(() =>
   width: 100%;
   background: transparent;
 }
+
 .project-select:focus {
   outline: none;
   box-shadow: none;
