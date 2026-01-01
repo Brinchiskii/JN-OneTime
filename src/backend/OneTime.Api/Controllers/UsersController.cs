@@ -145,5 +145,21 @@ namespace OneTime.Api.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
-	}
+
+		[HttpGet("leader/{id:int}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+		public async Task<IActionResult> GetUsersByLeaderId(int id)
+		{
+            var users = await _userService.GetUsersByLeaderId(id);
+
+            if (!users.Any())
+                return NoContent();
+
+            var response = users.Select(UserConverter.ToDto).ToList();
+
+            return Ok(response);
+        }
+    }
 }

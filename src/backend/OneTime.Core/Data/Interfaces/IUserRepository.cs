@@ -12,5 +12,6 @@ namespace OneTime.Core.Services.Interfaces
 		Task<JNUser> GetById(int id);
         Task<JNUser> Update(JNUser user, string name, string email, UserRole role, int? managerId);
         Task<bool> CheckManagersTeam(int managerId);
+        Task<IEnumerable<JNUser>> GetUsersByLeaderId(int id);
     }
 }

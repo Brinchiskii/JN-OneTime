@@ -104,46 +104,14 @@ namespace OneTime.Api.Controllers
 			if (!entries.Any())
 				return NoContent();
 
-            //var usersDict = entries
-            //	.GroupBy(e => e.User!.Name) //groupby timesheetId
-            //	.ToDictionary(
-            //		userGroup => userGroup.Key,
-            //		userGroup => userGroup
-            //				.GroupBy(e => new { e.ProjectId, ProjectName = e.Project!.Name, ProjectStatus = (int)e.Project.Status })
-            //				.Select(projectGroup =>
-            //				{
-            //					var hoursByDate = new Dictionary<string, decimal>();
-
-            //					foreach (var entry in projectGroup)
-            //					{
-            //						var key = entry.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-            //						if (!hoursByDate.ContainsKey(key))
-            //							hoursByDate[key] = 0;
-
-            //						hoursByDate[key] += entry.Hours;
-            //					}
-
-            //					return new ProjectHoursByDateDto(
-            //						new ProjectSimpleDto(projectGroup.Key.ProjectId, projectGroup.Key.ProjectName, projectGroup.Key.ProjectStatus),
-            //						hoursByDate
-            //					);
-            //				}).ToList()
-            //	);
-
-            //var response = new LeaderUsersProjectsResponseDto(usersDict);
-
-            //return Ok(response);
-
             var usersDict = entries
-                .GroupBy(e => e.User!.Name) // 1. Gruppér på Bruger
+                .GroupBy(e => e.User!.Name) 
                 .ToDictionary(
                     userGroup => userGroup.Key,
                     userGroup => userGroup
-                        .GroupBy(e => e.TimesheetId) // 2. NYT: Gruppér på TimesheetId
+                        .GroupBy(e => new { e.TimesheetId, Status = e.Timesheet!.Status })
                         .Select(timesheetGroup =>
                         {
-                            // 3. Saml projekterne for dette specifikke timesheet
                             var projects = timesheetGroup
                                 .GroupBy(e => new { e.ProjectId, ProjectName = e.Project!.Name, ProjectStatus = (int)e.Project.Status })
                                 .Select(projectGroup =>
@@ -163,7 +131,7 @@ namespace OneTime.Api.Controllers
                                     );
                                 }).ToList();
 
-                            return new PendingTimesheetDto(timesheetGroup.Key, projects);
+                            return new PendingTimesheetDto(timesheetGroup.Key.TimesheetId, timesheetGroup.Key.Status, projects);
                         })
                         .ToList() 
                 );

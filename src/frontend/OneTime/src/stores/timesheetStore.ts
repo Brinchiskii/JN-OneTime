@@ -7,7 +7,7 @@ import type { TimesheetRow, WeekDay, TeamCollection, DecisionPayload, TimeEntry,
 import timesheetService from '@/api/timesheetService'
 import timeEntriesService from '@/api/timeEntriesService'
 import { useAuthStore } from './AuthStore'
-import type { BlockLike } from 'typescript'
+import UserService from '@/api/UserService'
 
 dayjs.locale('da')
 dayjs.extend(isoWeek)
@@ -21,7 +21,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   }
 
 
-  const myRows = ref<TimesheetRow>({ timesheetId: 0, rows: [] })
+  const myRows = ref<TimesheetRow>({ timesheetId: 0, status: 0, rows: [] })
   const isApproved = ref(false)
   const currentTimesheetId = ref<number | null>(null)
   const currentTimesheetStatus = ref<number | null>(null)
@@ -100,32 +100,48 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   const teamRows = ref<TeamCollection>({})
 
   const loadTeamRows = async () => {
+    teamRows.value = {}
+
     const startObj = currentWeekStart.value
     const endObj = startObj.endOf('isoWeek')
     const startStr = startObj.format('YYYY-MM-DD')
     const endStr = endObj.format('YYYY-MM-DD')
 
-    const result = await timesheetService.getWeeklyTimeSheets(AuthStore.user?.userId ?? 0, startStr, endStr)
+    try {
+        const usersResponse = await UserService.getUsersByManagerId(AuthStore.user?.userId ?? 0)
+        const allEmployees = usersResponse.data
 
-    const apiData = result.data.users as ApiTeamCollection | undefined
+        const timesheetResult = await timesheetService.getWeeklyTimeSheets(AuthStore.user?.userId ?? 0, startStr, endStr)
+        
+        const apiData = timesheetResult.data?.users as ApiTeamCollection | undefined
 
-    const normalized: TeamCollection = {}
+        const normalized: TeamCollection = {}
 
-    if (apiData) {
-      for (const [userName, timesheets] of Object.entries(apiData)) {
+        if (allEmployees) {
+            for (const user of allEmployees) {
+                
+                const foundSheets = apiData ? apiData[user.name] : undefined
 
-        normalized[userName] = timesheets.map(ts => ({
-          timesheetId: ts.timesheetId,
+                if (foundSheets && foundSheets.length > 0) {
+                    normalized[user.name] = foundSheets.map(ts => ({
+                        timesheetId: ts.timesheetId,
+                        status: ts.status,
+                        rows: ts.rows.map(row => ({
+                            projectId: row.project.projectId,
+                            hours: row.hours
+                        }))
+                    }))
+                } else {
+                    normalized[user.name] = [{ timesheetId: 0, status: -1, rows: [] }]
+                }
+            }
+        }
+        teamRows.value = normalized
 
-          rows: ts.rows.map(row => ({
-            projectId: row.project.projectId,
-            hours: row.hours
-          }))
-        }))
-      }
+    } catch (error) {
+        console.error("Fejl ved hentning af team data:", error)
     }
-    teamRows.value = normalized
-  }
+}
 
   const submitDecision = async (timesheetId: number, status: number, comment: string) => {
     const currentLeaderId = AuthStore.user?.userId ?? 0
@@ -137,7 +153,6 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       comment: comment,
     }
     await timesheetService.updateTimeSheet(payload)
-    loadTeamRows()
   }
 
   const saveTimesheet = async (submit: boolean) => {
@@ -215,7 +230,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       const timesheet = await timesheetService.getUserTimeSheet(AuthStore.user?.userId ?? 0, currentWeekStart.value.format('YYYY-MM-DD'), currentWeekStart.value.endOf('isoWeek').format('YYYY-MM-DD'))
       const timeEntries = await timeEntriesService.GetTimeEntriesByTimesheetId(AuthStore.user?.userId ?? 0, timesheet.data.timesheetId)
 
-      const rows: TimesheetRow = { timesheetId: timesheet.data.timesheetId, rows: [] }
+      const rows: TimesheetRow = { timesheetId: timesheet.data.timesheetId, status: timesheet.data.status, rows: [] }
 
       for (const entry of timeEntries.data) {
         let row = rows.rows.find(r => r.projectId === entry.projectId)
@@ -235,7 +250,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       currentTimesheetStatus.value = timesheet.data.status
     } catch (error) {
       console.error("Fejl ved hentning af timesheet", error)
-      myRows.value = { timesheetId: 0, rows: [] }
+      myRows.value = { timesheetId: 0, status: 0, rows: [] }
       currentTimesheetId.value = null
       isApproved.value = false
       currentTimesheetStatus.value = null

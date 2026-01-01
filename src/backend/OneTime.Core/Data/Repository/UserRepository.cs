@@ -78,5 +78,13 @@ namespace OneTime.Core.Services.Repository
         {
             return await _context.JNUsers.AnyAsync(u => u.ManagerId == managerId);
         }
+
+        public async Task<IEnumerable<JNUser>> GetUsersByLeaderId(int id)
+        {
+            return await _context.JNUsers
+                .Include(u => u.Manager)
+                .Where(u => u.ManagerId == id)
+                .ToListAsync();
+        }
     }
 }

@@ -138,7 +138,6 @@ namespace OneTime.Core.Services.Repository
                 .Where(t =>
                     t.User.ManagerId == leaderId &&
                     t.User.Role == (int)UserRole.Employee &&
-                    t.Timesheet.Status == (int)TimesheetStatus.Pending &&
                     t.Timesheet.PeriodStart == start &&
                     t.Timesheet.PeriodEnd == end
                 )
@@ -146,9 +145,6 @@ namespace OneTime.Core.Services.Repository
                 .ThenBy(t => t.Project.Name)
                 .ThenBy(t => t.Date)
                 .ToListAsync();
-
-            // Returns empty list if no entries were found.
-            //return entries.Count == 0 ? [] : entries;
         }
 
         public async Task<Timesheet?> GetTimesheetByUserAndDate(int userId, DateOnly startDate, DateOnly endDate)

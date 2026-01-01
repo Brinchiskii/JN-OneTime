@@ -16,11 +16,13 @@ export interface TimeEntry {
 
 export interface TimesheetRow {
   timesheetId: number
+  status: number
   rows: Rows[]
 }
 
 export interface ApiTimesheetRow {
   timesheetId: number
+  status: number
   rows: ApiRows[]
 }
 

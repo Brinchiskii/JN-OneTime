@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useTimesheetStore } from '../stores/timesheetStore'
 import Timesheet from './Timesheet.vue'
 import type { TimesheetRow } from '@/types'
@@ -7,7 +7,23 @@ import type { TimesheetRow } from '@/types'
 const props = defineProps<{
   userName: string
   rows: TimesheetRow
+  status: number
 }>()
+
+const statusBadge = computed(() => {
+  switch (props.status) {
+    case 0:
+      return { text: "Afventer", class: "badge bg-warning" }
+    case 1:
+      return { text: "Godkendt", class: "badge bg-success" }
+    case 2:
+      return { text: "Afvist", class: "badge bg-danger" }
+    case 3:
+      return { text: "Kladde", class: "badge bg-secondary" }
+    default:
+      return { text: "Ikke oprettet", class: "badge bg-dark" }
+  }
+})
 
 const timesheetStore = useTimesheetStore()
 const comment = ref("")
@@ -16,13 +32,19 @@ const approve = () => {
   if (!props.rows?.timesheetId) return
   timesheetStore.submitDecision(props.rows.timesheetId, 1, comment.value)
   alert("Timesheet " + props.rows.timesheetId + " er blevet godkendt")
+  emit('refresh')
 }
 
 const deny = () => {
   if (!props.rows?.timesheetId) return
   timesheetStore.submitDecision(props.rows.timesheetId, 2, comment.value)
   alert("Timesheet " + props.rows.timesheetId + " er blevet afvist")
+  emit('refresh')
 }
+
+const emit = defineEmits<{
+  (e: 'refresh'): void
+}>()
 </script>
 
 <template>
@@ -30,11 +52,10 @@ const deny = () => {
     <div class="card-header-custom">
       <div class="d-flex align-items-center gap-3">
         <div class="avatar">{{ userName.charAt(0) }}</div>
-        <div>
-          <div class="fw-bold fs-5">{{ userName }}</div>
-        </div>
+        <div class="fw-bold fs-5">{{ userName }}</div>
+        <div :class="statusBadge.class">{{ statusBadge.text }}</div>
       </div>
-      <div>
+      <div v-if="props.status == 0" class="d-flex align-items-center">
         <input v-model="comment" type="text" placeholder="Tilføj kommentar..." />
         <button class="btn btn-success btn-sm px-3 rounded-pill ms-2" @click="approve()">
           <i class="bi bi-check-lg me-1"></i> <span>Godkend</span>
@@ -44,7 +65,6 @@ const deny = () => {
         </button>
       </div>
     </div>
-
     <Timesheet :timesheetrows="rows" :weekDays="timesheetStore.weekDays" :readonly="true"></Timesheet>
   </div>
 </template>
