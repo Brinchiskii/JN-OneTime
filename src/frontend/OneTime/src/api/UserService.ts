@@ -17,5 +17,9 @@ export default {
 
   updateUser(id: number, payload: UserPayload) {
     return http.put(`${users}/${id}`, payload)
+  },
+
+  getUsersByManagerId(managerId: number) {
+    return http.get<User[]>(`${users}/leader/${managerId}`)
   }
 }

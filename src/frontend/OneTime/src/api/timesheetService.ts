@@ -1,9 +1,9 @@
 import http from './http'
-import { type ApiRow, type DecisionPayload, type TimesheetPayload, type UsersCollection } from '@/types'
+import type { ApiTimesheetRow, DecisionPayload, Timesheet, TimesheetPayload, TeamCollection } from '@/types'
 const base = "Timesheets"
 export default {
-  getWeeklyTimeSheet(id: number, start: string , end: string) {
-    return http.get<Record<string, ApiRow[]>>(`/${base}/leader/${id}/team?startDate=${start}&endDate=${end}`);
+  getWeeklyTimeSheets(id: number, start: string , end: string) {
+    return http.get<Record<string, ApiTimesheetRow[]>>(`/${base}/leader/${id}/team?startDate=${start}&endDate=${end}`);
   },
 
   updateTimeSheet(payload: DecisionPayload) {
@@ -12,5 +12,9 @@ export default {
 
   createTimeSheet(payload: TimesheetPayload){
     return http.post(`${base}/submit`, payload)
+  },
+  
+  getUserTimeSheet(userId: number, start: string , end: string) {
+    return http.get<Timesheet>(`/${base}/user/${userId}/time?startDate=${start}&endDate=${end}`);
   }
 }

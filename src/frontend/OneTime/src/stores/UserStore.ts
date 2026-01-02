@@ -29,5 +29,5 @@ export const useUserStore = defineStore('user', () => {
     return userService.updateUser(id, payload)
   }
 
-  return { users, fetchUsers, createUser, deleteUserById, updateUser, getNameById }
+  return { users, fetchUsers, createUser, deleteUserById, updateUser, getNameById}
 })

@@ -25,6 +25,7 @@ namespace OneTime.Core.Services.Interfaces
         Task<bool> HasTimeEntriesInPeriod(int userId, DateOnly periodStart, DateOnly periodEnd);
         Task<Timesheet?> GetById(int timesheetId);
         Task Update(Timesheet sheet);
+        Task<Timesheet?> GetTimesheetByUserAndDate(int userId, DateOnly startDate, DateOnly endDate);
 
     }
 }

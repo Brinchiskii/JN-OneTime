@@ -3,7 +3,7 @@
 namespace OneTime.Api.Models.TimesheetsDto
 {
     /// <summary>
-    /// Data transfer object for a monthly review.
+    /// Data summary for a timesheet.
     /// </summary>
     public record TimesheetDto(
         int TimesheetId,

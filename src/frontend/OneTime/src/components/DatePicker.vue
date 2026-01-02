@@ -20,7 +20,7 @@ const onDateSelected = (event: any) => {
 </script>
 
 <template>
-  <div class="d-flex gap-2 my-3">
+  <span class="d-flex gap-2 my-3">
     <div class="btn-group shadow-sm rounded-3 me-2" role="group">
       <button class="btn btn-white bg-white border" @click="prevWeek" title="Forrige uge">
         <i class="bi bi-chevron-left"></i>
@@ -40,5 +40,6 @@ const onDateSelected = (event: any) => {
       <span>Vælg dato</span>
       <input type="date" class="date-input-hidden" @change="onDateSelected" />
     </div>
-  </div>
+    <button class="btn btn-white bg-white border">Opdater</button>
+  </span>
 </template>

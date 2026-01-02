@@ -114,4 +114,9 @@ public class UserService : IUserService
                 break;
         }
     }
+
+    public async Task<IEnumerable<JNUser>> GetUsersByLeaderId(int id)
+    {
+        return await _userRepository.GetUsersByLeaderId(id);
+    }
 }

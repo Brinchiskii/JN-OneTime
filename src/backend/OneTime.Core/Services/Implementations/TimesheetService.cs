@@ -39,7 +39,7 @@ public class TimesheetService : ITimesheetService
             UserId = userId,
             PeriodStart = periodStart,
             PeriodEnd = periodEnd,
-            Status = (int)TimesheetStatus.Pending,
+            Status = (int)TimesheetStatus.Draft,
             DecidedByUserId = null,
             DecidedAt = null,
             Comment = null
@@ -76,6 +76,7 @@ public class TimesheetService : ITimesheetService
             0 => TimesheetStatus.Pending,
             1 => TimesheetStatus.Approved,
             2 => TimesheetStatus.Rejected,
+            3 => TimesheetStatus.Draft,
             _ => throw new ArgumentOutOfRangeException(nameof(status), "Invalid timesheet status value.")
         };
 
@@ -116,5 +117,17 @@ public class TimesheetService : ITimesheetService
 
         var entries = await _timesheetRepository.GetTimeentriesForPendingTimesheet(leaderId, start, end);
         return entries ?? Array.Empty<TimeEntry>();
+    }
+    public async Task<Timesheet?> GetTimesheetByUserAndDate(int userId, DateOnly startDate, DateOnly endDate)
+    {
+        if(userId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero.");
+        }
+        if(startDate > endDate)
+        {
+            throw new ArgumentOutOfRangeException(nameof(startDate), "Start date must be before or equal to end date.");
+        }
+        return await _timesheetRepository.GetTimesheetByUserAndDate(userId, startDate, endDate);
     }
 }

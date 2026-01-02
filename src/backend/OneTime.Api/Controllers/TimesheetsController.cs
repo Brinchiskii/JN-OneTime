@@ -94,7 +94,7 @@ namespace OneTime.Api.Controllers
 			}
 		}
 
-		[HttpGet("leader/{leaderId}/team/")]
+		[HttpGet("leader/{leaderId}/team")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(204)]
 		public async Task<IActionResult> GetTimeentriesForPendingTimesheet(int leaderId, [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
@@ -104,37 +104,80 @@ namespace OneTime.Api.Controllers
 			if (!entries.Any())
 				return NoContent();
 
-			var usersDict = entries
-				.GroupBy(e => e.User!.Name) 
-				.ToDictionary(
-					userGroup => userGroup.Key,
-					userGroup =>
-						userGroup
-							.GroupBy(e => new { e.ProjectId, ProjectName = e.Project!.Name, ProjectStatus = (int)e.Project.Status })
-							.Select(projectGroup =>
-							{
-								var hoursByDate = new Dictionary<string, decimal>();
+            var usersDict = entries
+                .GroupBy(e => e.User!.Name) 
+                .ToDictionary(
+                    userGroup => userGroup.Key,
+                    userGroup => userGroup
+                        .GroupBy(e => new { e.TimesheetId, Status = e.Timesheet!.Status, Comment = e.Timesheet!.Comment })
+                        .Select(timesheetGroup =>
+                        {
+                            var projects = timesheetGroup
+                                .GroupBy(e => new { e.ProjectId, ProjectName = e.Project!.Name, ProjectStatus = (int)e.Project.Status })
+                                .Select(projectGroup =>
+                                {
+                                    var hoursByDate = new Dictionary<string, decimal>();
 
-								foreach (var entry in projectGroup)
-								{
-									var key = entry.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                                    foreach (var entry in projectGroup)
+                                    {
+                                        var key = entry.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                                        if (!hoursByDate.ContainsKey(key)) hoursByDate[key] = 0;
+                                        hoursByDate[key] += entry.Hours;
+                                    }
 
-									if (!hoursByDate.ContainsKey(key))
-										hoursByDate[key] = 0;
+                                    return new ProjectHoursByDateDto(
+                                        new ProjectSimpleDto(projectGroup.Key.ProjectId, projectGroup.Key.ProjectName, projectGroup.Key.ProjectStatus),
+                                        hoursByDate
+                                    );
+                                }).ToList();
 
-									hoursByDate[key] += entry.Hours;
-								}
+                            return new PendingTimesheetDto(timesheetGroup.Key.TimesheetId, timesheetGroup.Key.Status, timesheetGroup.Key.Comment, projects);
+                        })
+                        .ToList() 
+                );
 
-								return new ProjectHoursByDateDto(
-									new ProjectSimpleDto(projectGroup.Key.ProjectId, projectGroup.Key.ProjectName, projectGroup.Key.ProjectStatus),
-									hoursByDate
-								);
-							}).ToList()
-				);
+                    var response = new LeaderUsersProjectsResponseDto(usersDict);
 
-			var response = new LeaderUsersProjectsResponseDto(usersDict);
+                    return Ok(response);
+        }
 
-			return Ok(response);
-		}
+		[HttpGet("user/{userId}/time")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(204)]
+        public async Task<IActionResult> GetTimesheetByUserAndDate(int userId, [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+		{
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+			try
+			{
+				var timesheet = await _timeSheetService.GetTimesheetByUserAndDate(userId, startDate, endDate);
+
+                if (timesheet == null)
+                {
+                    return NoContent();
+                }
+
+                var response = new TimesheetDto(
+					timesheet.TimesheetId,
+					timesheet.UserId,
+					timesheet.PeriodStart,
+					timesheet.PeriodEnd,
+					(TimesheetStatus)timesheet.Status,
+					timesheet.DecidedAt,
+					timesheet.Comment
+					);
+
+				return Ok(response);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 	}
 }

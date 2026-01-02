@@ -21,24 +21,62 @@ namespace OneTime.Api.Controllers
 		/// <summary>
 		/// Opretter en ny time entry.
 		/// </summary>
-		[HttpPost]
+		//[HttpPost]
+		//[ProducesResponseType(200)]
+		//[ProducesResponseType(400)]
+		//public async Task<IActionResult> CreateTimeEntry([FromBody] TimeEntryCreateDto dto)
+		//{
+		//	if (!ModelState.IsValid)
+		//		return BadRequest(ModelState);
+
+		//	try
+		//	{
+		//		var entity = TimeEntryConverter.ToEntity(dto);
+
+		//		entity.Date = entity.Date == default ? DateOnly.FromDateTime(DateTime.Now) : entity.Date;
+
+		//		var created = await _timeEntryService.CreateTimeEntry(entity);
+
+		//		var response = TimeEntryConverter.ToDto(created);
+		//		return Ok(response);
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		return BadRequest(ex.Message);
+		//	}
+		//}
+
+		/// <summary>
+		/// Replaces all time entries for the specified timesheet with the provided collection of new entries.
+		/// </summary>
+		/// <remarks>All existing time entries for the specified timesheet are removed and replaced with the provided
+		/// entries. The request body must contain a valid list of time entry objects. This operation is atomic; either all
+		/// entries are replaced or none are if an error occurs.</remarks>
+		/// <param name="timesheetId">The unique identifier of the timesheet for which time entries will be replaced.</param>
+		/// <param name="entries">A list of time entry data transfer objects representing the new time entries to be saved. Cannot be null.</param>
+		/// <returns>An IActionResult indicating the result of the operation. Returns 200 OK if the entries are saved successfully;
+		/// otherwise, returns 400 Bad Request if the input is invalid or an error occurs.</returns>
+		[HttpPost("bulk/{timesheetId}")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
-		public async Task<IActionResult> CreateTimeEntry([FromBody] TimeEntryCreateDto dto)
+		public async Task<IActionResult> SaveTimeEntries(int timesheetId, [FromBody] List<TimeEntryCreateDto> entries)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
-
 			try
 			{
-				var entity = TimeEntryConverter.ToEntity(dto);
+                var entities = new List<TimeEntry>();
 
-				entity.Date = entity.Date == default ? DateOnly.FromDateTime(DateTime.Now) : entity.Date;
+                foreach (var dto in entries)
+                {
+                    var entity = TimeEntryConverter.ToEntity(dto);
+                    entity.TimesheetId = timesheetId;
 
-				var created = await _timeEntryService.CreateTimeEntry(entity);
+                    entities.Add(entity);
+                }
+                await _timeEntryService.ReplaceTimeEntries(timesheetId, entities);
 
-				var response = TimeEntryConverter.ToDto(created);
-				return Ok(response);
+				return Ok();
 			}
 			catch (Exception ex)
 			{
@@ -62,6 +100,22 @@ namespace OneTime.Api.Controllers
 			var response = entries.Select(TimeEntryConverter.ToDetailsDto).ToList();
 
 			return Ok(response);
+		}
+
+		/// <summary>
+		/// Henter alle brugerens timeentries med angivende timesheetid 
+		/// </summary>
+		/// <param name="userId"></param>
+		/// <param name="timesheetId"></param>
+		/// <returns></returns>
+		[HttpGet("user/{userId}/timesheet/{timesheetId}")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(204)]
+		public async Task<IActionResult> GetTimeEntriesForTimesheet(int userId, int timesheetId)
+		{
+			var entries = await _timeEntryService.GetTimeEntriesForTimesheet(userId, timesheetId);
+			var response = entries.Select(TimeEntryConverter.ToDetailsDto).ToList();
+            return Ok(response);
 		}
 	}
 }

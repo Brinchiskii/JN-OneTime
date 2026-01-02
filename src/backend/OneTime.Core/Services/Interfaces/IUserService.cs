@@ -13,4 +13,5 @@ public interface IUserService
     // Overloads to support API-layer DTO mapping without leaking business logic to controllers
     public Task<JNUser> Create(string name, string email, string password, UserRole role, int? managerId);
     public Task<JNUser> Update(int id, string name, string email, UserRole role, int? managerId);
+    public Task<IEnumerable<JNUser>> GetUsersByLeaderId(int id);
 }
