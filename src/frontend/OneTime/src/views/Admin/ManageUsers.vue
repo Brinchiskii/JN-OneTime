@@ -25,7 +25,7 @@ const userSelected = ref<User>()
 const showCreateModal = ref(false)
 const showDeleteModal = ref(false)
 const showUpdateModal = ref(false)
-const loading = ref(false)
+const isLoading = ref(false)
 
 const openCreateModal = () => {
   showCreateModal.value = true
@@ -34,7 +34,11 @@ const openCreateModal = () => {
 
 const createUser = async () => {
   try {
-    loading.value = true
+    isLoading.value = true
+    if (newUser.value.role == 2 && !newUser.value.managerId) {
+      alert("En medarbejder skal have en manager tilknyttet.")
+      return
+    }
     await userStore.createUser(newUser.value)
     showCreateModal.value = false
     userStore.fetchUsers()
@@ -44,7 +48,7 @@ const createUser = async () => {
     alert('Der opstod en fejl under oprettelse af brugeren. Prøv igen.')
   }
   finally {
-    loading.value = false
+    isLoading.value = false
   }
 }
 
@@ -56,7 +60,7 @@ const deleteUser = async () => {
   if (userSelected.value) await userStore.deleteUserById(userSelected.value?.userId)
   showDeleteModal.value = false
   userStore.fetchUsers()
-  alert("Bruger med id " + userSelected.value?.userId + " er nu blevet slettet")
+  alert(userSelected.value?.name + " er nu blevet slettet")
 }
 
 const chooseUpdate = (id: number) => {
@@ -73,12 +77,26 @@ const chooseUpdate = (id: number) => {
 }
 
 const updateUser = async () => {
-  console.log(userSelected.value)
-  console.log(newUser.value)
-  if (userSelected.value) await userStore.updateUser(userSelected.value.userId, newUser.value)
-  showUpdateModal.value = false
-  userStore.fetchUsers()
-  alert(newUser.value.name + " er blevet opdateret")
+  if (newUser.value.role == 2 && !newUser.value.managerId) {
+    alert("En medarbejder skal have en manager tilknyttet.")
+    return
+  }
+  if (newUser.value.role != 2) {
+    newUser.value.managerId = null
+  }
+  try {
+    isLoading.value = true
+    if (userSelected.value) await userStore.updateUser(userSelected.value.userId, newUser.value)
+    showUpdateModal.value = false
+    userStore.fetchUsers()
+    alert(newUser.value.name + " er blevet opdateret")
+  } catch (error) {
+    console.error('Fejl under opdatering:', error)
+    alert('Der opstod en fejl under opdatering af brugeren. Prøv igen.')
+  }
+  finally {
+    isLoading.value = false
+  }
 }
 
 const roleText = (roleId: number) => {
@@ -90,6 +108,32 @@ const roleText = (roleId: number) => {
 }
 
 const managers = computed(() => userStore.users.filter(user => user.role === 1))
+
+const getAvatarColor = (name: string) => {
+  const colors = [
+    '#ef4444', // Rød
+    '#f97316', // Orange
+    '#f59e0b', // Amber/Gul-orange
+    '#84cc16', // Lime
+    '#10b981', // Smaragd Grøn
+    '#06b6d4', // Cyan
+    '#3b82f6', // Blå
+    '#6366f1', // Indigo
+    '#8b5cf6', // Violet
+    '#d946ef', // Fuchsia
+    '#f43f5e', // Rose
+    '#64748b', // Skifergrå
+  ];
+
+  let hash = 9;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const index = Math.abs(hash) % colors.length;
+
+  return colors[index];
+}
 
 onMounted(() => {
   userStore.fetchUsers()
@@ -136,9 +180,16 @@ onMounted(() => {
             <td>
               <div class="d-flex align-items-center gap-3">
                 <div
-                  class="avatar-small rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
-                  style="width: 32px; height: 32px">
-                  {{ user.name.charAt(0) }}
+                  class="avatar-small rounded-circle text-white d-flex align-items-center justify-content-center fw-bold"
+                  :style="{
+                    backgroundColor: getAvatarColor(
+                      user.managerId ? userStore.getNameById(user.managerId) : user.name + 'a'
+                    ),
+                    width: '32px',
+                    height: '32px',
+                    fontSize: '0.9rem'
+                  }">
+                  {{ user.name.charAt(0).toUpperCase() }}
                 </div>
                 <div class="fw-bold">{{ user.name }}</div>
               </div>
@@ -149,7 +200,13 @@ onMounted(() => {
                 {{ roleText(user.role) }}
               </span>
             </td>
-            <td class="text-muted small">{{ userStore.getNameById(user.managerId) }}</td>
+            <td>
+              <span v-if="user.managerId" class="badge-role text-dark border shadow-sm">
+                {{ userStore.getNameById(user.managerId) }}
+              </span>
+
+              <span v-else class="text-muted small ms-2">-</span>
+            </td>
             <td class="text-end">
               <button class="btn btn-light btn-sm me-1 text-muted" @click="chooseUpdate(user.userId)">
                 <i class="bi bi-pencil"></i>
@@ -208,9 +265,9 @@ onMounted(() => {
 
       <div class="modal-footer">
         <button class="btn btn-light border" @click="showCreateModal = false">Annuller</button>
-        <button type="submit" class="btn btn-primary-admin" :disabled="loading">
-          <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-          {{ loading ? 'Opretter bruger...' : 'Opret Bruger' }}
+        <button type="submit" class="btn btn-primary-admin" :disabled="isLoading">
+          <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ isLoading ? 'Opretter bruger...' : 'Opret Bruger' }}
         </button>
       </div>
     </form>
@@ -242,16 +299,25 @@ onMounted(() => {
               <option :value="0">Admin</option>
             </select>
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Manager id</label>
-            <input type="number" class="form-control" v-model="newUser.managerId" />
+          <div class="col-md-6" :hidden="newUser.role != 2">
+            <label class="form-label">Vælg Manager</label>
+            <select class="form-select" v-model="newUser.managerId">
+              <option :value="null">Ingen manager valgt</option>
+
+              <option v-for="manager in managers" :key="manager.userId" :value="manager.userId">
+                {{ manager.name }}
+              </option>
+            </select>
           </div>
         </div>
       </div>
 
       <div class="modal-footer">
         <button class="btn btn-light border" @click="showUpdateModal = false">Annuller</button>
-        <button type="submit" class="btn btn-primary-admin">Opdater Bruger</button>
+        <button type="submit" class="btn btn-primary-admin" :disabled="isLoading">
+          <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ isLoading ? 'Opdaterer bruger...' : 'Opdater bruger' }}
+        </button>
       </div>
     </form>
   </div>
@@ -323,25 +389,24 @@ onMounted(() => {
 }
 
 .badge-role {
-  padding: 4px 10px;
+  padding: 4px 12px; /* Lidt bredere for pænere look */
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
+  color: white; /* Tvinger hvid tekst */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Lille skygge for effekt */
 }
 
 .role-Admin {
-  background-color: #f3e8ff;
-  color: #7e22ce;
+  background-color: green; /* Dyb Lilla */
 }
 
 .role-Leder {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: #6366f1; /* Stærk Blå */
 }
 
 .role-Medarbejder {
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: #475569; /* Mørk Koksgrå */
 }
 
 .badge-status {

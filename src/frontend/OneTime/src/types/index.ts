@@ -17,12 +17,14 @@ export interface TimeEntry {
 export interface TimesheetRow {
   timesheetId: number
   status: number
+  comment: string | null
   rows: Rows[]
 }
 
 export interface ApiTimesheetRow {
   timesheetId: number
   status: number
+  comment: string | null
   rows: ApiRows[]
 }
 

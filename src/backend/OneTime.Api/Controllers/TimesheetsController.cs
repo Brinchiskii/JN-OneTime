@@ -109,7 +109,7 @@ namespace OneTime.Api.Controllers
                 .ToDictionary(
                     userGroup => userGroup.Key,
                     userGroup => userGroup
-                        .GroupBy(e => new { e.TimesheetId, Status = e.Timesheet!.Status })
+                        .GroupBy(e => new { e.TimesheetId, Status = e.Timesheet!.Status, Comment = e.Timesheet!.Comment })
                         .Select(timesheetGroup =>
                         {
                             var projects = timesheetGroup
@@ -131,7 +131,7 @@ namespace OneTime.Api.Controllers
                                     );
                                 }).ToList();
 
-                            return new PendingTimesheetDto(timesheetGroup.Key.TimesheetId, timesheetGroup.Key.Status, projects);
+                            return new PendingTimesheetDto(timesheetGroup.Key.TimesheetId, timesheetGroup.Key.Status, timesheetGroup.Key.Comment, projects);
                         })
                         .ToList() 
                 );

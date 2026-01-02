@@ -41,41 +41,45 @@ const Status = computed(() => {
     case 0: // Afventer
       return {
         text: "Afventer godkendelse",
-        class: "btn-warning",     // Gul farve
-        icon: "bi bi-hourglass-split", // Timeglas ikon
-        isDisabled: true          // Man kan typisk ikke sende igen, mens man venter
+        class: "btn-warning",     
+        icon: "bi bi-hourglass-split", 
+        isDisabled: true         
       };
     case 1: // Godkendt
       return {
         text: "Godkendt",
-        class: "btn-success",     // Grøn farve
-        icon: "bi bi-check-circle-fill", // Flueben ikon
-        isDisabled: true          // Låst fordi den er godkendt
+        class: "btn-success",     
+        icon: "bi bi-check-circle-fill", 
+        isDisabled: true          
       };
     case 2: // Afvist
       return {
-        text: "Afvist - Send igen", // Opfordring til handling
-        class: "btn-danger",      // Rød farve
-        icon: "bi bi-exclamation-circle-fill", // Advarsels ikon
-        isDisabled: false         // Åben så man kan rette og sende igen
+        text: "Afvist - Send igen", 
+        class: "btn-danger",     
+        icon: "bi bi-exclamation-circle-fill", 
+        isDisabled: false         
       };
     default: // Ikke sendt (null eller andet)
       return {
         text: "Indsend ugeskema",
-        class: "btn-primary",     // Blå farve (Standard handling)
-        icon: "bi bi-send-fill",  // Send/Papirflyver ikon
+        class: "btn-primary",     
+        icon: "bi bi-send-fill", 
         isDisabled: false
       };
   }
 });
 
-onMounted(() => {
+const loading = () => {
   isLoading.value = true
-  projectStore.fetchProjects()
   timesheetStore.GetTimesheet()
     .finally(() => {
       isLoading.value = false
     })
+}
+
+onMounted(() => {
+  projectStore.fetchProjects()
+  loading()
 })
 </script>
 
@@ -99,7 +103,29 @@ onMounted(() => {
         </button>
       </div>
     </div>
-    <DatePicker @click="timesheetStore.GetTimesheet" @change="timesheetStore.GetTimesheet"></DatePicker>
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <DatePicker @click="loading" @change="loading"></DatePicker>
+      <transition name="fade">
+        <div 
+            v-if="timesheetStore.currentComment" 
+            class="alert alert-warning shadow-sm d-flex align-items-start gap-3 border-0 border-start border-4 border-warning" 
+            role="alert"
+        >
+            <div class="text-warning mt-1">
+                <i class="bi bi-chat-quote-fill fs-4"></i>
+            </div>  
+            
+            <div>
+                <h6 class="alert-heading fw-bold mb-1 text-dark">
+                    Besked fra din leder
+                </h6>
+                <p class="mb-0 text-dark opacity-75">
+                    {{ timesheetStore.currentComment }}
+                </p>
+            </div>
+        </div>
+    </transition>
+    </div>
     <div class="card bg-light mb-4 p-3">
       <div class="d-flex justify-content-between align-items-center">
         <span>Uge Total: <strong>{{ grandTotal }}t</strong></span>
@@ -107,7 +133,8 @@ onMounted(() => {
       </div>
     </div>
 
-    <span v-if="isLoading">Loading...</span>
+    <span class="spinner-border spinner-border-sm" v-if="isLoading"></span>
+    <span class="ms-2" v-if="isLoading">Loading...</span>
     <Timesheet v-else :timesheetrows="timesheetStore.myRows" :weekDays="timesheetStore.weekDays"
       :readonly="timesheetStore.currentTimesheetStatus === 1 || timesheetStore.currentTimesheetStatus === 0"></Timesheet>
   </div>

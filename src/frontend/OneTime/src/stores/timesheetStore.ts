@@ -21,10 +21,11 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   }
 
 
-  const myRows = ref<TimesheetRow>({ timesheetId: 0, status: 0, rows: [] })
+  const myRows = ref<TimesheetRow>({ timesheetId: 0, status: 0, comment: null, rows: [] })
   const isApproved = ref(false)
   const currentTimesheetId = ref<number | null>(null)
   const currentTimesheetStatus = ref<number | null>(null)
+  const currentComment = ref<string | null>(null)
 
   const addRow = () => {
     myRows.value.rows.push(createEmptyRow())
@@ -126,13 +127,14 @@ export const useTimesheetStore = defineStore('timesheet', () => {
                     normalized[user.name] = foundSheets.map(ts => ({
                         timesheetId: ts.timesheetId,
                         status: ts.status,
+                        comment: ts.comment,
                         rows: ts.rows.map(row => ({
                             projectId: row.project.projectId,
                             hours: row.hours
                         }))
                     }))
                 } else {
-                    normalized[user.name] = [{ timesheetId: 0, status: -1, rows: [] }]
+                    normalized[user.name] = [{ timesheetId: 0, status: -1, comment: null, rows: [] }]
                 }
             }
         }
@@ -230,7 +232,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       const timesheet = await timesheetService.getUserTimeSheet(AuthStore.user?.userId ?? 0, currentWeekStart.value.format('YYYY-MM-DD'), currentWeekStart.value.endOf('isoWeek').format('YYYY-MM-DD'))
       const timeEntries = await timeEntriesService.GetTimeEntriesByTimesheetId(AuthStore.user?.userId ?? 0, timesheet.data.timesheetId)
 
-      const rows: TimesheetRow = { timesheetId: timesheet.data.timesheetId, status: timesheet.data.status, rows: [] }
+      const rows: TimesheetRow = { timesheetId: timesheet.data.timesheetId, status: timesheet.data.status, comment: timesheet.data.comment, rows: [] }
 
       for (const entry of timeEntries.data) {
         let row = rows.rows.find(r => r.projectId === entry.projectId)
@@ -248,12 +250,14 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       isApproved.value = timesheet.data.status === 1
       currentTimesheetId.value = timesheet.data.timesheetId
       currentTimesheetStatus.value = timesheet.data.status
+      currentComment.value = timesheet.data.comment 
     } catch (error) {
       console.error("Fejl ved hentning af timesheet", error)
-      myRows.value = { timesheetId: 0, status: 0, rows: [] }
+      myRows.value = { timesheetId: 0, status: 0, comment: null, rows: [] }
       currentTimesheetId.value = null
       isApproved.value = false
       currentTimesheetStatus.value = null
+      currentComment.value = null
     }
   }
 
@@ -265,6 +269,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     isApproved,
     currentTimesheetId,
     currentTimesheetStatus,
+    currentComment,
 
     currentWeekStart,
     weekDays,

@@ -109,7 +109,8 @@ onMounted(() => {
     <span class="spinner-border spinner-border-sm" v-if="isLoading"></span>
     <span class="ms-2" v-if="isLoading">Loading...</span>
 
-    <div v-else-if="viewMode === 'pending' && filteredAndSortedRows.length === 0" class="text-center py-5 bg-light rounded">
+    <div v-else-if="viewMode === 'pending' && filteredAndSortedRows.length === 0"
+      class="text-center py-5 bg-light rounded">
 
       <div v-if="statusCounts.notSubmitted > 0 || statusCounts.rejected > 0">
 
@@ -150,8 +151,13 @@ onMounted(() => {
 
     </div>
 
-    <ManagerTeamCard v-else v-for="[userName, rows] in filteredAndSortedRows" :key="userName" :userName="userName"
-      :rows="rows[0]!" :status="rows[0]!.status" @refresh="loading">
+    <ManagerTeamCard v-else v-for="[userName, rows] in filteredAndSortedRows" 
+    :key="userName" 
+    :userName="userName"
+      :rows="rows[0]!" 
+      :status="rows[0]!.status" 
+      :comment="rows[0]!.comment"
+      @refresh="loading">
     </ManagerTeamCard>
   </div>
 

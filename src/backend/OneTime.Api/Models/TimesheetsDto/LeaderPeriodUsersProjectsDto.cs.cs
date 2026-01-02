@@ -8,7 +8,8 @@
 	);
 	public record PendingTimesheetDto(
 		int TimesheetId,
-		int status,
+		int Status,
+		string? Comment,
 		List<ProjectHoursByDateDto> Rows
 	);
 	public record LeaderUsersProjectsResponseDto(
