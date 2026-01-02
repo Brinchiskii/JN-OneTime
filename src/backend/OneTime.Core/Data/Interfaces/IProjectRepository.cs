@@ -20,7 +20,7 @@ namespace OneTime.Core.Services.Interfaces
         /// <returns>The project, which matches the unique identifier.</returns>
         Task<Project> GetById(int id);
 		Task<Project> Add(Project project);
-        Task<Project> Delete(int id);
+        Task<Project> Delete(Project project);
         Task<Project> Update(Project project);
 
 	}

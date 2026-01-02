@@ -8,118 +8,107 @@ namespace OneTime.Api.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class ProjectsController : ControllerBase
-	{
-		private readonly IProjectRepository _projectRepo;
+     public class ProjectsController : ControllerBase
+     {
+         private readonly IProjectService _projectService;
 
-		public ProjectsController(IProjectRepository projectRepo)
-		{
-			_projectRepo = projectRepo;
-		}
+         public ProjectsController(IProjectService projectService)
+         {
+             _projectService = projectService;
+         }
 
-		/// <summary>
-		/// Henter alle projekter.
-		/// </summary>
-		/// <returns>
-		/// 200 OK med en liste af projekter, hvis der findes nogen.  
-		/// 204 No Content, hvis der ikke er nogen projekter.
-		/// </returns>
-		[HttpGet]
-		[ProducesResponseType(200)]
-		[ProducesResponseType(204)]
-		public async Task<IActionResult> GetAll()
-		{
-			var projects = await _projectRepo.GetAll();
+		    /// <summary>
+		    /// Henter alle projekter.
+		    /// </summary>
+		    /// <returns>
+		    /// 200 OK med en liste af projekter, hvis der findes nogen.  
+		    /// 204 No Content, hvis der ikke er nogen projekter.
+		    /// </returns>
+		    [HttpGet]
+		    [ProducesResponseType(200)]
+		    [ProducesResponseType(204)]
+          public async Task<IActionResult> GetAll()
+          {
+              var projects = await _projectService.GetAll();
 
+              if (!projects.Any())
+                  return NoContent();
 
-			if (!projects.Any())
-				return NoContent();
+              return Ok(projects);
+          }
+          
+                [HttpPost]
+		        [ProducesResponseType(201)]
+		        [ProducesResponseType(400)]
+          public async Task<IActionResult> Create([FromBody] ProjectCreateDto dto)
+          {
+              if (!ModelState.IsValid)
+                  return BadRequest(ModelState);
 
-			return Ok(projects);
-		}
+              try
+              {
+                  var created = await _projectService.Create(dto.Name, (ProjectStatus)dto.Status);
+                  return CreatedAtAction(nameof(GetById), new { id = created.ProjectId }, created);
+              }
+              catch (InvalidOperationException ex)
+              {
+                  return BadRequest(ex.Message);
+              }
+          }
 
-		[HttpPost]
-		[ProducesResponseType(201)]
-		[ProducesResponseType(400)]
-		public async Task<IActionResult> Create([FromBody] ProjectCreateDto dto)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
+          [HttpDelete("{id:int}")]
+          [ProducesResponseType(204)]
+          [ProducesResponseType(400)]
+          [ProducesResponseType(404)]
+          public async Task<IActionResult> Delete(int id)
+          {
+              try
+              {
+                  await _projectService.Delete(id);
+                  return Ok(new
+                  {
+                      Message = $"Project with ID {id} was successfully deleted."
+                  });
+              }
+              catch (InvalidOperationException ex)
+              {
+                  if (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                      return NotFound(ex.Message);
 
-			try
-			{
-				if (!Enum.IsDefined(typeof(ProjectStatus), dto.Status))
-					return BadRequest("Invalid project status.");
+                  return BadRequest(ex.Message);
+              }
+          }
 
-				var entity = new Project
-				{
-					Name = dto.Name,
-					Status = dto.Status
-				};
+          [HttpPut("{id:int}")]
+          [ProducesResponseType(200)]
+          [ProducesResponseType(400)]
+          [ProducesResponseType(404)]
+          public async Task<IActionResult> Update(int id, [FromBody] ProjectUpdateDto dto)
+          {
+              if (!ModelState.IsValid) return BadRequest(ModelState);
 
-				var created = await _projectRepo.Add(entity);
+              try
+              {
+                  var updated = await _projectService.Update(id, dto.Name, (ProjectStatus)dto.Status);
+                  return Ok(updated);
+              }
+              catch (InvalidOperationException ex)
+              {
+                  if (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                      return NotFound(ex.Message);
+                  return BadRequest(ex.Message);
+              }
+          }
 
-				return CreatedAtAction(nameof(GetById), new { id = created.ProjectId }, created);
-			}
-			catch (InvalidOperationException ex)
-			{
-				return BadRequest(ex.Message);
-			}
-		}
-
-		[HttpDelete("{id:int}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                await _projectRepo.Delete(id);
-				return Ok(new
-				{
-					Message = $"Project with ID {id} was successfully deleted."
-				});
-			}
-            catch (InvalidOperationException ex)
-            {
-                if (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-                    return NotFound(ex.Message);
-
-                return BadRequest(ex.Message);
-            }
-        }
-
-		[HttpPut("{id:int}")]
-		[ProducesResponseType(200)]
-		[ProducesResponseType(400)]
-		[ProducesResponseType(404)]
-		public async Task<IActionResult> Update(int id, [FromBody] ProjectUpdateDto dto)
-		{
-			if (!ModelState.IsValid) return BadRequest(ModelState);
-
-			if (!Enum.IsDefined(typeof(ProjectStatus), dto.Status))
-				return BadRequest("Invalid project status.");
-
-			var project = await _projectRepo.GetById(id);
-			if (project == null) return NotFound("Project not found.");
-
-			project.Name = dto.Name;
-			project.Status = dto.Status;
-
-			var updated = await _projectRepo.Update(project);
-			return Ok((updated));
-		}
-
-		[HttpGet("{id}")]
-		[ProducesResponseType(200)]
-		[ProducesResponseType(404)]
-		public async Task<IActionResult> GetById(int id)
-		{
-			var project = await _projectRepo.GetById(id);
-			if (project == null)
-				return NotFound();
-			return Ok(project);
-		}
-	}
+          [HttpGet("{id}")]
+          [ProducesResponseType(200)]
+          [ProducesResponseType(404)]
+          public async Task<IActionResult> GetById(int id)
+          {
+              var project = await _projectService.GetById(id);
+              if (project == null)
+                  return NotFound();
+              return Ok(project);
+          } 
+     }
 }

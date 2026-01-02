@@ -24,27 +24,16 @@ namespace OneTime.Core.Services.Repository
 		{
 			if (project == null)
 				throw new ArgumentNullException(nameof(project));
-
-			if (string.IsNullOrWhiteSpace(project.Name))
-				throw new InvalidOperationException("Project name is required.");
-
-			var exists = await _context.Projects.AnyAsync(p => p.Name == project.Name);
-			if (exists)
-				throw new InvalidOperationException("A project with the same name already exists.");
-
+			
 			_context.Projects.Add(project);
 			await _context.SaveChangesAsync();
 
 			return project;
 		}
 
-		public async Task<Project> Delete(int id)
+		public async Task<Project> Delete(Project project)
 		{
-			var project = await _context.Projects.FindAsync(id);
-			if (project == null)
-				throw new InvalidOperationException("Project not found.");
-
-			var hasEntries = await _context.TimeEntries.AnyAsync(t => t.ProjectId == id);
+			var hasEntries = await _context.TimeEntries.AnyAsync(t => t.ProjectId == project.ProjectId);
 			if (hasEntries)
 				throw new InvalidOperationException("Cannot delete project with time entries.");
 
