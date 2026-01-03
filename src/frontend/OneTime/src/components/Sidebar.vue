@@ -23,8 +23,9 @@ const logout = () => {
     </router-link>
 
     <template v-if="role === 0" class="nav nav-pills flex-column mb-auto gap-1">
-        <router-link to="/admin" class="nav-link" exact-active-class="active"> <i class="bi bi-speedometer2"></i> Dashboard </router-link>
+        <!-- <router-link to="/admin" class="nav-link" exact-active-class="active"> <i class="bi bi-speedometer2"></i> Dashboard </router-link> -->
         <router-link to="/admin/users" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Medarbejdere </router-link>
+        <router-link to="/admin/projects" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Projekter </router-link>
         <router-link to="/admin/logs" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Logs </router-link>
     </template>
 

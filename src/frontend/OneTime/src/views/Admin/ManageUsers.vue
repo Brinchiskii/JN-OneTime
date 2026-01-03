@@ -7,6 +7,17 @@ const userStore = useUserStore()
 
 const sortRole = ref(4)
 const searchQuery = ref('')
+const sortColumn = ref('name')
+const sortDirection = ref('asc')
+
+const sortTable = (column: string) => {
+  if (sortColumn.value === column) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortColumn.value = column
+    sortDirection.value = 'asc'
+  }
+}
 
 const filteredUsers = computed(() => {
   let data = userStore.users
@@ -17,7 +28,37 @@ const filteredUsers = computed(() => {
       (user) => user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query),
     )
   }
-  return data
+  return data.sort((a, b) => {
+    let modifier = sortDirection.value === 'asc' ? 1 : -1
+
+    let valA: any = ''
+    let valB: any = ''
+    switch (sortColumn.value) {
+      case 'name':
+        valA = a.name.toLowerCase()
+        valB = b.name.toLowerCase()
+        break
+      case 'email':
+        valA = a.email.toLowerCase()
+        valB = b.email.toLowerCase()
+        break
+      case 'role':
+        valA = a.role
+        valB = b.role
+        break
+      case 'manager':
+        valA = a.managerId ? userStore.getNameById(a.managerId).toLowerCase() : ''
+        valB = b.managerId ? userStore.getNameById(b.managerId).toLowerCase() : ''
+        break
+      default:
+        valA = a.name
+        valB = b.name
+    }
+
+    if (valA < valB) return -1 * modifier
+    if (valA > valB) return 1 * modifier
+    return 0
+  })
 })
 
 const newUser = ref<UserPayload>({ name: '', email: '', password: null, managerId: null, role: 0 })
@@ -110,29 +151,12 @@ const roleText = (roleId: number) => {
 const managers = computed(() => userStore.users.filter(user => user.role === 1))
 
 const getAvatarColor = (name: string) => {
-  const colors = [
-    '#ef4444', // Rød
-    '#f97316', // Orange
-    '#f59e0b', // Amber/Gul-orange
-    '#84cc16', // Lime
-    '#10b981', // Smaragd Grøn
-    '#06b6d4', // Cyan
-    '#3b82f6', // Blå
-    '#6366f1', // Indigo
-    '#8b5cf6', // Violet
-    '#d946ef', // Fuchsia
-    '#f43f5e', // Rose
-    '#64748b', // Skifergrå
-  ];
-
-  let hash = 9;
+  let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-
-  const index = Math.abs(hash) % colors.length;
-
-  return colors[index];
+  const hue = Math.abs(hash * 137.508) % 360;
+  return `hsl(${hue}, 75%, 40%)`;
 }
 
 onMounted(() => {
@@ -168,10 +192,38 @@ onMounted(() => {
       <table class="table-admin">
         <thead>
           <tr>
-            <th>Bruger</th>
-            <th>Email</th>
-            <th>Rolle</th>
-            <th>Leder</th>
+            <th @click="sortTable('name')" class="cursor-pointer user-select-none">
+              Bruger
+              <span v-if="sortColumn === 'name'" class="text-primary">
+                <i :class="sortDirection === 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-up-alt'"></i>
+              </span>
+              <span v-else class="text-muted opacity-25"><i class="bi bi-arrow-down-up"></i></span>
+            </th>
+
+            <th @click="sortTable('email')" class="cursor-pointer user-select-none">
+              Email
+              <span v-if="sortColumn === 'email'" class="text-primary">
+                <i :class="sortDirection === 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-up-alt'"></i>
+              </span>
+              <span v-else class="text-muted opacity-25"><i class="bi bi-arrow-down-up"></i></span>
+            </th>
+
+            <th @click="sortTable('role')" class="cursor-pointer user-select-none">
+              Rolle
+              <span v-if="sortColumn === 'role'" class="text-primary">
+                <i :class="sortDirection === 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-up-alt'"></i>
+              </span>
+              <span v-else class="text-muted opacity-25"><i class="bi bi-arrow-down-up"></i></span>
+            </th>
+
+            <th @click="sortTable('manager')" class="cursor-pointer user-select-none">
+              Leder
+              <span v-if="sortColumn === 'manager'" class="text-primary">
+                <i :class="sortDirection === 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-up-alt'"></i>
+              </span>
+              <span v-else class="text-muted opacity-25"><i class="bi bi-arrow-down-up"></i></span>
+            </th>
+
             <th class="text-end">Handlinger</th>
           </tr>
         </thead>
@@ -389,24 +441,30 @@ onMounted(() => {
 }
 
 .badge-role {
-  padding: 4px 12px; /* Lidt bredere for pænere look */
+  padding: 4px 12px;
+  /* Lidt bredere for pænere look */
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: white; /* Tvinger hvid tekst */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Lille skygge for effekt */
+  color: white;
+  /* Tvinger hvid tekst */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Lille skygge for effekt */
 }
 
 .role-Admin {
-  background-color: green; /* Dyb Lilla */
+  background-color: green;
+  /* Dyb Lilla */
 }
 
 .role-Leder {
-  background-color: #6366f1; /* Stærk Blå */
+  background-color: #6366f1;
+  /* Stærk Blå */
 }
 
 .role-Medarbejder {
-  background-color: #475569; /* Mørk Koksgrå */
+  background-color: #475569;
+  /* Mørk Koksgrå */
 }
 
 .badge-status {

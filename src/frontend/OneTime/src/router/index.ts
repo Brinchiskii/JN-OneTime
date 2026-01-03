@@ -22,6 +22,7 @@ const router = createRouter({
       path: '/admin',
       meta: { requiresAuth: true, role: 0 },
       component: () => import('@/views/Admin/AdminDashboard.vue'),
+      redirect: '/admin/users',
       children: [
         {
           path: 'users',
@@ -34,6 +35,12 @@ const router = createRouter({
           name: 'admin-logs',
           meta: { requiresAuth: true, role: 0 },
           component: () => import('@/views/Admin/AuditLogs.vue'),
+        },
+        {
+          path: 'projects',
+          name: 'admin-projects',
+          meta: { requiresAuth: true, role: 0 },
+          component: () => import('@/views/Admin/ManageProjects.vue'),
         },
       ],
     },

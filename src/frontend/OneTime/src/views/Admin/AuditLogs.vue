@@ -44,9 +44,14 @@ const filteredLogs = computed(() => {
 </script>
 <template>
   <div class="flex-grow-1 p-4 p-lg-5 overflow-auto card">
+    <div class="mb-2">
+      <h6 class="text-uppercase text-muted fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 1px">
+        Logs
+      </h6>
+      <h2 class="fw-bold mb-0 text-dark">Log oversigt</h2>
+    </div>
     <div
-      class="card-header btn btn-white bg-white border shadow-sm date-picker-wrapper d-flex align-items-center gap-2"
-    >
+      class="card-header btn btn-white bg-white border shadow-sm date-picker-wrapper d-flex align-items-center gap-2">
       <i class="bi bi-calendar3"></i>
       <input type="date" class="date-input-hidden" @change="changeStartDate" />
       -

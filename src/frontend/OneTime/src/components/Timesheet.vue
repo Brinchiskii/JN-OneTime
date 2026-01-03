@@ -58,7 +58,7 @@ const grandTotal = computed(() => {
           <td>
             <select class="project-select form-select" :disabled="props.readonly" v-model="row.projectId">
               <option :value="0" hidden>Vælg projekt</option>
-              <option v-for="p in projectStore.projects" :key="p.projectId" :value="p.projectId">
+              <option v-for="p in readonly ? projectStore.projects : projectStore.projects.filter(p => p.status === 0)" :key="p.projectId" :value="p.projectId">
                 {{ p.name }}
               </option>
             </select>

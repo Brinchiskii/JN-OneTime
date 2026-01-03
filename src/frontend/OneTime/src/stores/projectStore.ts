@@ -12,5 +12,17 @@ export const useProjectStore = defineStore('project', () => {
     projects.value = res.data
   }
 
-  return { projects, fetchProjects }
+  const createProject = async (project: Partial<Project>) => {
+    await projectsService.createProject(project)
+  }
+
+  const updateProject = async (project: Partial<Project>) => {
+    await projectsService.updateProject(project)
+  }
+
+  const deleteProject = async (id: number) => {
+    await projectsService.deleteProject(id)
+  }
+
+  return { projects, fetchProjects, createProject, updateProject, deleteProject }
 })
