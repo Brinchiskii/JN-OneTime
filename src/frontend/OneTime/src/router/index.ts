@@ -49,7 +49,22 @@ const router = createRouter({
       path: '/manager',
       name: 'manager',
       meta: { requiresAuth: true, role: 1 },
-      component: () => import('@/views/ManagerDashboard.vue'),
+      component: () => import('@/views/Manager/ManagerDashboard.vue'),
+      redirect: '/manager/team-timesheets',
+      children: [
+        {
+          path: 'projects',
+          name: 'manager-projects',
+          meta: { requiresAuth: true, role: 1 },
+          component: () => import('@/views/Manager/ManageProjects.vue'),
+        },
+        {
+          path: 'team-timesheets',
+          name: 'manager-team-timesheets',
+          meta: { requiresAuth: true, role: 1 },
+          component: () => import('@/views/Manager/TeamTimesheets.vue'),
+        }
+      ],
     },
 
     {

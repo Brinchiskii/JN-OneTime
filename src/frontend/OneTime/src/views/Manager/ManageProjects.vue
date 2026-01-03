@@ -2,5 +2,5 @@
 import ManageProjects from '@/components/ManageProjects.vue';
 </script>
 <template>
-    <ManageProjects :isAdmin="true"></ManageProjects>
+    <ManageProjects :isAdmin="false"></ManageProjects>
 </template>

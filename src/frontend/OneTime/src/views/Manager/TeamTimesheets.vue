@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import Timesheet from '../components/Timesheet.vue'
 import { onMounted, ref, computed } from 'vue'
-import { useTimesheetStore } from '../stores/timesheetStore'
-import type { TimesheetRow } from '@/types'
+import { useTimesheetStore } from '../../stores/timesheetStore'
 import ManagerTeamCard from '@/components/ManagerTeamCard.vue'
 import DatePicker from '@/components/DatePicker.vue'
 import Sidebar from '@/components/Sidebar.vue'
@@ -84,7 +82,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <Sidebar></Sidebar>
   <div class="flex-grow-1 p-4 p-lg-5 overflow-auto">
     <h3>Team Oversigt</h3>
     <h5 class="my-1">{{ timesheetStore.weekHeader }}</h5>
