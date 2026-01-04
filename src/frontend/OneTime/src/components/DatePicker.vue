@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTimesheetStore } from '@/stores/timesheetStore';
+import { useTimesheetStore } from '@/stores/TimesheetStore';
 const timesheetStore = useTimesheetStore()
 
 

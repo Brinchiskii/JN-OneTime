@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useTimesheetStore } from '../stores/timesheetStore'
+import { useTimesheetStore } from '../stores/TimesheetStore'
 import Timesheet from './Timesheet.vue'
 import type { TimesheetRow } from '@/types'
 

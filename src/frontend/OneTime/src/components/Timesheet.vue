@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, onBeforeMount } from 'vue'
 import type { TimesheetRow, Project, WeekDay } from '../types'
-import { useProjectStore } from '@/stores/projectStore'
-import { useTimesheetStore } from '@/stores/timesheetStore'
+import { useProjectStore } from '@/stores/ProjectStore'
+import { useTimesheetStore } from '@/stores/TimesheetStore'
 
 const props = defineProps<{
   timesheetrows: TimesheetRow

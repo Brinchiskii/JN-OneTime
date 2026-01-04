@@ -150,15 +150,6 @@ const roleText = (roleId: number) => {
 
 const managers = computed(() => userStore.users.filter(user => user.role === 1))
 
-const getAvatarColor = (name: string) => {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const hue = Math.abs(hash * 137.508) % 360;
-  return `hsl(${hue}, 75%, 40%)`;
-}
-
 onMounted(() => {
   userStore.fetchUsers()
 })
@@ -234,7 +225,7 @@ onMounted(() => {
                 <div
                   class="avatar-small rounded-circle text-white d-flex align-items-center justify-content-center fw-bold"
                   :style="{
-                    backgroundColor: getAvatarColor(
+                    backgroundColor: userStore.getAvatarColor(
                       user.managerId ? userStore.getNameById(user.managerId) : user.name + 'a'
                     ),
                     width: '32px',

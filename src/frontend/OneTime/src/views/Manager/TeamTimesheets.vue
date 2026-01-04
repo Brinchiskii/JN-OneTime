@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { useTimesheetStore } from '../../stores/timesheetStore'
+import { useTimesheetStore } from '../../stores/TimesheetStore'
 import ManagerTeamCard from '@/components/ManagerTeamCard.vue'
 import DatePicker from '@/components/DatePicker.vue'
 import Sidebar from '@/components/Sidebar.vue'

@@ -29,5 +29,14 @@ export const useUserStore = defineStore('user', () => {
     return userService.updateUser(id, payload)
   }
 
-  return { users, fetchUsers, createUser, deleteUserById, updateUser, getNameById}
+  const getAvatarColor = (name: string) => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash * 137.508) % 360;
+  return `hsl(${hue}, 75%, 40%)`;
+}
+
+  return { users, fetchUsers, createUser, deleteUserById, updateUser, getNameById, getAvatarColor }
 })

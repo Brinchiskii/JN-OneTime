@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { useTimesheetStore } from '../stores/timesheetStore'
-import { useProjectStore } from '../stores/projectStore'
+import { useTimesheetStore } from '../stores/TimesheetStore'
+import { useProjectStore } from '../stores/ProjectStore'
 import Timesheet from './Timesheet.vue'
 import DatePicker from './DatePicker.vue'
 import { isBuildCommand } from 'typescript'

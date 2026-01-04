@@ -63,6 +63,12 @@ const router = createRouter({
           name: 'manager-team-timesheets',
           meta: { requiresAuth: true, role: 1 },
           component: () => import('@/views/Manager/TeamTimesheets.vue'),
+        },
+        {
+          path: 'project-overview',
+          name: 'manager-project-overview',
+          meta: { requiresAuth: true, role: 1 },
+          component: () => import('@/views/Manager/ProjetOverview.vue'),
         }
       ],
     },

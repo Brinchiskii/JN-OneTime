@@ -125,3 +125,18 @@ export interface Timesheet {
   decidedAt: string | null
   comment: string | null
 }
+
+interface ProjectMember {
+  userId: number
+  name: string
+  hoursContributor: number
+}
+
+export interface ProjectStat {
+  projectId: number      // Matcher C# ProjectId
+  projectName: string    // Matcher C# ProjectName
+  status: number         // Matcher C# Status
+  totalHours: number     // Matcher C# TotalHours
+  members: ProjectMember[]
+}
+

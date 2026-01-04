@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OneTime.Api.Models.ProjectsDto;
 using OneTime.Api.Models.TimeEntriesDto;
 using OneTime.Core.Models;
 using OneTime.Core.Models.Enums;
@@ -12,39 +13,11 @@ namespace OneTime.Api.Controllers
 	{
 		private readonly ITimeEntryService _timeEntryService;
 
-		public TimeEntriesController(ITimeEntryService timeEntryService)
+
+        public TimeEntriesController(ITimeEntryService timeEntryService)
 		{
 			_timeEntryService = timeEntryService;
 		}
-
-
-		/// <summary>
-		/// Opretter en ny time entry.
-		/// </summary>
-		//[HttpPost]
-		//[ProducesResponseType(200)]
-		//[ProducesResponseType(400)]
-		//public async Task<IActionResult> CreateTimeEntry([FromBody] TimeEntryCreateDto dto)
-		//{
-		//	if (!ModelState.IsValid)
-		//		return BadRequest(ModelState);
-
-		//	try
-		//	{
-		//		var entity = TimeEntryConverter.ToEntity(dto);
-
-		//		entity.Date = entity.Date == default ? DateOnly.FromDateTime(DateTime.Now) : entity.Date;
-
-		//		var created = await _timeEntryService.CreateTimeEntry(entity);
-
-		//		var response = TimeEntryConverter.ToDto(created);
-		//		return Ok(response);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		return BadRequest(ex.Message);
-		//	}
-		//}
 
 		/// <summary>
 		/// Replaces all time entries for the specified timesheet with the provided collection of new entries.
@@ -117,5 +90,5 @@ namespace OneTime.Api.Controllers
 			var response = entries.Select(TimeEntryConverter.ToDetailsDto).ToList();
             return Ok(response);
 		}
-	}
+    }
 }

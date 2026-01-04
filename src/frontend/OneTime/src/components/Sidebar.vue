@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/AuthStore';
+import { useUserStore } from '@/stores/UserStore';
 const AuthStore = useAuthStore()
-
+const userStore = useUserStore()
 const role = AuthStore.userRole
 
 const logout = () => {
@@ -15,7 +16,7 @@ const logout = () => {
     <router-link to="/" class="d-flex align-items-center mb-5 text-decoration-none">
       <div
         class="rounded-3 text-white d-flex align-items-center justify-content-center me-2"
-        style="width: 40px; height: 40px; background-color: var(--primary-color)"
+        style="width: 40px; height: 40px; background-color: var(--primary-color);"
       >
         <i class="bi bi-building-fill fs-5"></i>
       </div>
@@ -23,17 +24,15 @@ const logout = () => {
     </router-link>
 
     <template v-if="role === 0" class="nav nav-pills flex-column mb-auto gap-1">
-        <!-- <router-link to="/admin" class="nav-link" exact-active-class="active"> <i class="bi bi-speedometer2"></i> Dashboard </router-link> -->
         <router-link to="/admin/users" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Medarbejdere </router-link>
         <router-link to="/admin/projects" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Projekter </router-link>
         <router-link to="/admin/logs" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Logs </router-link>
     </template>
 
     <template v-if="role === 1" class="nav nav-pills flex-column mb-auto gap-1">
-      <router-link to="/manager/team-timesheets" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Medarbejder tidsregistreringer </router-link>
-      <router-link to="/manager/projects" class="nav-link" exact-active-class="active"> <i class="bi bi-speedometer2"></i> Projekter </router-link>
-      <!-- <router-link to="/manager" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Medarbejdere </router-link>
-      <router-link to="/manager" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Logs </router-link> -->
+      <router-link to="/manager/team-timesheets" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Team Oversigt </router-link>
+      <router-link to="/manager/projects" class="nav-link" exact-active-class="active"> <i class="bi bi-file-earmark-text"></i> Projekter </router-link>
+      <router-link to="/manager/project-overview" class="nav-link" exact-active-class="active"> <i class="bi bi-bar-chart-line"></i> Projekt Overblik </router-link>
     </template>
 
     <template v-if="role === 2" class="nav nav-pills flex-column mb-auto gap-1">
@@ -44,7 +43,9 @@ const logout = () => {
 
     <div class="mt-auto pt-4 border-top">
       <div class="d-flex align-items-center gap-3">
-        <div class="avatar bg-secondary">{{ AuthStore.user?.name.charAt(0)}}</div>
+        <div class="avatar" :style="'width: 40px; height: 40px; background-color: ' + userStore.getAvatarColor(AuthStore.user!.name)">
+          {{ AuthStore.user?.name.charAt(0) }}
+        </div>
         <div style="line-height: 1.2">
           <div class="fw-bold text-dark">{{ AuthStore.user?.name }}</div>
           <small class="text-muted">{{ AuthStore.roleText }}</small>
