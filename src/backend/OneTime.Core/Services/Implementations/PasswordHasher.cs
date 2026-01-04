@@ -15,7 +15,7 @@ namespace OneTime.Core.Services.Implementations
 		public (string Hash, string Salt) HashPassword(string password)
 		{
 			if (string.IsNullOrWhiteSpace(password))
-				throw new ArgumentException("Password cannot be empty", nameof(password));
+				throw new ArgumentException("Password cannot be empty");
 
 			var saltBytes = RandomNumberGenerator.GetBytes(SaltSize);
 

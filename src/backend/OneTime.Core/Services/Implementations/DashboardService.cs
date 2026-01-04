@@ -20,7 +20,7 @@ namespace OneTime.Core.Services.Implementations
         {
             if (startDate > endDate)
             {
-                throw new ArgumentException("Slutdato skal være efter startdato");
+                throw new ArgumentException("End date have to be after start date.");
             }
 
             return await _dashboardRepository.GetTeamPerformanceAsync(managerId, startDate, endDate);

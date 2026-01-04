@@ -117,6 +117,11 @@ public class UserService : IUserService
 
     public async Task<IEnumerable<JNUser>> GetUsersByLeaderId(int id)
     {
-        return await _userRepository.GetUsersByLeaderId(id);
+        if (id <= 0)
+            throw new ArgumentException("UserId must be greater than zero");
+
+        var user = await _userRepository.GetUsersByLeaderId(id);
+
+        return user;
     }
 }

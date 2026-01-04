@@ -19,14 +19,16 @@ public class ProjectService : IProjectService
         return projects;
     }
 
-    public Task<Project?> GetById(int id)
+    public async Task<Project?> GetById(int id)
     {
         if (id <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(id), "Project ID must be greater than zero.");
+            throw new ArgumentOutOfRangeException("Project ID must be greater than zero.");
         }
         
-        return _projectRepository.GetById(id);
+        var project = await _projectRepository.GetById(id);
+
+        return project ?? throw new InvalidOperationException("Project not found.");
     }
 
     public async Task<Project> Create(string name, ProjectStatus status)

@@ -20,11 +20,11 @@ public class TimesheetService : ITimesheetService
         // Validate basic input
         if (userId <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero.");
+            throw new ArgumentOutOfRangeException("User ID must be greater than zero.");
         }
         if (periodStart > periodEnd)
         {
-            throw new ArgumentOutOfRangeException(nameof(periodStart), "Start date must be before or equal to end date.");
+            throw new ArgumentOutOfRangeException("Start date must be before or equal to end date.");
         }
 
         // Business rules moved from repository into service
@@ -61,7 +61,7 @@ public class TimesheetService : ITimesheetService
     public async Task<Timesheet> UpdateTimeSheet(int timesheetId, int status, string? comment, int leaderId = 0)
     {
         if (timesheetId <= 0)
-            throw new ArgumentOutOfRangeException(nameof(timesheetId), "Timesheet ID must be greater than zero.");
+            throw new ArgumentOutOfRangeException("Timesheet ID must be greater than zero.");
 
         // Fetch sheet
         var sheet = await _timesheetRepository.GetById(timesheetId);
@@ -77,15 +77,12 @@ public class TimesheetService : ITimesheetService
             1 => TimesheetStatus.Approved,
             2 => TimesheetStatus.Rejected,
             3 => TimesheetStatus.Draft,
-            _ => throw new ArgumentOutOfRangeException(nameof(status), "Invalid timesheet status value.")
+            _ => throw new ArgumentOutOfRangeException("Invalid timesheet status value.")
         };
 
         sheet.Status = (int)newStatus;
 
-        if (leaderId != 0)
-        {
-            sheet.DecidedByUserId = leaderId;
-        }
+        sheet.DecidedByUserId = leaderId != 0 ? leaderId : sheet.UserId;
 
         sheet.DecidedAt = DateTime.Now;
         sheet.Comment = comment;
@@ -122,11 +119,11 @@ public class TimesheetService : ITimesheetService
     {
         if(userId <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(userId), "User ID must be greater than zero.");
+            throw new ArgumentOutOfRangeException("User ID must be greater than zero.");
         }
         if(startDate > endDate)
         {
-            throw new ArgumentOutOfRangeException(nameof(startDate), "Start date must be before or equal to end date.");
+            throw new ArgumentOutOfRangeException("Start date must be before or equal to end date.");
         }
         return await _timesheetRepository.GetTimesheetByUserAndDate(userId, startDate, endDate);
     }
