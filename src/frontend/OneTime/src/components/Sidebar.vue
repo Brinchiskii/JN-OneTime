@@ -37,8 +37,6 @@ const logout = () => {
 
     <template v-if="role === 2" class="nav nav-pills flex-column mb-auto gap-1">
       <router-link to="/employee" class="nav-link" exact-active-class="active"> <i class="bi bi-speedometer2"></i> Home </router-link>
-      <!-- <router-link to="/employee" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Medarbejdere </router-link>
-      <router-link to="/employee" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Logs </router-link> -->
     </template>
 
     <div class="mt-auto pt-4 border-top">

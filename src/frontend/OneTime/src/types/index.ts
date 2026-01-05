@@ -100,16 +100,16 @@ export interface Log {
 }
 
 export interface JwtPayload {
-  // ClaimTypes.NameIdentifier bliver til denne URL:
+  // NameIdentifier
   "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": string
 
-  // ClaimTypes.Name:
+  // Name
   "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": string
 
-  // ClaimTypes.Role:
+  // Role
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/role": string | string[]
 
-  // ClaimTypes.Email:
+  // Email
   "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": string
 
   exp: number // Udløbstid (standard)
@@ -132,10 +132,10 @@ interface ProjectMember {
 }
 
 export interface ProjectStat {
-  projectId: number      // Matcher C# ProjectId
-  projectName: string    // Matcher C# ProjectName
-  status: number         // Matcher C# Status
-  totalHours: number     // Matcher C# TotalHours
+  projectId: number      
+  projectName: string    
+  status: number         
+  totalHours: number     
   members: ProjectMember[]
 }
 

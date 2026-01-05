@@ -105,7 +105,6 @@ const grandTotal = computed(() => {
   border-radius: 16px;
   box-shadow: var(--card-shadow);
   overflow: hidden;
-  /* Sikrer at indhold ikke stikker ud af de runde hjørner */
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 

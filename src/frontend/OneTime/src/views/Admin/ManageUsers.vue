@@ -421,29 +421,23 @@ onMounted(() => {
 
 .badge-role {
   padding: 4px 12px;
-  /* Lidt bredere for pænere look */
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
-  /* Tvinger hvid tekst */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  /* Lille skygge for effekt */
 }
 
 .role-Admin {
   background-color: green;
-  /* Dyb Lilla */
 }
 
 .role-Leder {
   background-color: #6366f1;
-  /* Stærk Blå */
 }
 
 .role-Medarbejder {
   background-color: #475569;
-  /* Mørk Koksgrå */
 }
 
 .badge-status {

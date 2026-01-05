@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { useAuditLogsStore } from '@/stores/AuditlogsStore'
 import { onMounted, computed, ref } from 'vue'
-import type { Log } from '@/types' // Sørg for at Log typen er importeret
+import type { Log } from '@/types' 
 
 const auditLogsStore = useAuditLogsStore()
 const loading = ref(false)
 
-// --- STATE ---
 const searchQuery = ref('')
 const startDate = ref('')
 const endDate = ref('')
 
-// Sortering state
 const sortColumn = ref<keyof Log | ''>('timestamp')
-const sortDirection = ref<'asc' | 'desc'>('desc') // Nyeste først som standard
+const sortDirection = ref<'asc' | 'desc'>('desc') 
 
 onMounted(async () => {
   loading.value = true
@@ -21,9 +19,6 @@ onMounted(async () => {
   loading.value = false
 })
 
-// --- HELPERS ---
-
-// Formater dato pænt (DD-MM-YYYY HH:mm)
 const formatDate = (dateString: string) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleString('da-DK', {
@@ -32,7 +27,6 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Farvekoder til handlinger
 const getActionBadge = (action: string) => {
   const act = action.toLowerCase()
   if (act.includes('create') || act.includes('add')) return { class: 'bg-success bg-opacity-10 text-success', icon: 'bi-plus-circle' }
@@ -42,7 +36,6 @@ const getActionBadge = (action: string) => {
   return { class: 'bg-secondary bg-opacity-10 text-secondary', icon: 'bi-activity' }
 }
 
-// Sorterings funktion
 const sortTable = (column: keyof Log) => {
   if (sortColumn.value === column) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
@@ -52,11 +45,9 @@ const sortTable = (column: keyof Log) => {
   }
 }
 
-// --- FILTERING LOGIC ---
 const filteredLogs = computed(() => {
-  let data = [...auditLogsStore.logs] // Lav en kopi for ikke at mutere store direkte
+  let data = [...auditLogsStore.logs] 
 
-  // 1. Filtrer på dato
   if (startDate.value) {
     const start = new Date(startDate.value)
     start.setHours(0, 0, 0, 0)
@@ -69,7 +60,6 @@ const filteredLogs = computed(() => {
     data = data.filter((log) => new Date(log.timestamp) <= end)
   }
 
-  // 2. Filtrer på søgning (ActorUserName + lidt ekstra for brugervenlighed)
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     data = data.filter(log => 
@@ -79,7 +69,6 @@ const filteredLogs = computed(() => {
     )
   }
 
-  // 3. Sortering
   if (sortColumn.value) {
     data.sort((a, b) => {
       const valA = a[sortColumn.value as keyof Log]
@@ -245,8 +234,6 @@ const filteredLogs = computed(() => {
 </template>
 
 <style scoped>
-/* Genbruger stilen fra dine andre admin sider */
-
 .admin-card {
   background: white;
   border: 1px solid rgba(0,0,0,0.08);

@@ -15,6 +15,7 @@ const isOpen = ref(false)
 const searchQuery = ref('')
 const inputRef = ref<HTMLElement | null>(null)
 const wrapperRef = ref<HTMLElement | null>(null)
+const dropdownRef = ref<HTMLElement | null>(null) 
 
 const dropdownStyle = ref({ top: '0px', left: '0px', width: '0px' })
 
@@ -46,11 +47,12 @@ const updatePosition = () => {
     }
   }
 }
+
 const handleFocus = () => {
   if (props.disabled || props.readonly) return
   updatePosition()
   isOpen.value = true
-  searchQuery.value = '' 
+  searchQuery.value = ''
 }
 
 const handleInput = () => {
@@ -68,13 +70,21 @@ const selectProject = (project: any) => {
 
 const handleClickOutside = (event: MouseEvent) => {
   if (wrapperRef.value && !wrapperRef.value.contains(event.target as Node)) {
+    if (dropdownRef.value && dropdownRef.value.contains(event.target as Node)) {
+        return 
+    }
+    
     isOpen.value = false
     searchQuery.value = selectedName.value
   }
 }
 
-const handleScroll = () => {
+const handleScroll = (event: Event) => {
   if (isOpen.value) {
+    if (dropdownRef.value && dropdownRef.value.contains(event.target as Node)) {
+        return
+    }
+    
     isOpen.value = false
     if (props.modelValue) searchQuery.value = selectedName.value
   }
@@ -101,8 +111,7 @@ onUnmounted(() => {
         type="text" 
         class="form-control"
         :class="{'bg-light': disabled || readonly}"
-        style="cursor: pointer"
-        :placeholder="selectedName || placeholder || 'Vælg projekt'"
+        :placeholder="selectedName || placeholder || 'Søg...'"
         v-model="searchQuery"
         @focus="handleFocus"
         @input="handleInput" 
@@ -112,7 +121,9 @@ onUnmounted(() => {
 
     <ul 
         v-if="isOpen" 
+        ref="dropdownRef"
         class="dropdown-menu show shadow-sm border mt-1" 
+        @mousedown.prevent 
         :style="{
             position: 'fixed',
             top: dropdownStyle.top,
