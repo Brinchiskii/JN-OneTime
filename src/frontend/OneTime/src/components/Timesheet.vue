@@ -3,6 +3,7 @@ import { computed, onMounted, ref, onBeforeMount } from 'vue'
 import type { TimesheetRow, Project, WeekDay } from '../types'
 import { useProjectStore } from '@/stores/ProjectStore'
 import { useTimesheetStore } from '@/stores/TimesheetStore'
+import ProjectSelector from './ProjectSelector.vue'
 
 const props = defineProps<{
   timesheetrows: TimesheetRow
@@ -47,7 +48,7 @@ const grandTotal = computed(() => {
             {{ day.name }}
             <span class="d-block fw-normal text-muted" style="font-size: 0.7rem">{{
               day.date
-            }}</span>
+              }}</span>
           </th>
           <th class="text-center" style="width: 8%">Total</th>
           <th style="width: 5%" v-if="!props.readonly">Handlinger</th>
@@ -56,12 +57,8 @@ const grandTotal = computed(() => {
       <tbody>
         <tr v-for="(row, index) in rows" :key="row.projectId" class="project-row">
           <td>
-            <select class="project-select form-select" :disabled="props.readonly" v-model="row.projectId">
-              <option :value="0" hidden>Vælg projekt</option>
-              <option v-for="p in readonly ? projectStore.projects : projectStore.projects.filter(p => p.status === 0)" :key="p.projectId" :value="p.projectId">
-                {{ p.name }}
-              </option>
-            </select>
+            <ProjectSelector :readonly="props.readonly" :disabled="props.readonly" v-model="row.projectId"
+              :projects="props.readonly ? projectStore.projects : projectStore.projects.filter(p => p.status === 0)" />
           </td>
 
           <td v-for="day in props.weekDays" :key="day.key" class="text-center">

@@ -104,7 +104,7 @@ onMounted(() => {
       </div>
     </div>
     <div class="d-flex justify-content-between align-items-center mb-1">
-      <DatePicker @click="loading" @change="loading"></DatePicker>
+      <DatePicker @change="loading"></DatePicker>
       <transition name="fade">
         <div 
             v-if="timesheetStore.currentComment" 

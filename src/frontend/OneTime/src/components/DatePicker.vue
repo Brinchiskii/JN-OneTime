@@ -2,20 +2,30 @@
 import { useTimesheetStore } from '@/stores/TimesheetStore';
 const timesheetStore = useTimesheetStore()
 
+const emits = defineEmits(['click', 'change'])
 
 const prevWeek = () => {
     timesheetStore.previousWeek()
+    emits('change') 
 }
 
 const nextWeek = () => {
     timesheetStore.nextWeek()
+    emits('change')
 }
 
 const goToToday = () => {
     timesheetStore.setWeek()
+    emits('change')
 }
+
 const onDateSelected = (event: any) => {
     timesheetStore.setWeekFromDate(event.target.value)
+    emits('change')
+}
+
+const manualUpdate = () => {
+    emits('change')
 }
 </script>
 
@@ -40,6 +50,7 @@ const onDateSelected = (event: any) => {
       <span>Vælg dato</span>
       <input type="date" class="date-input-hidden" @change="onDateSelected" />
     </div>
-    <button class="btn btn-white bg-white border">Opdater</button>
+    
+    <button class="btn btn-white bg-white border" @click="manualUpdate">Opdater</button>
   </span>
 </template>

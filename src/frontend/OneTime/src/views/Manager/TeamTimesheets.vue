@@ -86,7 +86,7 @@ onMounted(() => {
     <h3>Team Oversigt</h3>
     <h5 class="my-1">{{ timesheetStore.weekHeader }}</h5>
     <div class="d-flex align-items-center mb-1">
-      <DatePicker @change="loading" @click="loading"></DatePicker>
+      <DatePicker @change="loading"></DatePicker>
       <div class="btn-group ms-2" role="group" aria-label="View Mode Toggle">
         <button type="button" class="btn" :class="viewMode === 'pending' ? 'btn-dark' : 'btn-outline-dark'"
           @click="viewMode = 'pending'">

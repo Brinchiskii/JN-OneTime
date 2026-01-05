@@ -111,7 +111,7 @@ const getAvatarColor = (name: string) => {
 </script>
 
 <template>
-  <div class="p-4 p-lg-5">
+  <div class="p-4 p-lg-5 container">
 
     <div class="d-flex flex-column flex-md-row align-items-end mb-5 gap-3">
       <div>
