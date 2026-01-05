@@ -10,7 +10,6 @@ const props = defineProps<{
 const projectStore = useProjectStore()
 const searchQuery = ref('')
 const sortStatus = ref(0)
-
 const sortColumn = ref('name')
 const sortDirection = ref('asc')
 
@@ -102,9 +101,30 @@ const openDeleteModal = (project: Project) => {
 
 const deleteProject = async () => {
     if (!selectedProject.value?.projectId || !props.isAdmin) return
-    await projectStore.deleteProject(selectedProject.value.projectId)
-    showDeleteModal.value = false
-    await projectStore.fetchProjects()
+    try {
+        loading.value = true
+        await projectStore.deleteProject(selectedProject.value.projectId)
+    } catch {
+        const shouldArchive = confirm(
+            `Kan ikke slette projekt: "${selectedProject.value.name}", da der er data tilknyttet.\n\nVil du arkivere det i stedet?`
+        )
+
+        if (shouldArchive) {
+            try {
+                await projectStore.updateProject({
+                    projectId: selectedProject.value.projectId,
+                    name: selectedProject.value.name,
+                    status: 3 
+                })
+            } catch (archiveError) {
+                alert("Det lykkedes desværre heller ikke at arkivere projektet.")
+            }
+        }
+    } finally {
+        loading.value = false
+        showDeleteModal.value = false
+        await projectStore.fetchProjects()
+    }
 }
 
 const getStatusBadge = (status: number) => {
@@ -120,175 +140,185 @@ onMounted(() => {
 })
 </script>
 <template>
-  <div class="flex-grow-1 p-4 p-lg-5 overflow-auto card">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-      <div>
-        <h6 class="text-uppercase text-muted fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 1px">
-          Projekter
-        </h6>
-        <h2 class="fw-bold mb-0 text-dark">Administrer Projekter</h2>
-      </div>
-      <button class="btn btn-primary-admin" @click="openCreateModal">
-        <i class="bi bi-plus-lg me-2"></i> Opret Nyt Projekt
-      </button>
+    <div class="flex-grow-1 p-4 p-lg-5 overflow-auto card">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h6 class="text-uppercase text-muted fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 1px">
+                    Projekter
+                </h6>
+                <h2 class="fw-bold mb-0 text-dark">Administrer Projekter</h2>
+            </div>
+            <button class="btn btn-primary-admin" @click="openCreateModal">
+                <i class="bi bi-plus-lg me-2"></i> Opret Nyt Projekt
+            </button>
+        </div>
+
+        <div class="admin-card p-0 mb-4">
+
+            <div class="p-3 border-bottom d-flex gap-3 bg-light bg-opacity-50">
+                <input type="text" class="search-input" placeholder="Søg projekt..." v-model="searchQuery" />
+                <select class="form-select w-auto border-light shadow-sm" style="background: white"
+                    v-model="sortStatus">
+                    <option :value="0">Vis Alle</option>
+                    <option :value="1">Aktive</option>
+                    <option :value="2">På pause</option>
+                    <option :value="3">Afsluttet</option>
+                    <option :value="4">Arkiveret</option>
+                </select>
+            </div>
+
+            <table class="table-admin">
+                <thead>
+                    <tr>
+                        <th @click="sortTable('name')" class="cursor-pointer user-select-none">
+                            Projekt Navn
+                            <span v-if="sortColumn === 'name'" class="text-primary">
+                                <i
+                                    :class="sortDirection === 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-up-alt'"></i>
+                            </span>
+                            <span v-else class="text-muted opacity-25"><i class="bi bi-arrow-down-up"></i></span>
+                        </th>
+
+                        <th @click="sortTable('status')" class="cursor-pointer user-select-none">
+                            Status
+                            <span v-if="sortColumn === 'status'" class="text-primary">
+                                <i
+                                    :class="sortDirection === 'asc' ? 'bi bi-sort-numeric-down' : 'bi bi-sort-numeric-up-alt'"></i>
+                            </span>
+                            <span v-else class="text-muted opacity-25"><i class="bi bi-arrow-down-up"></i></span>
+                        </th>
+
+                        <th class="text-end" v-if="isAdmin">Handlinger</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="project in filteredProjects" :key="project.projectId">
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary fw-bold"
+                                    style="width: 40px; height: 40px;">
+                                    {{ project.name.charAt(0).toUpperCase() }}
+                                </div>
+                                <div class="fw-bold">{{ project.name }}</div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="badge rounded-pill fw-normal px-3 py-2 shadow-sm"
+                                :class="getStatusBadge(project.status).class">
+                                {{ getStatusBadge(project.status).text }}
+                            </span>
+                        </td>
+
+                        <td class="text-end" v-if="isAdmin">
+                            <button class="btn btn-light btn-sm me-1 text-muted" @click="openEditModal(project)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm text-danger" @click="openDeleteModal(project)">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div v-if="filteredProjects.length === 0" class="text-center py-5 text-muted">
+                <i class="bi bi-folder2-open display-4 mb-3 d-block opacity-50"></i>
+                Ingen projekter fundet
+            </div>
+        </div>
     </div>
 
-    <div class="admin-card p-0 mb-4">
-      
-      <div class="p-3 border-bottom d-flex gap-3 bg-light bg-opacity-50">
-        <input type="text" class="search-input" placeholder="Søg projekt..." v-model="searchQuery" />
-        <select class="form-select w-auto border-light shadow-sm" style="background: white" v-model="sortStatus">
-          <option :value="0">Vis Alle</option>
-          <option :value="1">Kun Aktive</option>
-          <option :value="2">På pause</option>
-          <option :value="3">Afsluttet</option>
-          <option :value="4">Arkiveret</option>
-        </select>
-      </div>
-
-      <table class="table-admin">
-        <thead>
-          <tr>
-            <th @click="sortTable('name')" class="cursor-pointer user-select-none">
-              Projekt Navn
-              <span v-if="sortColumn === 'name'" class="text-primary">
-                <i :class="sortDirection === 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-up-alt'"></i>
-              </span>
-              <span v-else class="text-muted opacity-25"><i class="bi bi-arrow-down-up"></i></span>
-            </th>
-            
-            <th @click="sortTable('status')" class="cursor-pointer user-select-none">
-              Status
-              <span v-if="sortColumn === 'status'" class="text-primary">
-                <i :class="sortDirection === 'asc' ? 'bi bi-sort-numeric-down' : 'bi bi-sort-numeric-up-alt'"></i>
-              </span>
-              <span v-else class="text-muted opacity-25"><i class="bi bi-arrow-down-up"></i></span>
-            </th>
-
-            <th class="text-end" v-if="isAdmin">Handlinger</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="project in filteredProjects" :key="project.projectId">
-            <td>
-              <div class="d-flex align-items-center gap-3">
-                <div class="rounded d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary fw-bold"
-                  style="width: 40px; height: 40px;">
-                  {{ project.name.charAt(0).toUpperCase() }}
+    <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
+        <form class="modal-card" @submit.prevent="createProject">
+            <div class="modal-header">
+                <h5 class="mb-0 fw-bold">Nyt Projekt</h5>
+                <button type="button" class="btn-close" @click="showCreateModal = false"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Projekt Navn</label>
+                        <input type="text" class="form-control" v-model="projectForm.name" required
+                            placeholder="F.eks. Hjemmeside Redesign" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" v-model="projectForm.status">
+                            <option :value="0">Aktiv</option>
+                            <option :value="1">På pause</option>
+                            <option :value="2">Afsluttet</option>
+                            <option :value="3">Arkiveret</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="fw-bold">{{ project.name }}</div>
-              </div>
-            </td>
-
-            <td>
-              <span class="badge rounded-pill fw-normal px-3 py-2 shadow-sm"
-                :class="getStatusBadge(project.status).class">
-                {{ getStatusBadge(project.status).text }}
-              </span>
-            </td>
-
-            <td class="text-end" v-if="isAdmin">
-              <button class="btn btn-light btn-sm me-1 text-muted" @click="openEditModal(project)">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button class="btn btn-light btn-sm text-danger" @click="openDeleteModal(project)">
-                <i class="bi bi-trash3"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div v-if="filteredProjects.length === 0" class="text-center py-5 text-muted">
-        <i class="bi bi-folder2-open display-4 mb-3 d-block opacity-50"></i>
-        Ingen projekter fundet
-      </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light border" @click="showCreateModal = false">Annuller</button>
+                <button type="submit" class="btn btn-primary-admin" :disabled="loading">
+                    <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                    Opret Projekt
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
 
-  <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
-    <form class="modal-card" @submit.prevent="createProject">
-      <div class="modal-header">
-        <h5 class="mb-0 fw-bold">Nyt Projekt</h5>
-        <button type="button" class="btn-close" @click="showCreateModal = false"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row g-3">
-          <div class="col-12">
-            <label class="form-label">Projekt Navn</label>
-            <input type="text" class="form-control" v-model="projectForm.name" required
-              placeholder="F.eks. Hjemmeside Redesign" />
-          </div>
-          <div class="col-12">
-            <label class="form-label">Status</label>
-            <select class="form-select" v-model="projectForm.status">
-              <option :value="0">Aktiv</option>
-              <option :value="1">På pause</option>
-              <option :value="2">Afsluttet</option>
-              <option :value="3">Arkiveret</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light border" @click="showCreateModal = false">Annuller</button>
-        <button type="submit" class="btn btn-primary-admin" :disabled="loading">
-          <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-          Opret Projekt
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
-    <form class="modal-card" @submit.prevent="updateProject">
-      <div class="modal-header">
-        <h5 class="mb-0 fw-bold">Rediger Projekt</h5>
-        <button type="button" class="btn-close" @click="showEditModal = false"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row g-3">
-          <div class="col-12">
-            <label class="form-label">Projekt Navn</label>
-            <input type="text" class="form-control" v-model="projectForm.name" required />
-          </div>
-          <div class="col-12">
-            <label class="form-label">Status</label>
-            <select class="form-select" v-model="projectForm.status">
-              <option :value="0">Aktiv</option>
-              <option :value="1">På pause</option>
-              <option :value="2">Afsluttet</option>
-              <option :value="3">Arkiveret</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light border" @click="showEditModal = false">Annuller</button>
-        <button type="submit" class="btn btn-primary-admin" :disabled="loading">Gem Ændringer</button>
-      </div>
-    </form>
-  </div>
-
-  <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
-    <div class="modal-card" style="max-width: 400px">
-      <div class="modal-body text-center pt-4">
-        <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3"
-          style="width: 60px; height: 60px">
-          <i class="bi bi-exclamation-triangle text-danger fs-3"></i>
-        </div>
-        <h5 class="fw-bold mb-2">Slet Projekt?</h5>
-        <p class="text-muted mb-0">
-          Er du sikker på, at du vil slette <strong>{{ selectedProject?.name }}</strong>?<br>
-          Dette kan påvirke tidsregistreringer.
-        </p>
-      </div>
-      <div class="modal-footer border-0 pt-0 pb-4 justify-content-center">
-        <button type="button" class="btn btn-light border px-4" @click="showDeleteModal = false">Annuller</button>
-        <button type="button" class="btn btn-danger px-4" @click="deleteProject">Slet Projekt</button>
-      </div>
+    <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
+        <form class="modal-card" @submit.prevent="updateProject">
+            <div class="modal-header">
+                <h5 class="mb-0 fw-bold">Rediger Projekt</h5>
+                <button type="button" class="btn-close" @click="showEditModal = false"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Projekt Navn</label>
+                        <input type="text" class="form-control" v-model="projectForm.name" required />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" v-model="projectForm.status">
+                            <option :value="0">Aktiv</option>
+                            <option :value="1">På pause</option>
+                            <option :value="2">Afsluttet</option>
+                            <option :value="3">Arkiveret</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light border" @click="showEditModal = false">Annuller</button>
+                <button type="submit" class="btn btn-primary-admin" :disabled="loading">
+                    <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                    Gem Ændringer
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
+
+    <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
+        <div class="modal-card" style="max-width: 400px">
+            <div class="modal-body text-center pt-4">
+                <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3"
+                    style="width: 60px; height: 60px">
+                    <i class="bi bi-exclamation-triangle text-danger fs-3"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Slet Projekt?</h5>
+                <p class="text-muted mb-0">
+                    Er du sikker på, at du vil slette <strong>{{ selectedProject?.name }}</strong>?<br>
+                    Dette kan påvirke tidsregistreringer.
+                </p>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 justify-content-center">
+                <button type="button" class="btn btn-light border px-4"
+                    @click="showDeleteModal = false">Annuller</button>
+                <button type="button" class="btn btn-danger px-4" :disabled="loading" @click="deleteProject">
+                    <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                    Slet Projekt
+                </button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <style scoped>
@@ -335,7 +365,7 @@ onMounted(() => {
 
 /* Custom Button */
 .btn-primary-admin {
-    background-color: #0f172a;
+    background-color: var(--primary-color);
     color: white;
     border: none;
     padding: 10px 20px;

@@ -2,7 +2,6 @@ export interface Project {
   projectId: number
   name: string
   status: number
-  timeEntries: Array<number>
 }
 
 export interface TimeEntry {

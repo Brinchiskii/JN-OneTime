@@ -21,7 +21,7 @@ export const useProjectStore = defineStore('project', () => {
   }
 
   const deleteProject = async (id: number) => {
-    await projectsService.deleteProject(id)
+      await projectsService.deleteProject(id)
   }
 
   return { projects, fetchProjects, createProject, updateProject, deleteProject }

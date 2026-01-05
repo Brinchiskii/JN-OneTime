@@ -222,18 +222,6 @@ onMounted(() => {
           <tr v-for="user in filteredUsers" :key="user.userId">
             <td>
               <div class="d-flex align-items-center gap-3">
-                <div
-                  class="avatar-small rounded-circle text-white d-flex align-items-center justify-content-center fw-bold"
-                  :style="{
-                    backgroundColor: userStore.getAvatarColor(
-                      user.managerId ? userStore.getNameById(user.managerId) : user.name + 'a'
-                    ),
-                    width: '32px',
-                    height: '32px',
-                    fontSize: '0.9rem'
-                  }">
-                  {{ user.name.charAt(0).toUpperCase() }}
-                </div>
                 <div class="fw-bold">{{ user.name }}</div>
               </div>
             </td>
@@ -488,16 +476,18 @@ onMounted(() => {
 }
 
 .btn-primary-admin {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 500;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
 }
 
 .btn-primary-admin:hover {
-  background-color: var(--primary-dark);
+    background-color: #1e293b;
+    transform: translateY(-1px);
 }
 
 .search-input {
