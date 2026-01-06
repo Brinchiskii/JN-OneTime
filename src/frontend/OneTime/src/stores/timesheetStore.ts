@@ -21,7 +21,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   }
 
 
-  const myRows = ref<TimesheetRow>({ timesheetId: 0, status: 0, comment: null, rows: [] })
+  const myRows = ref<TimesheetRow>({ userId: 0, timesheetId: 0, status: 0, comment: null, rows: [] })
   const isApproved = ref(false)
   const currentTimesheetId = ref<number | null>(null)
   const currentTimesheetStatus = ref<number | null>(null)
@@ -125,6 +125,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
 
                 if (foundSheets && foundSheets.length > 0) {
                     normalized[user.name] = foundSheets.map(ts => ({
+                        userId: user.userId,
                         timesheetId: ts.timesheetId,
                         status: ts.status,
                         comment: ts.comment,
@@ -134,11 +135,12 @@ export const useTimesheetStore = defineStore('timesheet', () => {
                         }))
                     }))
                 } else {
-                    normalized[user.name] = [{ timesheetId: 0, status: -1, comment: null, rows: [] }]
+                    normalized[user.name] = [{ userId: user.userId, timesheetId: 0, status: -1, comment: null, rows: [] }]
                 }
             }
         }
         teamRows.value = normalized
+        console.log(teamRows.value)
 
     } catch (error) {
         console.error("Fejl ved hentning af team data:", error)
@@ -157,19 +159,23 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     await timesheetService.updateTimeSheet(payload)
   }
 
+  const updateRows = (rows: TimesheetRow) => {
+    myRows.value = rows
+  }
+
   const saveTimesheet = async (submit: boolean) => {
-    if (!validateRows()) return
+    if (!validateRows()) return false
 
     try {
-      const userId = AuthStore.user?.userId ?? 0
-      let tsId = currentTimesheetId.value
+      let tsId = currentTimesheetId.value ?? myRows.value.timesheetId
+      const ownerId = (myRows.value as any).userId || AuthStore.user?.userId || 0     
 
       if (!tsId) {
         const startObj = currentWeekStart.value
         const endObj = startObj.endOf('isoWeek')
 
         const payload: TimesheetPayload = {
-          userId: userId,
+          userId: ownerId,
           periodStart: startObj.format('YYYY-MM-DD'),
           periodEnd: endObj.format('YYYY-MM-DD')
         }
@@ -188,7 +194,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
           const hours = row.hours[day.fullDate]
           if (hours && hours > 0) {
             entriesToSave.push({
-              userId: userId,
+              userId: ownerId,
               projectId: row.projectId,
               date: day.fullDate,
               note: "",
@@ -211,12 +217,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
           comment: ""
         }
         await timesheetService.updateTimeSheet(payload)
-        alert("Tid er indsendt til godkendelse.")
       }
-      else {
-        alert("Tid er gemt som kladde.")
-      }
-
 
     } catch (error) {
       console.error("Fejl ved indsendelse", error)
@@ -232,7 +233,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       const timesheet = await timesheetService.getUserTimeSheet(AuthStore.user?.userId ?? 0, currentWeekStart.value.format('YYYY-MM-DD'), currentWeekStart.value.endOf('isoWeek').format('YYYY-MM-DD'))
       const timeEntries = await timeEntriesService.GetTimeEntriesByTimesheetId(AuthStore.user?.userId ?? 0, timesheet.data.timesheetId)
 
-      const rows: TimesheetRow = { timesheetId: timesheet.data.timesheetId, status: timesheet.data.status, comment: timesheet.data.comment, rows: [] }
+      const rows: TimesheetRow = { userId: AuthStore.user?.userId ?? 0, timesheetId: timesheet.data.timesheetId, status: timesheet.data.status, comment: timesheet.data.comment, rows: [] }
 
       for (const entry of timeEntries.data) {
         let row = rows.rows.find(r => r.projectId === entry.projectId)
@@ -253,7 +254,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       currentComment.value = timesheet.data.comment 
     } catch (error) {
       console.error("Fejl ved hentning af timesheet", error)
-      myRows.value = { timesheetId: 0, status: 0, comment: null, rows: [] }
+      myRows.value = { userId: 0, timesheetId: 0, status: 0, comment: null, rows: [] }
       currentTimesheetId.value = null
       isApproved.value = false
       currentTimesheetStatus.value = null
@@ -283,5 +284,6 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     submitDecision,
     saveTimesheet,
     GetTimesheet,
+    updateRows,
   }
 })

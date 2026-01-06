@@ -4,7 +4,6 @@ import { useTimesheetStore } from '../stores/TimesheetStore'
 import { useProjectStore } from '../stores/ProjectStore'
 import Timesheet from './Timesheet.vue'
 import DatePicker from './DatePicker.vue'
-import { isBuildCommand } from 'typescript'
 
 const timesheetStore = useTimesheetStore()
 const projectStore = useProjectStore()
@@ -15,6 +14,7 @@ const handleSubmit = async (submit: boolean) => {
   isSubmitting.value = true
   try {
     await timesheetStore.saveTimesheet(submit)
+    submit ? alert("Tid er indsendt til godkendelse.") : alert("Tid er gemt som kladde")
   } catch (error) {
     console.error('Fejl under indsendelse:', error)
   } finally {

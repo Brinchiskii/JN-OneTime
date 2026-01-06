@@ -14,6 +14,7 @@ export interface TimeEntry {
 }
 
 export interface TimesheetRow {
+  userId: number
   timesheetId: number
   status: number
   comment: string | null

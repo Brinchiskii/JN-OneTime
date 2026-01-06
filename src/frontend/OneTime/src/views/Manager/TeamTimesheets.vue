@@ -3,7 +3,6 @@ import { onMounted, ref, computed } from 'vue'
 import { useTimesheetStore } from '../../stores/TimesheetStore'
 import ManagerTeamCard from '@/components/ManagerTeamCard.vue'
 import DatePicker from '@/components/DatePicker.vue'
-import Sidebar from '@/components/Sidebar.vue'
 
 const timesheetStore = useTimesheetStore()
 const isLoading = ref(true)
@@ -34,7 +33,6 @@ const filteredAndSortedRows = computed(() => {
     const statusA = sheetsA[0]?.status
     const statusB = sheetsB[0]?.status
 
-    // Hjælpefunktion: Tildel "Vigtighed" (Lavt tal = Kommer først)
     const getRank = (s: number | null | undefined): number => {
       // 1. Pending (Afventer)
       if (s === 0) return 1

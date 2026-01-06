@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, onBeforeMount } from 'vue'
-import type { TimesheetRow, Project, WeekDay } from '../types'
+import { computed, onMounted } from 'vue'
+import type { TimesheetRow, Rows, WeekDay } from '../types'
 import { useProjectStore } from '@/stores/ProjectStore'
 import { useTimesheetStore } from '@/stores/TimesheetStore'
 import ProjectSelector from './ProjectSelector.vue'
@@ -31,6 +31,21 @@ const getRowTotal = (row: any) => {
 
   return total
 }
+
+const createEmptyRow = (): Rows => {
+    return {
+      projectId: 0,
+      hours: {}
+    }
+  }
+
+const addRow = () => {
+    props.timesheetrows.rows.push(createEmptyRow())
+  }
+
+const removeRow = (index: number) => {
+    props.timesheetrows.rows.splice(index, 1)
+  }
 
 const grandTotal = computed(() => {
   return props.timesheetrows.rows.map(row => getRowTotal(row)).reduce((acc: any, val: any) => acc + val, 0)
@@ -71,7 +86,7 @@ const grandTotal = computed(() => {
           </td>
 
           <td class="text-center" v-if="!props.readonly">
-            <button @click="timesheetStore.removeRow(index)" class="btn btn-outline-danger btn-sm" title="Delete row">
+            <button @click="removeRow(index)" class="btn btn-outline-danger btn-sm" title="Delete row">
               <i class="bi bi-trash"></i>
             </button>
           </td>
@@ -94,7 +109,7 @@ const grandTotal = computed(() => {
       </tbody>
     </table>
   </div>
-  <button v-if="!props.readonly" @click="timesheetStore.addRow" class="btn btn-outline-secondary w-100 mt-3">
+  <button v-if="!props.readonly" @click="addRow" class="btn btn-outline-secondary w-100 mt-3">
     <i class="bi bi-plus-lg me-1"></i> Tilføj nyt projekt
   </button>
 </template>
