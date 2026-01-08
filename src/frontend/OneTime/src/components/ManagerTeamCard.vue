@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useTimesheetStore } from '../stores/TimesheetStore'
 import Timesheet from './Timesheet.vue'
 import type { TimesheetRow } from '@/types'
+import { useUserStore } from '@/stores/UserStore';
 
 const props = defineProps<{
   userName: string
@@ -36,6 +37,7 @@ const startEdit = () => {
 
 const cancelEdit = () => {
   isEditing.value = false
+  emit('refresh')
 }
 
 const saveChanges = async () => {
@@ -70,7 +72,7 @@ const deny = () => {
     <div class="card-header-custom">
 
       <div class="d-flex align-items-center gap-3">
-        <div class="avatar">{{ userName.charAt(0) }}</div>
+        <div class="avatar" :style=" 'background-color:' + useUserStore().getAvatarColor(userName)">{{ userName.charAt(0) }}</div>
         <div class="fw-bold fs-5">{{ userName }}</div>
         <span class="badge d-inline-flex align-items-center gap-1 py-2 px-3" :class="Status.class">
           <i :class="Status.icon"></i>
@@ -145,6 +147,6 @@ const deny = () => {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  color: #495057;
+  
 }
 </style>
