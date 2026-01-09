@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using OneTime.Core.Data.Interfaces;
 using OneTime.Core.Models;
+using OneTime.Core.Models.Enums;
 using OneTime.Core.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ namespace OneTime.Core.Data.Repository
                 .Include(t => t.User)    
                 .Where(t => t.Date >= startDate && t.Date <= endDate)
                 .Where(t => t.User.ManagerId == managerId)
+                .Where(t => t.Timesheet.Status == (int)TimesheetStatus.Approved)
                 .ToListAsync();
 
             var result = rawData
@@ -48,6 +50,24 @@ namespace OneTime.Core.Data.Repository
                 .ToList();
 
             return result;
+        }
+        public async Task<List<ProjectStatModel>> GetUserStatsAsync(int userId, DateOnly startDate, DateOnly endDate)
+        {
+            return await _context.TimeEntries
+                .Include(t => t.Project)
+                .Where(t => t.UserId == userId && t.Date >= startDate && t.Date <= endDate && t.Timesheet.Status == (int)TimesheetStatus.Approved)
+                .GroupBy(t => new { t.Project.ProjectId, t.Project.Name, t.Project.Status })
+                .Select(g => new ProjectStatModel
+                {
+                    ProjectId = g.Key.ProjectId,
+                    ProjectName = g.Key.Name,
+                    Status = g.Key.Status,
+                    TotalHours = g.Sum(t => t.Hours),
+
+                    Members = new List<ProjectMemberStat>()
+                })
+                .OrderByDescending(x => x.TotalHours)
+                .ToListAsync();
         }
     }
 }

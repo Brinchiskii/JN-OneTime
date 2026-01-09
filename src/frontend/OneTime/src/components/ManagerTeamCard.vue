@@ -18,7 +18,7 @@ const emit = defineEmits<{
 
 const timesheetStore = useTimesheetStore()
 const comment = ref("")
-const isEditing = ref(false) 
+const isEditing = ref(false)
 
 const Status = computed(() => {
   switch (props.status) {
@@ -72,7 +72,8 @@ const deny = () => {
     <div class="card-header-custom">
 
       <div class="d-flex align-items-center gap-3">
-        <div class="avatar" :style=" 'background-color:' + useUserStore().getAvatarColor(userName)">{{ userName.charAt(0) }}</div>
+        <div class="avatar" :style="'background-color:' + useUserStore().getAvatarColor(userName)">{{
+          userName.charAt(0) }}</div>
         <div class="fw-bold fs-5">{{ userName }}</div>
         <span class="badge d-inline-flex align-items-center gap-1 py-2 px-3" :class="Status.class">
           <i :class="Status.icon"></i>
@@ -83,20 +84,25 @@ const deny = () => {
       <div v-if="props.status != 1" class="d-flex align-items-center gap-2">
 
         <template v-if="!isEditing">
-          <input v-model="comment" type="text" class="form-control form-control-sm" placeholder="Tilføj kommentar..."
-            style="width: 200px;" />
 
-          <button class="btn btn-success btn-sm px-3" @click="approve()">
-            <i class="bi bi-check-lg me-1"></i> Godkend
+          <template v-if="props.status === 0 || props.status >= 2">
+            <input v-model="comment" type="text" class="form-control form-control-sm" placeholder="Tilføj kommentar..."
+              style="width: 200px;" />
+
+            <button class="btn btn-success btn-sm px-3" @click="approve()">
+              <i class="bi bi-check-lg me-1"></i> Godkend
+            </button>
+
+            <button class="btn btn-danger btn-sm px-3" @click="deny()">
+              <i class="bi bi-x-lg me-1"></i> Afvis
+            </button>
+          </template>
+
+          <button class="btn btn-outline-primary btn-sm px-3" @click="startEdit()">
+            <i class="bi bi-pencil me-1"></i> {{ (props.status >= 0) ? 'Ret' : 'Opret'
+            }}
           </button>
 
-          <button class="btn btn-danger btn-sm px-3" @click="deny()">
-            <i class="bi bi-x-lg me-1"></i> Afvis
-          </button>
-
-          <div class="vr mx-1"></div> <button class="btn btn-outline-primary btn-sm px-3" @click="startEdit()">
-            <i class="bi bi-pencil me-1"></i> Ret
-          </button>
         </template>
 
         <template v-else>
@@ -147,6 +153,6 @@ const deny = () => {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  
+
 }
 </style>

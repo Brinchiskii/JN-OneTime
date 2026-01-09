@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { useTimesheetStore } from '../stores/TimesheetStore'
-import { useProjectStore } from '../stores/ProjectStore'
-import Timesheet from './Timesheet.vue'
-import DatePicker from './DatePicker.vue'
+import { useTimesheetStore } from '@/stores/TimesheetStore'
+import { useProjectStore } from '@/stores/ProjectStore'
+import Timesheet from '@/components/Timesheet.vue'
+import DatePicker from '@/components/DatePicker.vue'
 
 const timesheetStore = useTimesheetStore()
 const projectStore = useProjectStore()

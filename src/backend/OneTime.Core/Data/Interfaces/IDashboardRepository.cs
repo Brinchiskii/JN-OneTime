@@ -8,5 +8,6 @@ namespace OneTime.Core.Data.Interfaces
     public interface IDashboardRepository
     {
         Task<List<ProjectStatModel>> GetTeamPerformanceAsync(int managerId, DateOnly startDate, DateOnly endDate);
+        Task<List<ProjectStatModel>> GetUserStatsAsync(int userId, DateOnly startDate, DateOnly endDate);
     }
 }

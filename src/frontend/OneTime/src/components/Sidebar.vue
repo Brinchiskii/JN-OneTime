@@ -26,17 +26,18 @@ const logout = () => {
     <template v-if="role === 0" class="nav nav-pills flex-column mb-auto gap-1">
         <router-link to="/admin/users" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Medarbejdere </router-link>
         <router-link to="/admin/projects" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Projekter </router-link>
-        <router-link to="/admin/logs" class="nav-link" active-class="active"> <i class="bi bi-file-earmark-text"></i> Logs </router-link>
+        <router-link to="/admin/logs" class="nav-link" active-class="active"> <i class="bi bi-terminal"></i> Logs </router-link>
     </template>
 
     <template v-if="role === 1" class="nav nav-pills flex-column mb-auto gap-1">
       <router-link to="/manager/team-timesheets" class="nav-link" active-class="active"> <i class="bi bi-people-fill"></i> Team Oversigt </router-link>
       <router-link to="/manager/projects" class="nav-link" exact-active-class="active"> <i class="bi bi-file-earmark-text"></i> Projekter </router-link>
-      <router-link to="/manager/project-overview" class="nav-link" exact-active-class="active"> <i class="bi bi-bar-chart-line"></i> Projekt Overblik </router-link>
+      <router-link to="/manager/project-overview" class="nav-link" exact-active-class="active"> <i class="bi bi-bar-chart-line"></i> Team Performance </router-link>
     </template>
 
     <template v-if="role === 2" class="nav nav-pills flex-column mb-auto gap-1">
-      <router-link to="/employee" class="nav-link" exact-active-class="active"> <i class="bi bi-speedometer2"></i> Home </router-link>
+      <router-link to="/employee/register" class="nav-link" exact-active-class="active"> <i class="bi bi-calendar-plus"></i> Registrer tid </router-link>
+      <router-link to="/employee/stats" class="nav-link" exact-active-class="active"><i class="bi bi-bar-chart-line"></i> Min Statestik</router-link>
     </template>
 
     <div class="mt-auto pt-4 border-top">

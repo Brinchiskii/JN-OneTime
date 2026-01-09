@@ -13,5 +13,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
     return res.data
   }
 
-  return { fetchStats, ProjectStats}
+  const fetchUserStats = async (userId: number, startDate: string, endDate: string): Promise<ProjectStat[]> => {
+    const res = await dashboardService.getUserStats(userId, startDate, endDate)
+    ProjectStats.value = res.data
+    return res.data
+  }
+  return { fetchStats, ProjectStats, fetchUserStats}
 })

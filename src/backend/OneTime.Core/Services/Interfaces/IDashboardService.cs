@@ -7,6 +7,7 @@ namespace OneTime.Core.Services.Interfaces
 {
     public interface IDashboardService
     {
-        Task<List<ProjectStatModel>> GetTeamProjectStatsAsync(int managerId, DateOnly startDate, DateOnly endDate);
+        Task<List<ProjectStatModel>> GetTeamStatsAsync(int managerId, DateOnly startDate, DateOnly endDate);
+        Task<List<ProjectStatModel>> GetUserStatsAsync(int userId, DateOnly startDate, DateOnly endDate);
     }
 }

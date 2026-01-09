@@ -68,7 +68,7 @@ const router = createRouter({
           path: 'project-overview',
           name: 'manager-project-overview',
           meta: { requiresAuth: true, role: 1 },
-          component: () => import('@/views/Manager/ProjetOverview.vue'),
+          component: () => import('@/views/Manager/ProjectOverview.vue'),
         }
       ],
     },
@@ -77,7 +77,22 @@ const router = createRouter({
       path: '/employee',
       name: 'employee',
       meta: { requiresAuth: true, role: 2 },
-      component: () => import('@/views/EmployeeDashboard.vue'),
+      component: () => import('@/views/Employee/EmployeeDashboard.vue'),
+      redirect: '/employee/register',
+      children: [
+        {
+          path: 'register',
+          name: 'register-time',
+          meta: { requiresAuth: true, role: 2},
+          component: () => import('@/views/Employee/RegisterTime.vue'),
+        },
+        {
+          path: 'stats',
+          name: 'my-stats',
+          meta: { requiresAuth: true, role: 2},
+          component: () => import('@/views/Employee/MyStats.vue'),
+        }
+      ]
     },
   ],
 })

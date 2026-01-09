@@ -2,11 +2,12 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useUserStore } from '@/stores/UserStore'
 import { useDashboardStore } from '@/stores/DashboardStore'
-import type { ProjectStat } from '@/types'
+import type { ProjectStat, User } from '@/types'
 import { useAuthStore } from '@/stores/AuthStore'
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isoWeek from 'dayjs/plugin/isoWeek'
+import 'dayjs/locale/da' 
 
 dayjs.extend(weekOfYear)
 dayjs.extend(isoWeek)
@@ -14,10 +15,16 @@ dayjs.locale('da')
 
 const AuthStore = useAuthStore()
 const dashboardStore = useDashboardStore()
+const userStore = useUserStore()
+
 const projectStats = ref<ProjectStat[]>([])
 const loading = ref(false)
+const employees = ref<User[]>([]) 
+const selectedEmployeeId = ref<number>(0)
 
 const currentCursor = ref(dayjs())
+const periodMode = ref<string>('month')
+
 const startDate = computed(() => {
   if (periodMode.value === 'all') return '2000-01-01'
   return currentCursor.value.startOf(periodMode.value as any).format('YYYY-MM-DD')
@@ -27,24 +34,55 @@ const endDate = computed(() => {
   if (periodMode.value === 'all') return dayjs().format('YYYY-MM-DD')
   return currentCursor.value.endOf(periodMode.value as any).format('YYYY-MM-DD')
 })
-const periodMode = ref<string>('month')
 
-const formattedDisplay = computed(() => {
-  const c = currentCursor.value
-  switch (periodMode.value) {
-    case 'week':
-      return `Uge ${c.isoWeek()}, ${c.format('YYYY')}`
-    case 'month':
-      const m = c.format('MMMM YYYY')
-      return m.charAt(0).toUpperCase() + m.slice(1)
-    case 'year':
-      return c.format('YYYY')
-    case 'all':
-      return 'Hele perioden'
-    default:
-      return '-'
-  }
+const formattedCursor = computed(() => {
+  if (periodMode.value === 'week') return `Uge ${currentCursor.value.isoWeek()}, ${currentCursor.value.format('YYYY')}`
+  if (periodMode.value === 'month') return currentCursor.value.format('MMMM YYYY')
+  if (periodMode.value === 'year') return currentCursor.value.format('YYYY')
+  return 'Hele perioden'
 })
+
+const fetchEmployees = async () => {
+  try {
+    const res = await userStore.getUsersByManagerId(AuthStore.user!.userId)
+    employees.value = res.data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const fetchStats = async () => {
+  loading.value = true
+  projectStats.value = []
+
+  try {
+    if (selectedEmployeeId.value === 0) {
+      projectStats.value = await dashboardStore.fetchStats(
+        AuthStore.user?.userId ?? 0, 
+        startDate.value, 
+        endDate.value
+      )
+    } else {
+      const response = await dashboardStore.fetchUserStats(
+        selectedEmployeeId.value, 
+        startDate.value, 
+        endDate.value
+      )
+      
+      projectStats.value = response.map((item: any) => ({
+        projectId: item.projectId || 0,
+        projectName: item.projectName,
+        totalHours: item.hours || item.totalHours, 
+        status: 0,
+        members: []
+      }))
+    }
+  } catch (error) {
+    console.error("Fejl ved hentning af dashboard data", error)
+  } finally {
+    loading.value = false
+  }
+}
 
 const moveCursor = (amount: number) => {
   if (periodMode.value === 'all') return
@@ -57,16 +95,11 @@ const goToToday = () => {
 
 const onInputSelected = (event: any) => {
   if (!event.target.value) return
-
   const val = event.target.value
 
   if (periodMode.value === 'week') {
-
     const [year, week] = val.split('-W')
-    currentCursor.value = dayjs()
-      .year(parseInt(year))
-      .isoWeek(parseInt(week))
-      .startOf('week') 
+    currentCursor.value = dayjs().year(parseInt(year)).isoWeek(parseInt(week)).startOf('week')
   } else if (periodMode.value === 'month') {
     currentCursor.value = dayjs(val)
   } else if (periodMode.value === 'year')
@@ -82,21 +115,6 @@ const mostActiveProject = computed(() => {
   return projectStats.value!.reduce((prev, current) => (prev.totalHours > current.totalHours) ? prev : current)
 })
 
-const fetchStats = async () => {
-  loading.value = true
-  try {
-    projectStats.value = await dashboardStore.fetchStats(AuthStore.user?.userId ?? 0, startDate.value, endDate.value)
-  } catch (error) {
-    console.error("Fejl ved hentning af dashboard data", error)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => { fetchStats() })
-
-watch([currentCursor, periodMode], () => { fetchStats() })
-
 const getPercentageShare = (projectHours: number) => {
   if (totalPeriodHours.value === 0) return 0
   return Math.round((projectHours / totalPeriodHours.value!) * 100)
@@ -108,6 +126,15 @@ const getAvatarColor = (name: string) => {
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return colors[Math.abs(hash) % colors.length];
 }
+
+onMounted(() => { 
+  fetchEmployees()
+  fetchStats() 
+})
+
+watch([currentCursor, periodMode, selectedEmployeeId], () => { 
+  fetchStats() 
+})
 </script>
 
 <template>
@@ -118,52 +145,75 @@ const getAvatarColor = (name: string) => {
         <h6 class="text-uppercase text-muted fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 1px">
           Overblik
         </h6>
-        <h2 class="fw-bold mb-0 text-dark">Team Performance</h2>
+        <h2 class="fw-bold mb-0 text-dark">
+            {{ selectedEmployeeId ? 'Medarbejder Performance' : 'Team Performance' }}
+        </h2>
       </div>
 
-      <div class="d-flex gap-2 align-items-center bg-white p-2 rounded shadow-sm border">
+      <div class="d-flex flex-column flex-md-row gap-3">
 
-        <select class="form-select border-0 bg-light fw-bold text-uppercase"
-          style="width: auto; font-size: 0.8rem; letter-spacing: 0.5px;" v-model="periodMode">
-          <option value="week">Uge</option>
-          <option value="month">Måned</option>
-          <option value="year">År</option>
-          <option value="all">Altid</option>
-        </select>
-
-        <div class="vr mx-1"></div>
-
-        <div class="btn-group shadow-none" role="group">
-          <button class="btn btn-light btn-sm border" @click="moveCursor(-1)" :disabled="periodMode === 'all'">
-            <i class="bi bi-chevron-left"></i>
-          </button>
-
-          <button class="btn btn-light btn-sm border px-3 fw-medium" @click="goToToday"
-            :disabled="periodMode === 'all'">
-            I dag
-          </button>
-
-          <button class="btn btn-light btn-sm border" @click="moveCursor(1)" :disabled="periodMode === 'all'">
-            <i class="bi bi-chevron-right"></i>
-          </button>
+        <div class="bg-white p-2 rounded shadow-sm border d-flex align-items-center">
+            <span class="text-muted small fw-bold text-uppercase px-2" style="font-size: 0.7rem;">Visning:</span>
+            
+            <select 
+                class="form-select border-0 bg-light fw-bold" 
+                style="width: auto; min-width: 180px; font-size: 0.9rem;" 
+                v-model="selectedEmployeeId"
+            >
+                <option :value="0">👥 Hele Teamet</option>
+                <option disabled>──────────</option>
+                <option v-for="emp in employees" :key="emp.userId" :value="emp.userId">
+                    👤 {{ emp.name }}
+                </option>
+            </select>
         </div>
 
-        <div class="position-relative d-flex align-items-center">
+        <div class="d-flex gap-2 align-items-center bg-white p-2 rounded shadow-sm border">
 
-          <input v-if="periodMode === 'week'" type="week" class="date-input-hidden" @change="onInputSelected"
-            :value="`${currentCursor.isoWeekYear()}-W${String(currentCursor.isoWeek()).padStart(2, '0')}`" />
+          <select class="form-select border-0 bg-light fw-bold text-uppercase"
+            style="width: auto; font-size: 0.8rem; letter-spacing: 0.5px;" v-model="periodMode">
+            <option value="week">Uge</option>
+            <option value="month">Måned</option>
+            <option value="year">År</option>
+            <option value="all">Altid</option>
+          </select>
 
-          <input v-else-if="periodMode === 'month'" type="month" class="date-input-hidden" @change="onInputSelected"
-            :value="currentCursor.format('YYYY-MM')" />
+          <div class="vr mx-1"></div>
 
-          <input v-else-if="periodMode === 'year'" type="year" class="date-input-hidden" @change="onInputSelected"
-            :value="currentCursor.format('YYYY')">
+          <div class="btn-group shadow-none" role="group">
+            <button class="btn btn-light btn-sm border" @click="moveCursor(-1)" :disabled="periodMode === 'all'">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+
+            <button class="btn btn-light btn-sm border px-3 fw-medium" @click="goToToday"
+              :disabled="periodMode === 'all'">
+              I dag
+            </button>
+
+            <button class="btn btn-light btn-sm border" @click="moveCursor(1)" :disabled="periodMode === 'all'">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="position-relative d-flex align-items-center justify-content-center px-2" style="min-width: 120px;">
+            
+            <span class="fw-bold text-capitalize">{{ formattedCursor }}</span>
+
+            <input v-if="periodMode === 'week'" type="week" class="date-input-hidden" @change="onInputSelected"
+              :value="`${currentCursor.isoWeekYear()}-W${String(currentCursor.isoWeek()).padStart(2, '0')}`" />
+
+            <input v-else-if="periodMode === 'month'" type="month" class="date-input-hidden" @change="onInputSelected"
+              :value="currentCursor.format('YYYY-MM')" />
+
+            <input v-else-if="periodMode === 'year'" type="year" class="date-input-hidden" @change="onInputSelected"
+              :value="currentCursor.format('YYYY')" />
+          </div>
+
+          <button class="btn btn-light btn-sm border text-muted" @click="fetchStats">
+            <i class="bi bi-arrow-clockwise" :class="{ 'spin-icon': loading }"></i>
+          </button>
+
         </div>
-
-        <button class="btn btn-light btn-sm border text-muted" @click="fetchStats">
-          <i class="bi bi-arrow-clockwise" :class="{ 'spin-icon': loading }"></i>
-        </button>
-
       </div>
     </div>
 
@@ -225,11 +275,13 @@ const getAvatarColor = (name: string) => {
       </div>
     </div>
 
-    <h5 class="fw-bold mb-3">Projekt Fordeling</h5>
+    <h5 class="fw-bold mb-3">
+        {{ selectedEmployeeId ? 'Medarbejderens Projekter' : 'Projekt Fordeling' }}
+    </h5>
 
     <div v-if="loading && projectStats?.length === 0" class="text-center py-5 my-5 text-muted">
       <div class="spinner-border text-primary mb-3" role="status"></div>
-      <div>Henter teamets projekter...</div>
+      <div>Henter data...</div>
     </div>
 
     <div v-else-if="!loading && projectStats?.length === 0" class="text-center py-5 my-5 text-muted bg-light rounded">
@@ -274,7 +326,7 @@ const getAvatarColor = (name: string) => {
               </div>
             </div>
 
-            <div class="d-flex align-items-center justify-content-between border-top pt-3">
+            <div v-if="selectedEmployeeId === 0" class="d-flex align-items-center justify-content-between border-top pt-3">
               <span class="text-muted small fw-bold text-uppercase"
                 style="font-size: 0.7rem; letter-spacing: 0.5px;">Bidragydere</span>
 
@@ -330,5 +382,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 input[type="date"]:hover::-webkit-calendar-picker-indicator {
   opacity: 1;
+}
+
+.date-input-hidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
 }
 </style>
