@@ -4,9 +4,9 @@ using OneTime.Core.Services.Implementations;
 using OneTime.Core.Services.Repository;
 using OneTime.Core.Tests.TestHelpers;
 
-namespace OneTime.Core.Tests.Services;
+namespace OneTime.Core.Tests.Integration;
 
-public class UserServiceTests
+public class UserServiceIntegrationTest
 {
     [Fact]
     public async Task GetAllUsers_Returns_UsersOk()

@@ -105,10 +105,19 @@ namespace OneTime.Api.Controllers
           [ProducesResponseType(404)]
           public async Task<IActionResult> GetById(int id)
           {
-              var project = await _projectService.GetById(id);
-              if (project == null)
-                  return NotFound();
-              return Ok(project);
+              try
+              {
+                  var project = await _projectService.GetById(id);
+                  if (project == null)
+                      return NotFound();
+                  return Ok(project);
+              }
+              catch (InvalidOperationException ex)
+              {
+                  if (ex.Message.Contains("Project not found.", StringComparison.OrdinalIgnoreCase))
+                      return NotFound(ex.Message);
+                  return BadRequest(ex.Message);
+              }
           } 
      }
 }

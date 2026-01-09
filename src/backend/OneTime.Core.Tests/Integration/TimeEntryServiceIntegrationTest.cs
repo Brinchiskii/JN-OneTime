@@ -1,21 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using OneTime.Core.Data.Repository;
+﻿using OneTime.Core.Data.Repository;
 using OneTime.Core.Models;
 using OneTime.Core.Services.Implementations;
 using OneTime.Core.Services.Repository;
 using OneTime.Core.Tests.TestHelpers;
-using Xunit;
 
-namespace OneTime.Core.Tests.Services;
+namespace OneTime.Core.Tests.Integration;
 
-public class TimeEntryServiceTests
+public class TimeEntryServiceIntegrationTest
 {
-    public TimeEntryServiceTests()
-    {
-
-    }
 
     [Fact]
     public async Task CreateTimeEntry_Throws_When_Project_Not_Found()

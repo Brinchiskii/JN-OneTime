@@ -3,8 +3,10 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using OneTime.Api.Models.ProjectsDto;
 using OneTime.Api.Tests.TestHelpers;
 using OneTime.Core.Models;
+using OneTime.Core.Models.Enums;
 using Xunit;
 
 namespace OneTime.Api.Tests.Endpoints;
@@ -16,74 +18,202 @@ public class ProjectsControllerTests
         var factory = new OneTimeApiFactory();
         return factory.CreateClient();
     }
-
+    
     [Fact]
-    public async Task GetAll_Returns_Ok_With_Projects()
+    public async Task GetAll_WhenNoProjects_Returns204()
     {
-        using var client = CreateClient();
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var response = await client.GetAsync("/api/projects");
 
-        var response = await client.GetAsync("api/Projects");
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task GetAll_WhenProjectsExist_Returns200()
+    {
+        var client = CreateClient();
+        
+        // Arrange
+        var createDto = new ProjectCreateDto(
+            Name: "Test Project",
+            Status: (int)ProjectStatus.Active
+        );
 
+        await client.PostAsJsonAsync("/api/projects", createDto);
+
+        // Act
+        var response = await client.GetAsync("/api/projects");
+
+        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var projects = await response.Content.ReadFromJsonAsync<List<Project>>();
         Assert.NotNull(projects);
-        Assert.NotEmpty(projects!);
-        
-        Assert.Contains(projects!, p => p.ProjectId == 1 && p.Name == "Test Project 1");
-        Assert.Contains(projects!, p => p.ProjectId == 2 && p.Name == "Test Project 2");
+        Assert.NotEmpty(projects);
     }
 
     [Fact]
-    public async Task GetAll_Returns_NoContent_When_No_Projects()
+    public async Task GetById_ProjectExists_Returns200()
     {
-        using var factory = new EmptyProjectsApiFactory();
-        using var client = factory.CreateClient();
+        // Arrange
+        var client = CreateClient();
+        
+        
+        // Act
+        var createResponse = await client.PostAsJsonAsync("/api/projects",
+            new ProjectCreateDto("Project A", (int)ProjectStatus.Active));
 
-        var response = await client.GetAsync("api/Projects");
+        var created = await createResponse.Content.ReadFromJsonAsync<Project>();
 
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        var response = await client.GetAsync($"/api/projects/{created!.ProjectId}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var project = await response.Content.ReadFromJsonAsync<Project>();
+        Assert.Equal("Project A", project!.Name);
+    }
+    
+    [Fact]
+    public async Task GetById_ProjectNotFound_Returns404()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var response = await client.GetAsync("/api/projects/999");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task Create_ValidInput_Returns201()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        var dto = new ProjectCreateDto(
+            Name: "New Project",
+            Status: (int)ProjectStatus.Active);
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/projects", dto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var project = await response.Content.ReadFromJsonAsync<Project>();
+        Assert.Equal("New Project", project!.Name);
+    }
+    
+    [Fact]
+    public async Task Create_InvalidName_Returns400()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        var dto = new ProjectCreateDto(
+            Name: "",
+            Status: (int)ProjectStatus.Active);
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/projects", dto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task Create_InvalidStatus_Returns400()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        var dto = new ProjectCreateDto(
+            Name: "Bad Project",
+            Status: 999);
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/projects", dto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task Update_ProjectExists_Returns200()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var createResponse = await client.PostAsJsonAsync("/api/projects",
+            new ProjectCreateDto("Old Name", (int)ProjectStatus.Active));
+
+        var project = await createResponse.Content.ReadFromJsonAsync<Project>();
+
+        var updateDto = new ProjectUpdateDto(
+            Name: "Updated Name",
+            Status: (int)ProjectStatus.Active);
+
+        var response = await client.PutAsJsonAsync(
+            $"/api/projects/{project!.ProjectId}", updateDto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var updated = await response.Content.ReadFromJsonAsync<Project>();
+        Assert.Equal("Updated Name", updated!.Name);
+    }
+    
+    [Fact]
+    public async Task Update_ProjectNotFound_Returns404()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        var dto = new ProjectUpdateDto("Test", (int)ProjectStatus.Active);
+
+        // Act
+        var response = await client.PutAsJsonAsync("/api/projects/999", dto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task Delete_ProjectExists_Returns200()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var createResponse = await client.PostAsJsonAsync("/api/projects",
+            new ProjectCreateDto("To Be Deleted", (int)ProjectStatus.Active));
+
+        var project = await createResponse.Content.ReadFromJsonAsync<Project>();
+
+        var response = await client.DeleteAsync($"/api/projects/{project!.ProjectId}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
-    /// <summary>
-    /// Test-only factory that starts from the normal seeded DB, then removes all projects
-    /// to validate the controller's 204 NoContent branch.
-    /// </summary>
-    private sealed class EmptyProjectsApiFactory : WebApplicationFactory<Program>
+    [Fact]
+    public async Task Delete_ProjectNotFound_Returns404()
     {
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder.UseEnvironment("IntegrationsTesting");
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var response = await client.DeleteAsync("/api/projects/999");
 
-            builder.ConfigureServices(services =>
-            {
-                var sp = services.BuildServiceProvider();
-                using var scope = sp.CreateScope();
-
-                var context = scope.ServiceProvider.GetRequiredService<OneTimeContext>();
-
-                // Reuse the same reset behavior as OneTimeApiFactory
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
-
-                // Seed the usual data first (so all required entities/config are present),
-                // then remove projects to simulate an empty Projects table.
-                SeedFromMainFactory(context);
-
-                context.Projects.RemoveRange(context.Projects);
-                context.SaveChanges();
-            });
-        }
-
-        private static void SeedFromMainFactory(OneTimeContext context)
-        {
-            // Minimal inline seed matching OneTimeApiFactory's projects seed
-            // (we only need projects to exist before we delete them)
-            context.Projects.AddRange(
-                new Project { ProjectId = 1, Name = "Test Project 1" },
-                new Project { ProjectId = 2, Name = "Test Project 2" }
-            );
-            context.SaveChanges();
-        }
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

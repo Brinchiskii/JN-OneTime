@@ -15,118 +15,27 @@ namespace OneTime.Api.Tests.TestHelpers
     /// </summary>
     public class OneTimeApiFactory : WebApplicationFactory<Program>
     {
+        private readonly string _dbName = Guid.NewGuid().ToString();
+        
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("IntegrationsTesting");
 
             builder.ConfigureServices(services =>
             {
-                var sp = services.BuildServiceProvider();
+                // Fjern eksisterende DbContext
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<OneTimeContext>));
 
-                using var scope = sp.CreateScope();
-                var scopedServices = scope.ServiceProvider;
-                var context = scopedServices.GetRequiredService<OneTimeContext>();
+                if (descriptor != null)
+                    services.Remove(descriptor);
 
-                // Resets the database to ensure a clean state for each test run
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
-
-                // Adds data to the in-memory database for testing
-                SeedTestData(context);
+                // Test-database (unik pr. run)
+                services.AddDbContext<OneTimeContext>(options =>
+                {
+                    options.UseInMemoryDatabase(_dbName);
+                });
             });
-        }
-
-        // private void SeedTestData(OneTimeContext context)
-        // {
-        //     context.Projects.AddRange(
-        //         new Project { ProjectId = 1, Name = "Test Project 1" },
-        //         new Project { ProjectId = 2, Name = "Test Project 2" }
-        //     );
-        //
-        //     context.TimeEntries.AddRange(
-        //         new TimeEntry { TimeEntryId = 1, UserId = 1, ProjectId = 1, Date = new DateOnly(2025, 10, 15), Hours = 8m, Note = "Worked on feature A", Status = (int)TimeEntryStatus.Pending },
-        //         new TimeEntry { TimeEntryId = 2, UserId = 1, ProjectId = 2, Date = new DateOnly(2025, 10, 20), Hours = 6m, Note = "Fixed bug B", Status = (int)TimeEntryStatus.Approved }
-        //     );
-        //
-        //     context.Timesheets.AddRange(
-        //         new Timesheet { UserId = 1, PeriodStart = new DateOnly(2025, 11, 1), PeriodEnd = new DateOnly(2025, 11, 30), Status = TimesheetStatus.Pending }
-        //     );
-        //
-        //     context.SaveChanges();
-        // }
-        
-        private void SeedTestData(OneTimeContext context)
-        {
-            var leader = new JNUser
-            {
-                UserId = 1,
-                Name = "Team Lead",
-                Email = "teamlead@example.com",
-                PasswordHash = "hash",
-                PasswordSalt = "salt",
-                Role = (int)UserRole.Manager
-            };
-
-            var employee = new JNUser
-            {
-                UserId = 2,
-                Name = "Team Member",
-                Email = "teammember@example.com",
-                PasswordHash = "hash",
-                PasswordSalt = "salt",
-                Role = (int)UserRole.Employee,
-                ManagerId = leader.UserId
-            };
-
-            context.JNUsers.AddRange(leader, employee);
-
-            context.Projects.AddRange(
-                new Project { ProjectId = 1, Name = "Test Project 1" },
-                new Project { ProjectId = 2, Name = "Test Project 2" }
-            );
-
-            // Create the timesheets with explicit IDs so we can link time entries to them.
-            var leaderNov2025 = new Timesheet
-            {
-                TimesheetId = 1,
-                UserId = 1,
-                PeriodStart = new DateOnly(2025, 11, 1),
-                PeriodEnd = new DateOnly(2025, 11, 30),
-                Status = (int)TimesheetStatus.Pending
-            };
-
-            var employeeDec2025 = new Timesheet
-            {
-                TimesheetId = 2,
-                UserId = 2,
-                PeriodStart = new DateOnly(2025, 12, 1),
-                PeriodEnd = new DateOnly(2025, 12, 31),
-                Status = (int)TimesheetStatus.Pending
-            };
-
-            var employeeDec2026 = new Timesheet
-            {
-                TimesheetId = 3,
-                UserId = 2,
-                PeriodStart = new DateOnly(2026, 12, 1),
-                PeriodEnd = new DateOnly(2026, 12, 31),
-                Status = (int)TimesheetStatus.Pending
-            };
-
-            context.Timesheets.AddRange(leaderNov2025, employeeDec2025, employeeDec2026);
-
-            context.TimeEntries.AddRange(
-                // leader entries (not used by leader/team endpoint)
-                new TimeEntry { TimeEntryId = 1, UserId = 1, ProjectId = 1, Date = new DateOnly(2025, 10, 15), Hours = 8m, Note = "Worked on feature A" },
-                new TimeEntry { TimeEntryId = 2, UserId = 1, ProjectId = 2, Date = new DateOnly(2025, 10, 20), Hours = 6m, Note = "Fixed bug B" },
-
-                // employee entries MUST be linked to the matching pending timesheet
-                new TimeEntry { TimeEntryId = 3, UserId = 2, ProjectId = 1, Date = new DateOnly(2025, 12, 5), Hours = 7m, Note = "Team member task 1", TimesheetId = employeeDec2025.TimesheetId },
-                new TimeEntry { TimeEntryId = 4, UserId = 2, ProjectId = 1, Date = new DateOnly(2025, 12, 6), Hours = 8m, Note = "Team member task 2", TimesheetId = employeeDec2025.TimesheetId },
-                new TimeEntry { TimeEntryId = 5, UserId = 2, ProjectId = 1, Date = new DateOnly(2026, 12, 6), Hours = 8m, Note = "Team member task 2", TimesheetId = employeeDec2026.TimesheetId }
-            );
-
-            context.SaveChanges();
         }
     }
 }

@@ -30,21 +30,17 @@ builder.Services.AddCors(options =>
 });
 
 // Configure DbContext based on environment
-if (builder.Environment.IsEnvironment("IntegrationsTesting"))
+builder.Services.AddDbContext<OneTimeContext>(options =>
 {
-    builder.Services.AddDbContext<OneTimeContext>(options =>
+    if (builder.Environment.IsEnvironment("IntegrationsTesting"))
     {
         options.UseInMemoryDatabase("OneTimeTestDb");
-    });
-}
-else
-{
-    // Add services to the container.
-    builder.Services.AddDbContext<OneTimeContext>(options =>
+    }
+    else
     {
         options.UseSqlServer(Secret.ConnectionString);
-    });
-}
+    }
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

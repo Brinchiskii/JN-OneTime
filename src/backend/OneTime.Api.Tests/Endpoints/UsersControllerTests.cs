@@ -8,169 +8,222 @@ namespace OneTime.Api.Tests.Endpoints;
 
 public class UsersControllerTests : IClassFixture<OneTimeApiFactory>
 {
-    private readonly HttpClient _client;
-
-    public UsersControllerTests(OneTimeApiFactory factory)
+    private HttpClient CreateClient()
     {
-        _client = factory.CreateClient();
+        var factory = new OneTimeApiFactory();
+        return factory.CreateClient();
     }
 
     [Fact]
-    public async Task GetAll_Returns_Ok_With_Seeded_Users()
-    {
-        // Act
-        var response = await _client.GetAsync("api/Users");
-
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var users = await response.Content.ReadFromJsonAsync<List<UserDto>>();
-        Assert.NotNull(users);
-        Assert.True(users!.Count >= 2);
-        Assert.Contains(users, u => u.UserId == 1 && u.Name == "Team Lead");
-        Assert.Contains(users, u => u.UserId == 2 && u.Name == "Team Member");
-    }
-
-    [Fact]
-    public async Task GetById_Existing_Returns_Ok()
-    {
-        var response = await _client.GetAsync("api/Users/1");
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var user = await response.Content.ReadFromJsonAsync<UserDto>();
-        Assert.NotNull(user);
-        Assert.Equal(1, user!.UserId);
-        Assert.Equal("Team Lead", user.Name);
-    }
-
-    [Fact]
-    public async Task GetById_NotFound_Returns_404()
-    {
-        var response = await _client.GetAsync("api/Users/999");
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task Create_Employee_With_Manager_Succeeds()
-    {
-        var dto = new UserCreateDto(
-            Name: "New Employee",
-            Email: "new.employee@example.com",
-            Password: "irrelevant-in-test",
-            Role: (int)UserRole.Employee,
-            ManagerId: 1 // must have a manager for Employee
-        );
-
-        var response = await _client.PostAsJsonAsync("api/Users", dto);
-
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        var created = await response.Content.ReadFromJsonAsync<UserDto>();
-        Assert.NotNull(created);
-        Assert.True(created!.UserId > 0);
-        Assert.Equal(dto.Name, created.Name);
-        Assert.Equal(dto.Email, created.Email);
-        Assert.Equal(dto.Role, created.Role);
-        Assert.Equal(dto.ManagerId, created.ManagerId);
-    }
-
-    [Fact]
-    public async Task Create_InvalidRole_Returns_BadRequest()
-    {
-        var dto = new UserCreateDto(
-            Name: "Bad Role",
-            Email: "bad.role@example.com",
-            Password: "x",
-            Role: 999, // invalid
-            ManagerId: null
-        );
-
-        var response = await _client.PostAsJsonAsync("api/Users", dto);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        var msg = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Invalid role value.", msg);
-    }
-
-    [Fact]
-    public async Task Update_User_Succeeds()
+    public async Task GetAll_WhenNoUsers_Returns204()
     {
         // Arrange
-        var create = new UserCreateDto(
-            Name: "Updatable User",
-            Email: "updatable@example.com",
-            Password: "x",
-            Role: (int)UserRole.Employee,
-            ManagerId: 1
-        );
-        var createdResp = await _client.PostAsJsonAsync("api/Users", create);
-        var created = await createdResp.Content.ReadFromJsonAsync<UserDto>();
-        Assert.NotNull(created);
-
-        var update = new UserUpdateDto(
-            Name: "Updated User",
-            Email: "updated@example.com",
-            Password: "x",
-            Role: (int)UserRole.Employee,
-            ManagerId: 1
-        );
-
+        var client = CreateClient();
+        
         // Act
-        var response = await _client.PutAsJsonAsync($"api/Users/{created!.UserId}", update);
+        var response = await client.GetAsync("/api/users");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task GetAll_WhenUsersExist_Returns200()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        await client.PostAsJsonAsync("/api/users",
+            new UserCreateDto("A", "a@test.com", "p", 2, 1));
+
+        var response = await client.GetAsync("/api/users");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var updated = await response.Content.ReadFromJsonAsync<UserDto>();
-        Assert.NotNull(updated);
-        Assert.Equal(created.UserId, updated!.UserId);
-        Assert.Equal(update.Name, updated.Name);
-        Assert.Equal(update.Email, updated.Email);
-        Assert.Equal(update.Role, updated.Role);
-        Assert.Equal(update.ManagerId, updated.ManagerId);
     }
-
+    
     [Fact]
-    public async Task Update_NotFound_Returns_404()
+    public async Task GetById_NotFound_Returns404()
     {
-        var update = new UserUpdateDto(
-            Name: "Does Not Exist",
-            Email: "nope@example.com",
-            Password: "x",
-            Role: (int)UserRole.Employee,
-            ManagerId: 1
-        );
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var response = await client.GetAsync("/api/users/999");
 
-        var response = await _client.PutAsJsonAsync("api/Users/999", update);
+        // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
-    public async Task Delete_Employee_Succeeds()
+    public async Task GetById_ExistingUser_Returns200()
     {
-        // Create a disposable employee
-        var dto = new UserCreateDto(
-            Name: "Disposable",
-            Email: "disposable@example.com",
-            Password: "x",
-            Role: (int)UserRole.Employee,
-            ManagerId: 1
-        );
-        var createResp = await _client.PostAsJsonAsync("api/Users", dto);
-        var created = await createResp.Content.ReadFromJsonAsync<UserDto>();
-        Assert.NotNull(created);
-
+        // Arrange
+        var client = CreateClient();
+        
         // Act
-        var response = await _client.DeleteAsync($"api/Users/{created!.UserId}");
+        var create = await client.PostAsJsonAsync("/api/users",
+            new UserCreateDto("A", "a@test.com", "p", 2, 1));
+
+        var user = await create.Content.ReadFromJsonAsync<UserDto>();
+
+        var response = await client.GetAsync($"/api/users/{user!.UserId}");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var message = await response.Content.ReadAsStringAsync();
-        Assert.Contains($"User with ID {created.UserId} was successfully deleted.", message);
+    }
+    
+    [Fact]
+    public async Task CreateUser_ValidInput_Returns201()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        var dto = new UserCreateDto(
+            "Test User",
+            "test@test.com",
+            "password",
+            Role: 2, // Employee
+            ManagerId: 1);
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/users", dto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var user = await response.Content.ReadFromJsonAsync<UserDto>();
+        
+        Assert.NotNull(user);
+        Assert.Equal("test@test.com", user!.Email);
     }
 
     [Fact]
-    public async Task Delete_Manager_With_Team_Returns_BadRequest()
+    public async Task CreateUser_InvalidRole_Returns400()
     {
-        // Seeded manager has an employee → service should reject deletion
-        var response = await _client.DeleteAsync("api/Users/1");
+        // Arrange
+        var client = CreateClient();
+        
+        var dto = new UserCreateDto("A", "a@test.com", "p", 99, 1);
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/users", dto);
+
+        // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        var message = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Cannot delete manager with employees assigned.", message);
     }
+    
+    [Fact]
+    public async Task CreateUser_EmailAlreadyExists_Returns400()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var dto = new UserCreateDto("A", "a@test.com", "p", 2, 1);
+
+        await client.PostAsJsonAsync("/api/users", dto);
+        var response = await client.PostAsJsonAsync("/api/users", dto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateUser_NotFound_Returns404()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var dto = new UserUpdateDto("A", "a@test.com", "p", 2, 1);
+
+        var response = await client.PutAsJsonAsync("/api/users/999", dto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task UpdateUser_Valid_Returns200()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var create = await client.PostAsJsonAsync("/api/users",
+            new UserCreateDto("A", "a@test.com", "p", 2, 1));
+
+        var user = await create.Content.ReadFromJsonAsync<UserDto>();
+
+        var update = new UserUpdateDto("Updated", "a@test.com", "p", 2, 1);
+
+        var response = await client.PutAsJsonAsync($"/api/users/{user!.UserId}", update);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task DeleteUser_NotFound_Returns404()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var response = await client.DeleteAsync("/api/users/999");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteUser_Valid_Returns200()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var create = await client.PostAsJsonAsync("/api/users",
+            new UserCreateDto("A", "a@test.com", "p", 2, 1));
+        
+        var user = await create.Content.ReadFromJsonAsync<UserDto>();
+        
+        var response = await client.DeleteAsync($"/api/users/{user!.UserId}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task GetUsersByLeader_NoUsers_Returns204()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        var response = await client.GetAsync("/api/users/leader/1");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetUsersByLeader_Returns200()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        // Act
+        await client.PostAsJsonAsync("/api/users",
+            new UserCreateDto("Emp", "e@test.com", "p", 2, 1));
+
+        var response = await client.GetAsync("/api/users/leader/1");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+
 }

@@ -4,14 +4,10 @@ using OneTime.Core.Models;
 using OneTime.Core.Services.Implementations;
 using OneTime.Core.Tests.TestHelpers;
 
-namespace OneTime.Core.Tests.Services;
+namespace OneTime.Core.Tests.Integration;
 
-public class AuditLogServiceTests
+public class AuditLogServiceIntegrationTest
 {
-    public AuditLogServiceTests()
-    {
-        
-    }
 
     [Fact]
     public async Task Log_Writes_Record_With_All_Fields()

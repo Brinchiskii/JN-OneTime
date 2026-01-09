@@ -4,14 +4,10 @@ using OneTime.Core.Services.Implementations;
 using OneTime.Core.Services.Repository;
 using OneTime.Core.Tests.TestHelpers;
 
-namespace OneTime.Core.Tests.Services;
+namespace OneTime.Core.Tests.Integration;
 
-public class ProjectServiceTests
+public class ProjectServiceIntegrationTest
 {
-    public ProjectServiceTests()
-    {
-        
-    }
     
     [Fact]
     public async Task GetAllProjects_Returns_ProjectsOk()

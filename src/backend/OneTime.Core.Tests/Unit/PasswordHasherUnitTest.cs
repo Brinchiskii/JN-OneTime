@@ -1,13 +1,9 @@
 using OneTime.Core.Services.Implementations;
 
-namespace OneTime.Core.Tests.Services;
+namespace OneTime.Core.Tests.Unit;
 
-public class PasswordHasherTests
+public class PasswordHasherUnitTest
 {
-    public PasswordHasherTests()
-    {
-        
-    }
 
     [Fact]
     public void HashPassword_Empty_Throws()

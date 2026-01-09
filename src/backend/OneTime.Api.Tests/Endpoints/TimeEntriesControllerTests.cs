@@ -15,105 +15,159 @@ public class TimeEntriesControllerTests
         var factory = new OneTimeApiFactory();
         return factory.CreateClient();
     }
-
+    
     [Fact]
-    public async Task CreateTimeEntry_Returns_Ok_With_Created_Entry()
+    public async Task SaveTimeEntries_ValidInput_Returns200()
     {
-        using var client = CreateClient();
+        var client = CreateClient();
         
-        var dto = new TimeEntryCreateDto(
-            UserId: 2,
-            ProjectId: 1,
-            Date: new DateOnly(2025, 12, 7),
-            Note: "Integration test entry",
-            Hours: 4m,
-            TimesheetId: 2
-        );
+        var entries = new List<TimeEntryCreateDto>
+        {
+            new(
+                UserId: 1,
+                ProjectId: 1,
+                Date: new DateOnly(2025, 1, 1),
+                Note: "Test",
+                Hours: 8,
+                TimesheetId: 1)
+        };
 
-        var response = await client.PostAsJsonAsync("api/TimeEntries", dto);
+        var response = await client.PostAsJsonAsync("/api/timeentries/bulk/1", entries);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-        var created = await response.Content.ReadFromJsonAsync<TimeEntryDto>();
-        Assert.NotNull(created);
-
-        Assert.True(created!.TimeEntryId > 0);
-        Assert.Equal(dto.UserId, created.UserId);
-        Assert.Equal(dto.ProjectId, created.ProjectId);
-        Assert.Equal(dto.Date, created.Date);
-        Assert.Equal(dto.Note, created.Note);
-        Assert.Equal(dto.Hours, created.Hours);
-        Assert.Equal(dto.TimesheetId, created.TimesheetId);
     }
-
+    
     [Fact]
-    public async Task CreateTimeEntry_InvalidProject_Returns_BadRequest()
+    public async Task SaveTimeEntries_InvalidTimesheetId_Returns400()
     {
-        using var client = CreateClient();
-
-        var dto = new TimeEntryCreateDto(
-            UserId: 2,
-            ProjectId: 9999, // does not exist
-            Date: new DateOnly(2025, 12, 7),
-            Note: "Should fail",
-            Hours: 4m,
-            TimesheetId: 2
-        );
-
-        var response = await client.PostAsJsonAsync("api/TimeEntries", dto);
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-        var msg = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Project not found", msg);
-    }
-
-    [Fact]
-    public async Task CreateTimeEntry_InvalidHours_Returns_BadRequest()
-    {
-        using var client = CreateClient();
-
-        var dto = new TimeEntryCreateDto(
-            UserId: 2,
-            ProjectId: 1,
-            Date: new DateOnly(2025, 12, 7),
-            Note: "Should fail",
-            Hours: 0m, // invalid per controller
-            TimesheetId: 2
-        );
-
-        var response = await client.PostAsJsonAsync("api/TimeEntries", dto);
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-        var msg = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Hours must be greater than zero and less than 24", msg);
-    }
-
-    [Fact]
-    public async Task GetTimeEntriesForUser_Returns_Ok_With_Data()
-    {
-        using var client = CreateClient();
+        var client = CreateClient();
         
-        var response = await client.GetAsync("api/TimeEntries/user/2");
+        var entries = new List<TimeEntryCreateDto>();
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var response = await client.PostAsJsonAsync("/api/timeentries/bulk/0", entries);
 
-        var entries = await response.Content.ReadFromJsonAsync<List<TimeEntryDetailsDto>>();
-        Assert.NotNull(entries);
-        Assert.NotEmpty(entries!);
-
-        Assert.All(entries!, e => Assert.Equal(2, e.UserId));
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
-
+    
     [Fact]
-    public async Task GetTimeEntriesForUser_NoEntries_Returns_NoContent()
+    public async Task GetTimeEntriesForUser_NoEntries_Returns204()
     {
-        using var client = CreateClient();
-
-        // No seeded entries for this user id
-        var response = await client.GetAsync("api/TimeEntries/user/9999");
+        var client = CreateClient();
+        
+        var response = await client.GetAsync("/api/timeentries/user/1");
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task GetTimeEntriesForUser_WithEntries_Returns200()
+    {
+        // Arrange
+        var client = CreateClient();
+        
+        await client.PostAsJsonAsync("/api/users", new
+        {
+            Name = "Test User",
+            Email = "test@test.com",
+            Password = "password",
+            Role = 0,
+        });
+        
+        await client.PostAsJsonAsync("/api/projects", new
+        {
+            Name = "Test Project",
+            Status = 0
+        });
+        
+        var entries = new List<TimeEntryCreateDto>
+        {
+            new(
+                UserId: 1,
+                ProjectId: 1,
+                Date: new DateOnly(2025, 1, 1),
+                Note: "Worked",
+                Hours: 7,
+                TimesheetId: 1)
+        };
+
+        await client.PostAsJsonAsync("/api/timeentries/bulk/1", entries);
+
+        // Act
+        var response = await client.GetAsync("/api/timeentries/user/1");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var result = await response.Content.ReadFromJsonAsync<List<TimeEntryDetailsDto>>();
+        Assert.NotNull(result);
+        Assert.Single(result);
+        Assert.Equal(7, result[0].Hours);
+    }
+
+
+    [Fact]
+    public async Task GetTimeEntriesForTimesheet_Returns200()
+    {
+        var client = CreateClient();
+
+        await client.PostAsJsonAsync("/api/users", new
+        {
+            Name = "Test User",
+            Email = "test@test.com",
+            Password = "password",
+            Role = 0
+        });
+
+        await client.PostAsJsonAsync("/api/projects", new
+        {
+            Name = "Test Project",
+            Status = 0
+        });
+
+        await client.PostAsJsonAsync("/api/timesheets/submit", new
+        {
+            UserId = 1,
+            PeriodStart = new DateOnly(2025, 1, 1),
+            PeriodEnd = new DateOnly(2025, 1, 31)
+        });
+        
+        var entries = new List<TimeEntryCreateDto>
+        {
+            new(
+                UserId: 1,
+                ProjectId: 1,
+                Date: new DateOnly(2025, 1, 2),
+                Note: "More work",
+                Hours: 6,
+                TimesheetId: 1)
+        };
+
+        await client.PostAsJsonAsync("/api/timeentries/bulk/1", entries);
+
+        // Act
+        var response = await client.GetAsync("/api/timeentries/user/1/timesheet/1");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var result = await response.Content.ReadFromJsonAsync<List<TimeEntryDetailsDto>>();
+        Assert.NotNull(result);
+        Assert.Single(result);
+        Assert.Equal(6, result[0].Hours);
+    }
+
+    
+    [Fact]
+    public async Task GetTimeEntriesForTimesheet_NoEntries_Returns200_WithEmptyList()
+    {
+        var client = CreateClient();
+        
+        var response = await client.GetAsync("/api/timeentries/user/1/timesheet/1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var result = await response.Content.ReadFromJsonAsync<List<TimeEntryDetailsDto>>();
+        Assert.NotNull(result);
+        Assert.Empty(result);
     }
 }

@@ -1,14 +1,13 @@
-﻿
-using OneTime.Core.Services.Repository;
-using OneTime.Core.Data.Repository;
+﻿using OneTime.Core.Data.Repository;
 using OneTime.Core.Models;
 using OneTime.Core.Models.Enums;
 using OneTime.Core.Services.Implementations;
+using OneTime.Core.Services.Repository;
 using OneTime.Core.Tests.TestHelpers;
 
-namespace OneTime.Core.Tests.Services;
+namespace OneTime.Core.Tests.Integration;
 
-public class TimesheetServiceTests
+public class TimesheetServiceIntegrationTest
 {
     [Fact]
     public async Task CreateTimesheet_Already_Exists_Throws()

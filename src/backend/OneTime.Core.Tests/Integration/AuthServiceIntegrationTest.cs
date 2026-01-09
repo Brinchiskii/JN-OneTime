@@ -4,14 +4,10 @@ using OneTime.Core.Services.Implementations;
 using OneTime.Core.Services.Repository;
 using OneTime.Core.Tests.TestHelpers;
 
-namespace OneTime.Core.Tests.Services;
+namespace OneTime.Core.Tests.Integration;
 
-public class AuthServiceTests
+public class AuthServiceIntegrationTest
 {
-    public AuthServiceTests()
-    {
-        
-    }
 
     [Fact]
     public async Task Login_UserNotFound_Throws()

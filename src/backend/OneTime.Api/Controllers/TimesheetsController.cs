@@ -30,7 +30,7 @@ namespace OneTime.Api.Controllers
         /// Return 400 Bad Request if the input data is invalid or an error occurs.
         /// </returns>
         [HttpPost("submit")]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         public async Task<IActionResult> Submit([FromBody] SubmitTimesheetDto dto)
         {
@@ -41,22 +41,27 @@ namespace OneTime.Api.Controllers
 
             try
             {
-                var review = await _timeSheetService.CreateTimesheet(dto.UserId, dto.PeriodStart, dto.PeriodEnd);
+	            var review = await _timeSheetService.CreateTimesheet(dto.UserId, dto.PeriodStart, dto.PeriodEnd);
 
-                var response = new TimesheetDto(
-                    review.TimesheetId,
-                    review.UserId,
-                    review.PeriodStart,
-                    review.PeriodEnd,
-                    (TimesheetStatus)review.Status,
-                    review.DecidedAt,
-                    review.Comment
-                );
+	            var response = new TimesheetDto(
+		            review.TimesheetId,
+		            review.UserId,
+		            review.PeriodStart,
+		            review.PeriodEnd,
+		            (TimesheetStatus)review.Status,
+		            review.DecidedAt,
+		            review.Comment
+	            );
 
-                return Ok(response);
-            } catch (InvalidOperationException ex)
+	            return Ok(response);
+            }
+            catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+	            return BadRequest(ex.Message);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+	            return BadRequest(ex.Message);
             }
         }
 
