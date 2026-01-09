@@ -220,7 +220,8 @@ watch([currentCursor, periodMode, selectedEmployeeId], () => {
     <div class="row g-4 mb-5">
       <div class="col-md-6 col-xl-4">
         <div
-          class="card border-0 shadow-sm h-100 bg-primary text-white p-3 overflow-hidden position-relative card-hover">
+          class="card border-0 shadow-sm h-100 text-white p-3 overflow-hidden position-relative card-hover"
+          style="background-color: var(--primary-color) ">
           <div class="position-absolute end-0 bottom-0 opacity-25 me-n3 mb-n3">
             <i class="bi bi-clock-history" style="font-size: 8rem;"></i>
           </div>
@@ -296,8 +297,8 @@ watch([currentCursor, periodMode, selectedEmployeeId], () => {
 
             <div class="d-flex justify-content-between align-items-start mb-4">
               <div class="d-flex gap-3 align-items-center">
-                <div class="rounded d-flex align-items-center justify-content-center bg-light fw-bold fs-4 text-primary"
-                  style="width: 54px; height: 54px;">
+                <div class="rounded d-flex align-items-center justify-content-center bg-light fw-bold fs-4"
+                  style="width: 54px; height: 54px; color: var(--primary-color)">
                   {{ project.projectName.charAt(0) }}
                 </div>
                 <div>
@@ -316,13 +317,13 @@ watch([currentCursor, periodMode, selectedEmployeeId], () => {
               <div class="d-flex justify-content-between small mb-2">
                 <span class="fw-bold text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Andel
                   af arbejdsbyrde</span>
-                <span class="fw-bold text-primary">
+                <span class="fw-bold" style="color: var(--primary-color)">
                   {{ getPercentageShare(project.totalHours) }}%
                 </span>
               </div>
               <div class="progress" style="height: 8px; border-radius: 10px; background-color: #f1f5f9;">
-                <div class="progress-bar bg-primary" role="progressbar"
-                  :style="{ width: getPercentageShare(project.totalHours) + '%', opacity: 0.8 }"></div>
+                <div class="progress-bar" role="progressbar"
+                  :style="{ width: getPercentageShare(project.totalHours) + '%', opacity: 0.8 }" style="background-color: var(--primary-color)"></div>
               </div>
             </div>
 
