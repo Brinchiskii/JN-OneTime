@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import projectsService from '../api/projectsService'
+import ProjectsService from '../api/ProjectsService'
 import { ref } from 'vue'
 import type { Project } from '../types'
 
@@ -8,20 +8,20 @@ export const useProjectStore = defineStore('project', () => {
   const projects = ref<Project[]>([])
   
   const fetchProjects = async () => {
-    const res = await projectsService.getProjects()
+    const res = await ProjectsService.getProjects()
     projects.value = res.data
   }
 
   const createProject = async (project: Partial<Project>) => {
-    await projectsService.createProject(project)
+    await ProjectsService.createProject(project)
   }
 
   const updateProject = async (project: Partial<Project>) => {
-    await projectsService.updateProject(project)
+    await ProjectsService.updateProject(project)
   }
 
   const deleteProject = async (id: number) => {
-      await projectsService.deleteProject(id)
+      await ProjectsService.deleteProject(id)
   }
 
   return { projects, fetchProjects, createProject, updateProject, deleteProject }

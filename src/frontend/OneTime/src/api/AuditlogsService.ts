@@ -1,8 +1,8 @@
-import http from './http';
+import https from './Https';
 import { type Log } from '@/types'
 
 export default {
     getLogs() {
-        return http.get<Log[]>("/auditlogs/all");
+        return https.get<Log[]>("/auditlogs/all");
     }
 }

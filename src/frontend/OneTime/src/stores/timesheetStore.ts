@@ -4,8 +4,8 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/da'
 import isoWeek from 'dayjs/plugin/isoWeek'
 import type { TimesheetRow, WeekDay, TeamCollection, DecisionPayload, TimeEntry, TimesheetPayload, ApiTeamCollection, Rows } from '../types'
-import timesheetService from '@/api/timesheetService'
-import timeEntriesService from '@/api/timeEntriesService'
+import TimesheetService from '@/api/TimesheetService'
+import TimeEntriesService from '@/api/TimeEntriesService'
 import { useAuthStore } from './AuthStore'
 import UserService from '@/api/UserService'
 
@@ -112,7 +112,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
         const usersResponse = await UserService.getUsersByManagerId(AuthStore.user?.userId ?? 0)
         const allEmployees = usersResponse.data
 
-        const timesheetResult = await timesheetService.getWeeklyTimeSheets(AuthStore.user?.userId ?? 0, startStr, endStr)
+        const timesheetResult = await TimesheetService.getWeeklyTimeSheets(AuthStore.user?.userId ?? 0, startStr, endStr)
         
         const apiData = timesheetResult.data?.users as ApiTeamCollection | undefined
 
@@ -156,7 +156,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       status: status,
       comment: comment,
     }
-    await timesheetService.updateTimeSheet(payload)
+    await TimesheetService.updateTimeSheet(payload)
   }
 
   const updateRows = (rows: TimesheetRow) => {
@@ -180,7 +180,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
           periodEnd: endObj.format('YYYY-MM-DD')
         }
 
-        const timesheetRes = await timesheetService.createTimeSheet(payload)
+        const timesheetRes = await TimesheetService.createTimeSheet(payload)
         tsId = timesheetRes.data.timesheetId
         currentTimesheetId.value = tsId
       }
@@ -205,9 +205,9 @@ export const useTimesheetStore = defineStore('timesheet', () => {
         }
       }
       if (entriesToSave.length > 0) {
-        await timeEntriesService.SaveTimeEntries(tsId ?? 0, entriesToSave)
+        await TimeEntriesService.SaveTimeEntries(tsId ?? 0, entriesToSave)
       } else {
-        await timeEntriesService.SaveTimeEntries(tsId ?? 0, [])
+        await TimeEntriesService.SaveTimeEntries(tsId ?? 0, [])
       }
       if (submit) {
         const payload: DecisionPayload = {
@@ -216,7 +216,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
           status: 0,
           comment: ""
         }
-        await timesheetService.updateTimeSheet(payload)
+        await TimesheetService.updateTimeSheet(payload)
       }
 
     } catch (error) {
@@ -230,8 +230,8 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   const GetTimesheet = async () => {
     try {
 
-      const timesheet = await timesheetService.getUserTimeSheet(AuthStore.user?.userId ?? 0, currentWeekStart.value.format('YYYY-MM-DD'), currentWeekStart.value.endOf('isoWeek').format('YYYY-MM-DD'))
-      const timeEntries = await timeEntriesService.GetTimeEntriesByTimesheetId(AuthStore.user?.userId ?? 0, timesheet.data.timesheetId)
+      const timesheet = await TimesheetService.getUserTimeSheet(AuthStore.user?.userId ?? 0, currentWeekStart.value.format('YYYY-MM-DD'), currentWeekStart.value.endOf('isoWeek').format('YYYY-MM-DD'))
+      const timeEntries = await TimeEntriesService.GetTimeEntriesByTimesheetId(AuthStore.user?.userId ?? 0, timesheet.data.timesheetId)
 
       const rows: TimesheetRow = { userId: AuthStore.user?.userId ?? 0, timesheetId: timesheet.data.timesheetId, status: timesheet.data.status, comment: timesheet.data.comment, rows: [] }
 
