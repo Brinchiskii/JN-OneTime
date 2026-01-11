@@ -24,8 +24,9 @@ builder.Services.AddCors(options =>
                 .AllowCredentials()
                 .WithOrigins(
                     "http://localhost:5173",
-                    "https://localhost:5173"
-                );
+                    "https://localhost:5173",
+					"https://jnonetime.dk"
+				);
         });
 });
 
